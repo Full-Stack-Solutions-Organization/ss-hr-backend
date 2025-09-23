@@ -68,9 +68,15 @@ app.use('/api/admin/users',adminUsersRoutes);
 app.use("/api/admin/testimonials",adminTestimonialRoutes);
 app.use('/api/admin/packages', adminPackageRoutes);
 app.use('/api/admin/payments', adminPaymentRoutes);
-
 app.use('/api/message',messageRoutes);
-
 app.use('/api/user',userRoutes);
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    environment: appConfig.nodeEnv,
+    timestamp: new Date().toISOString()
+  });
+});
 
 export default app;

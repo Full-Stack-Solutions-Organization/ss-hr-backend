@@ -1,9 +1,11 @@
-name: Deploy Backend to EC2
+name: Deploy Backend
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "ss-hr-backend/**"
 
 jobs:
   deploy:
@@ -13,18 +15,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup SSH
+      - name: Set up SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: Deploy Backend
+      - name: Deploy Backend to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@13.233.27.93 "
-            cd ~/ss-hr-backend &&
-            git fetch origin main &&
-            git reset --hard origin/main &&
-            npm install --production &&
-            npm run build &&
-            pm2 restart ss-hr-backend || pm2 start dist/server.js --name ss-hr-backend
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "
+            cd ~/ss-hr-backend && \
+            git pull origin main && \
+            npm install && \
+            npm run build && \
+            pm2 restart ss-hr-backend || pm2 start npm --name ss-hr-backend -- run start
           "

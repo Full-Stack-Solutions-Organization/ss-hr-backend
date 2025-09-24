@@ -21,7 +21,7 @@ import adminTestimonialRoutes from './presentation/routes/adminTestimonialRoutes
 const app = express();
 
 if (appConfig.nodeEnv === 'development') {
-  app.use(morgan('dev'));
+  app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
 }
 
 const allowedOrigins = [appConfig.frontendUrl];
@@ -78,5 +78,7 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+
 
 export default app;

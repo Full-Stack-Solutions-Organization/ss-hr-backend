@@ -21,21 +21,21 @@ jobs:
           script: |
             echo "🚀 Starting deployment on EC2..."
 
-            # navigate to backend folder
+            # Navigate to project
             cd /home/ubuntu/ss-hr-backend
 
-            # pull latest code
+            # Ensure correct branch
             git fetch origin main
             git reset --hard origin/main
 
-            # install dependencies and build TS
-            npm ci
+            echo "📦 Installing dependencies..."
+            npm ci --omit=dev
+
+            echo "🏗️ Building TypeScript..."
             npm run build
 
-            # restart app with PM2 (start if not already running)
+            echo "♻️ Restarting PM2 process..."
             pm2 restart ss-hr-backend || pm2 start dist/server.js --name ss-hr-backend
 
-            # save pm2 state
             pm2 save
-
             echo "✅ Deployment complete!"

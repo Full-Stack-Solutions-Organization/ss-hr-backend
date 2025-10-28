@@ -3,7 +3,6 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import express from 'express';
 import compression from 'compression';
-import session from "express-session";
 import cookieParser from 'cookie-parser';
 import { appConfig } from './config/env';
 import passport from './infrastructure/auth/passport';
@@ -39,23 +38,12 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
 }));
 
-app.use(session({
-  secret: appConfig.sessionSecret || "secret",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: appConfig.nodeEnv === 'production',
-    maxAge: 24 * 60 * 60 * 1000 
-  }
-}));
-
 app.use(compression());
 app.use(helmet());
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
-
 
 app.use('/api/auth',authRoutes);
 

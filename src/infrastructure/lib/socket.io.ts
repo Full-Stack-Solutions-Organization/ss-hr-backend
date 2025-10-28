@@ -6,7 +6,9 @@ import { Server } from "socket.io";
 import { appConfig } from "../../config/env";
 
 const socketServer = http.createServer(app);
-const allowedOrigins = [appConfig.frontendUrl, appConfig.frontendUrl2].filter(
+const allowedOrigins = ['https://sshrconsultancy.com',
+  'https://www.sshrconsultancy.com',
+  'http://localhost:5000'].filter(
   (url): url is string => Boolean(url)
 );
 

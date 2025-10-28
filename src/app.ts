@@ -26,7 +26,9 @@ if (appConfig.nodeEnv === 'development') {
   app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
 }
 
-const allowedOrigins = [appConfig.frontendUrl, appConfig.frontendUrl2];
+const allowedOrigins = ['https://sshrconsultancy.com',
+  'https://www.sshrconsultancy.com',
+  'http://localhost:5000'];
 
 app.use(cors({
   origin: (origin, callback) => {

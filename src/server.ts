@@ -1,10 +1,6 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import { appConfig } from "./config/env";
 import { socketServer } from "./infrastructure/lib/socket.io";
 import { connectDB, disconnectDB } from "./config/database/connection";
-
 
 const port = parseInt(appConfig.port || "5000", 10);
 
@@ -13,7 +9,6 @@ async function startServer() {
     await connectDB();
 
     const server = socketServer.listen(port, () => {
-      console.log("appconfig : ",appConfig)
       console.log(`Server running on port ${port}`);
     });
 

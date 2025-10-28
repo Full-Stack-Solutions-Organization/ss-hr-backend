@@ -19,7 +19,8 @@ export const appConfig = {
     sessionSecret: process.env.SESSION_SECRET,
     port: process.env.PORT,
     nodeEnv: process.env.NODE_ENV,
-    frontendUrl: process.env.NODE_ENV === "development" ? process.env.FRONTEND_BASE_URL : process.env.FRONTEND_PRODUCTION_URL
+    frontendUrl: process.env.NODE_ENV === "development" ? process.env.FRONTEND_BASE_URL : process.env.FRONTEND_PRODUCTION_URL,
+    frontendUrl2: process.env.NODE_ENV === "development" ? process.env.FRONTEND_BASE_URL : process.env.FRONTEND_PRODUCTION_URL2
 }
 
 export const adminConfig = {

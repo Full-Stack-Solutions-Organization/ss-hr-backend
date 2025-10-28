@@ -23,10 +23,14 @@ if (appConfig.nodeEnv === 'development') {
   app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
 }
 
-const allowedOrigins = [appConfig.frontendUrl];
+const allowedOrigins = [appConfig.frontendUrl, appConfig.frontendUrl2];
+
+console.log("node.env : ",appConfig.nodeEnv);
+console.log("allowedOrigins : ",allowedOrigins);
 
 app.use(cors({
   origin: (origin, callback) => {
+    console.log("origin : ",origin);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {

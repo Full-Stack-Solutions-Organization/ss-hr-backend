@@ -5,12 +5,12 @@ import { User } from '../../domain/entities/user';
 import { JWTService } from '../../infrastructure/security/jwt';
 import { ApiResponse } from '../../infrastructure/dtos/common.dts';
 import { OTPService } from '../../infrastructure/service/otpService';
+import { CreateLocalUser } from '../../domain/repositories/IUserRepository';
 import { handleUseCaseError } from '../../infrastructure/error/useCaseError';
 import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
 import { SignedUrlService } from '../../infrastructure/service/generateSignedUrl';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
-import { CreateLocalUser } from '../../domain/repositories/IUserRepository';
 
 export class RegisterUseCase {
   constructor(
@@ -140,12 +140,6 @@ export class LoginUseCase {
         user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
       } else if (role === "systemAdmin") {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
-          console.log("email : ",email);
-          console.log("adminConfig.adminEmail : ",adminConfig.adminEmail);
-          console.log("email === adminConfig.adminEmail : ",email === adminConfig.adminEmail)
-          console.log("password : ",password);
-          console.log("adminConfig.adminPassword : ",adminConfig.adminPassword);
-          console.log("password === adminConfig.adminPassword : ",password === adminConfig.adminPassword);
           throw new Error("Invalid credentials.");
         }
         const token = JWTService.generateToken({ email: email, role: role });
@@ -154,7 +148,6 @@ export class LoginUseCase {
         throw new Error("Invalid request.");
       }
 
-      console.log("here");
       if (!user) throw new Error("Invalid credentials")
 
       if (user.isBlocked) throw new Error("Your account is blocked, please contact us.");
@@ -182,7 +175,6 @@ export class LoginUseCase {
         }
       };
     } catch (error) {
-      console.log("LoginUseCase error : ",error);
       throw handleUseCaseError(error || "Unexpected error in VerifyOTPUseCase");
     }
   }
@@ -194,9 +186,6 @@ export class CheckUserStatusUseCase {
 
   async execute(data: CheckUserStatusRequest): Promise<CheckUserStatusResponse> {
     const { id } = data;
-
-    // Validator.validateObjectId(id);
-    // Validator.validateRole(role);
 
     const user = await this.userRepository.findUserById(new Types.ObjectId(id));
     if (user?.isBlocked) {

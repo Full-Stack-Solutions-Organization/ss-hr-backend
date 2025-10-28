@@ -31,6 +31,8 @@ const loginUseCase = new LoginUseCase(userRepositoryImpl, signedUrlService);
 const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
 const googleAuthUseCase = new GoogleAuthUseCase(userRepositoryImpl);
 
+const isProduction = appConfig.nodeEnv === "production";
+
 export class AuthController {
   constructor(
     private registerUseCase: RegisterUseCase,
@@ -55,8 +57,8 @@ export class AuthController {
 
       res.cookie("token", result.user.token, {
         httpOnly: true,
-        secure: appConfig.nodeEnv === "production",
-        sameSite: "none",
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         maxAge: 2 * 24 * 60 * 60 * 1000,
         path: "/",
       });
@@ -118,10 +120,12 @@ export class AuthController {
         role,
       });
 
+      console.log("user : ", user);
+
       res.cookie("token", user.token, {
         httpOnly: true,
-        secure: appConfig.nodeEnv === "production",
-        sameSite: "none",
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         maxAge: 2 * 24 * 60 * 60 * 1000,
         path: "/",
       });
@@ -175,18 +179,18 @@ export class AuthController {
       const result = await this.googleAuthUseCase.execute(req.user as any);
 
       res.cookie("token", result.user.token, {
-        httpOnly: true,
-        secure: appConfig.nodeEnv === "production",
-        sameSite: "none",
+         httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         maxAge: 2 * 24 * 60 * 60 * 1000,
         path: "/",
       });
 
-      const frontendUrl =  appConfig.frontendUrl;
+      const frontendUrl = appConfig.frontendUrl;
       res.redirect(`${frontendUrl}/`);
     } catch (error) {
       console.log("Google auth error:", error);
-      const frontendUrl =  appConfig.frontendUrl;
+      const frontendUrl = appConfig.frontendUrl;
       res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
     }
   }

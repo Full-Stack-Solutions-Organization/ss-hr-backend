@@ -12,6 +12,7 @@ async function startServer() {
     await connectDB();
 
     const server = socketServer.listen(port, () => {
+      console.log("appconfig : ",appConfig)
       console.log(`Server running on port ${port}`);
     });
 

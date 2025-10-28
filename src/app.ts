@@ -19,14 +19,14 @@ import adminTestimonialRoutes from './presentation/routes/adminTestimonialRoutes
 
 const app = express();
 
+console.log("Production");
+
 if (appConfig.nodeEnv === 'development') {
+  console.log("Development");
   app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
 }
 
 const allowedOrigins = [appConfig.frontendUrl, appConfig.frontendUrl2];
-
-console.log("node.env : ",appConfig.nodeEnv);
-console.log("allowedOrigins : ",allowedOrigins);
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -41,7 +41,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 }));
-
 
 app.use(compression());
 app.use(helmet());

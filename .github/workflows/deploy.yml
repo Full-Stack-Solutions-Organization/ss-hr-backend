@@ -35,7 +35,9 @@ jobs:
             npm run build
 
             echo "♻️ Restarting PM2 process..."
-            pm2 restart ss-hr-backend || pm2 start dist/server.js --name ss-hr-backend
+            # pm2 restart ss-hr-backend || pm2 start dist/server.js --name ss-hr-backend
+            pm2 delete ss-hr-backend || true
+            pm2 start dist/server.js --name ss-hr-backend
 
             pm2 save
             echo "✅ Deployment complete!"

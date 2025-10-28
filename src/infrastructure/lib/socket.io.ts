@@ -3,12 +3,17 @@ import app from "../../app";
 import { redis } from "./redis";
 import { Types } from "mongoose";
 import { Server } from "socket.io";
+import { appConfig } from "../../config/env";
 
 const socketServer = http.createServer(app);
+const allowedOrigins = [appConfig.frontendUrl, appConfig.frontendUrl2].filter(
+  (url): url is string => Boolean(url)
+);
 
 const io = new Server(socketServer, {
     cors: {
-        origin: ["http://localhost:3000"],
+        origin: allowedOrigins,
+        credentials: true,
     },
 });
 

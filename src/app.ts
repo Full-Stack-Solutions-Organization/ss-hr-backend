@@ -26,26 +26,22 @@ if (appConfig.nodeEnv === 'development') {
 const allowedOrigins = [appConfig.frontendUrl];
 
 app.use(cors({
-  origin: (origin, callback) => {
-    // Testing only
-    // TODO remove this after testing
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(null, false);
-
-    // if (!origin || allowedOrigins.includes(origin)) {
-    //   callback(null, true);
-    // } else {
-    //   callback(new Error("Not allowed by CORS"));
-    // }
-  },
+  // Todo uncomment after testing
+  // origin: (origin, callback) => {
+  //   if (!origin || allowedOrigins.includes(origin)) {
+  //     callback(null, true);
+  //   } else {
+  //     callback(new Error("Not allowed by CORS"));
+  //   }
+  // },
+  // Todo remove after testing
+  origin: true,
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 }));
+
+app.options("*", cors());
 
 app.use(compression());
 app.use(helmet());

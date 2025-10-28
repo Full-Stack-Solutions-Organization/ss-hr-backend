@@ -26,22 +26,18 @@ if (appConfig.nodeEnv === 'development') {
 const allowedOrigins = [appConfig.frontendUrl];
 
 app.use(cors({
-  // Todo uncomment after testing
-  // origin: (origin, callback) => {
-  //   if (!origin || allowedOrigins.includes(origin)) {
-  //     callback(null, true);
-  //   } else {
-  //     callback(new Error("Not allowed by CORS"));
-  //   }
-  // },
-  // Todo remove after testing
-  origin: true,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 }));
 
-app.options("*", cors());
 
 app.use(compression());
 app.use(helmet());
@@ -51,7 +47,6 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 app.use('/api/auth', authRoutes);
-
 app.use("/api/admin/settings", adminSettingsRoutes);
 app.use('/api/admin/jobs', adminJobRoutes);
 app.use('/api/admin/chat', adminChatRoutes);

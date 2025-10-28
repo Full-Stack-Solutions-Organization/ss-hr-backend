@@ -1,0 +1,41 @@
+name: CI/CD - Deploy ss-hr-backend to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to AWS EC2 via SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "🚀 Starting deployment on EC2..."
+
+            # navigate to backend folder
+            cd /home/ubuntu/ss-hr-backend
+
+            # pull latest code
+            git fetch origin main
+            git reset --hard origin/main
+
+            # install dependencies and build TS
+            npm ci
+            npm run build
+
+            # restart app with PM2 (start if not already running)
+            pm2 restart ss-hr-backend || pm2 start dist/server.js --name ss-hr-backend
+
+            # save pm2 state
+            pm2 save
+
+            echo "✅ Deployment complete!"

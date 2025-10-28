@@ -26,8 +26,6 @@ if (appConfig.nodeEnv === 'development') {
 
 const allowedOrigins = [appConfig.frontendUrl];
 
-console.log("allowedOrigins : ",allowedOrigins);
-
 app.use(cors({
   origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
@@ -78,7 +76,5 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-
-
 
 export default app;

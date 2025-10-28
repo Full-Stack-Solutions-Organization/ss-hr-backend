@@ -42,8 +42,5 @@ export const redisConfig = {
 export const googleClientConfig = {
     googleClientId: process.env.GOOGLE_CLIENT_ID,
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    googleCallbackURL: appConfig.nodeEnv === 'development' ? process.env.GOOGLE_CALLBACK_LOCAL_URL : process.env.GOOGLE_CALLBACK_PRODUCTION_URL,
+    googleCallbackURL: process.env.NODE_ENV === 'development' ? process.env.GOOGLE_CALLBACK_LOCAL_URL : process.env.GOOGLE_CALLBACK_PRODUCTION_URL,
 }
-
-
-console.log("frontendUrl : ",appConfig.frontendUrl);

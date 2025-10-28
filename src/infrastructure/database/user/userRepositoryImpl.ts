@@ -48,7 +48,6 @@ export class UserRepositoryImpl implements IUserRepository {
 
   async createUser<T>(user: T): Promise<User> {
     try {
-      console.log("user : ", user)
       const createdUser = await UserModel.create({ ...user });
       return this.mapToEntity(createdUser);
     } catch (error) {

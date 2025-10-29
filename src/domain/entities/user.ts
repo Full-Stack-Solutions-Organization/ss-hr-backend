@@ -1,6 +1,11 @@
 import { Types } from "mongoose";
 
-export type Role = 'user' | 'admin' | 'superAdmin' | 'systemAdmin';
+export enum Role {
+  User = "user",
+  Admin = "admin",
+  SuperAdmin = "superAdmin",
+  SystemAdmin = "systemAdmin",
+}
 
 export class User {
   constructor(

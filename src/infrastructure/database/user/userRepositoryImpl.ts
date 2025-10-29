@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { IUser, UserModel } from "./userModel";
-import { Role, User } from "../../../domain/entities/user";
+import { User } from "../../../domain/entities/user";
 import { ApiPaginationRequest, ApiResponse, FetchUsersForChatSideBar } from "../../dtos/common.dts";
 import { AdminFetchAllAdmins, AdminFetchAllUsers, IUserRepository } from "../../../domain/repositories/IUserRepository";
 
@@ -167,7 +167,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
   async findUserByEmailWithRole(
     email: string,
-    role: Role
+    role: User["role"],
   ): Promise<User | null> {
     try {
       const user = await UserModel.findOne({ email, role });
@@ -227,10 +227,10 @@ export class UserRepositoryImpl implements IUserRepository {
     }
   }
 
-  async deleteUserById(id: Types.ObjectId): Promise<boolean> {
+  async deleteUserById(id: Types.ObjectId): Promise<User | null> {
     try {
       const result = await UserModel.findByIdAndDelete(id);
-      return !!result;
+      return result || null;
     } catch (error) {
       throw new Error("Failed to delete user.");
     }

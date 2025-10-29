@@ -1,11 +1,11 @@
 import { Types } from "mongoose";
-import { Role } from "../../domain/entities/user";
+import { User } from "../../domain/entities/user";
 
 export interface CreateUserByAdminRequest {
   fullName: string;
   email: string;
   password: string;
-  role: Role;
+  role: User["role"];
   phone?: string;
   phoneTwo?: string;
 }
@@ -18,7 +18,7 @@ export interface CreateUserByAdminResponse {
     serialNumber: string;
     fullName: string;
     email: string;
-    role: Role;
+    role: User["role"];
   };
 }
 
@@ -40,7 +40,7 @@ export interface UpdateUserResponse {
     serialNumber: string;
     fullName: string;
     email: string;
-    role: Role;
+    role: User["role"];
     isBlocked: boolean;
     isVerified: boolean;
   };
@@ -62,7 +62,7 @@ export interface GetUserByIdResponse {
     serialNumber: string;
     fullName: string;
     email: string;
-    role: Role;
+    role: User["role"];
     phone: string;
     phoneTwo: string;
     profileImage: string;

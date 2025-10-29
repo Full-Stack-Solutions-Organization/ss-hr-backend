@@ -1,4 +1,4 @@
-import { Role } from "../../../domain/entities/user";
+import { User } from "../../../domain/entities/user";
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IUser extends Document {
@@ -7,7 +7,7 @@ export interface IUser extends Document {
   fullName: string;
   email: string;
   password: string;
-  role: Role;
+  role: User["role"];
   phone: string;
   phoneTwo: string;
   profileImage: string;

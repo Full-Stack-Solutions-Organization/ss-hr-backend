@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { adminConfig } from '../../config/env';
-import { User } from '../../domain/entities/user';
+import { Role, User } from '../../domain/entities/user';
 import { JWTService } from '../../infrastructure/security/jwt';
 import { ApiResponse } from '../../infrastructure/dtos/common.dts';
 import { OTPService } from '../../infrastructure/service/otpService';
@@ -98,7 +98,7 @@ export class ResendOtpUseCase {
       let user: User | null = null;
 
       if (email && role) {
-        if (role === "user") {
+        if (role === Role.User) {
           user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
         }
 
@@ -136,9 +136,9 @@ export class LoginUseCase {
 
       let user: User | null = null;
 
-      if (role === "user" || role === "admin" || role === "superAdmin") { // TODO need to ahandle admin
+      if (role === Role.User || role === Role.Admin || role === Role.SuperAdmin) {
         user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
-      } else if (role === "systemAdmin") {
+      } else if (role === Role.SystemAdmin) {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
           throw new Error("Invalid credentials.");
         }

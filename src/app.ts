@@ -19,10 +19,7 @@ import adminTestimonialRoutes from './presentation/routes/adminTestimonialRoutes
 
 const app = express();
 
-console.log("Production");
-
 if (appConfig.nodeEnv === 'development') {
-  console.log("Development");
   app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
 }
 
@@ -30,20 +27,18 @@ const allowedOrigins = ['https://sshrconsultancy.com',
   'https://www.sshrconsultancy.com',
   'http://localhost:5000'];
 
-app.use(cors(
-//   {
-//   origin: (origin, callback) => {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not allowed by CORS"));
-//     }
-//   },
-//   credentials: true,
-//   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-// }
-));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+}));
 
 app.use(compression());
 app.use(helmet());

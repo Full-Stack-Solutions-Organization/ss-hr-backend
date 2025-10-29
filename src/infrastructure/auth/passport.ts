@@ -4,6 +4,7 @@ import { appConfig, googleClientConfig, } from '../../config/env';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { UserRepositoryImpl } from '../database/user/userRepositoryImpl';
 import { CreateGoogleUser } from '../../domain/repositories/IUserRepository';
+import { Role } from '../../domain/entities/user';
 
 const userRepository = new UserRepositoryImpl();
 
@@ -36,7 +37,7 @@ if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret
         email: profile.emails?.[0]?.value || '',
         password: '',
         profileImage: profile.photos?.[0]?.value || '',
-        role: 'user',
+        role: Role.User,
         isVerified: true,
         verificationToken: '',
         phone: '',

@@ -5,11 +5,9 @@ on:
     branches: [ main ]
 
 jobs:
-  # 🧱 Build job (runs on GitHub Actions)
+  # 🧱 Build on GitHub Actions
   build:
-    name: Build Backend
     runs-on: ubuntu-latest
-
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
@@ -35,25 +33,23 @@ jobs:
       - name: 📦 Archive build files
         run: tar -czf build.tar.gz dist package*.json
 
-      - name: ⬆️ Upload build artifact
+      - name: ⬆️ Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: backend-build
           path: build.tar.gz
 
-  # 🚀 Deploy job (runs after build)
+  # 🚀 Deploy to EC2
   deploy:
-    name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build
-
     steps:
       - name: ⬇️ Download artifact
         uses: actions/download-artifact@v4
         with:
           name: backend-build
 
-      - name: 📤 Copy build files to EC2
+      - name: 📤 Upload to EC2
         uses: appleboy/scp-action@v0.1.5
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -62,7 +58,7 @@ jobs:
           source: "build.tar.gz"
           target: "/home/ubuntu/ss-hr-backend"
 
-      - name: 🚀 Deploy and restart backend on EC2
+      - name: 🚀 Deploy and restart backend
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -72,45 +68,19 @@ jobs:
             echo "🚀 Starting deployment on EC2..."
             cd /home/ubuntu/ss-hr-backend
 
-            echo "🔄 Pulling latest code from GitHub..."
-            if [ ! -d ".git" ]; then
-              echo "🧱 .git not found — initializing repository"
-              git init
-              git remote add origin https://github.com/Full-Stack-Solutions-Organization/ss-hr-backend.git
-              git fetch origin main
-              git checkout -t origin/main
-            else
-              git fetch origin main
-              git reset --hard origin/main
-            fi
-
-            echo "🧹 Removing old dist folder..."
-            rm -rf dist
+            echo "🧹 Cleaning old files..."
+            rm -rf dist node_modules
 
             echo "📦 Extracting new build..."
             tar -xzf build.tar.gz
             rm -f build.tar.gz
 
-            echo "🧹 Cleaning node_modules..."
-            rm -rf node_modules
-
             echo "📦 Installing production dependencies..."
-            npm install --production
+            npm ci --omit=dev
 
-            echo "🧩 Installing rimraf (dev dependency for clean)..."
-            npm install rimraf --save-dev
-
-            echo "🏗️ Rebuilding TypeScript project..."
-            npm run build
-
-            echo "♻️ Restarting PM2 process..."
+            echo "♻️ Restarting PM2..."
             pm2 delete ss-hr-backend || true
             pm2 start dist/server.js --name ss-hr-backend
-
-            echo "💾 Saving PM2 state..."
             pm2 save
 
-            echo "🧾 Showing PM2 logs..."
-            pm2 logs ss-hr-backend --lines 20
-
-            echo "✅ Deployment complete! 🎉"
+            echo "✅ Deployment complete!"

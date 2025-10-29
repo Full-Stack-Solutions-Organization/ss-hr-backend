@@ -13,6 +13,8 @@ import { FileDeleteService, FileUploadService } from "../../infrastructure/servi
 import { AdminGetAllAdminsUseCase } from "../../application/adminUse-cases/adminGetAllAdminsUseCase";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 import { CreateAdminUseCase, DeleteAdminUseCase } from "../../application/adminUse-cases/adminSettingsUseCase";
+import { DecodedUser } from "../../express";
+import { Role } from "../../domain/entities/user";
 
 const s3Client = new S3Client();
 const randomStringGenerator = new RandomStringGenerator()
@@ -62,9 +64,9 @@ export class AdminSettingsController {
 
     async deleteAdmin(req: Request, res: Response) {
         try {
-            console.log("Admin deleting")
             const { id: adminId } = req.params;
-            const result = await this.deleteAdminUseCase.execute(new Types.ObjectId(adminId));
+            const user = req.user as DecodedUser;
+            const result = await this.deleteAdminUseCase.execute(user.role as Role,new Types.ObjectId(adminId));
             res.status(200).json(result);
         } catch (error) {
             console.log("deleteAdmin error : ", error);

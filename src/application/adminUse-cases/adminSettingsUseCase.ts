@@ -8,6 +8,7 @@ import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
 import { CreateAdminRequest, CreateAdminResponse } from "../../infrastructure/dtos/admin.dtos";
+import { Role, User } from "../../domain/entities/user";
 
 export class CreateAdminUseCase {
     constructor(
@@ -64,18 +65,31 @@ export class DeleteAdminUseCase {
         private fileDeleteService: FileDeleteService
     ) { }
 
-    async execute(adminId: Types.ObjectId): Promise<ApiResponse> {
+    async execute(requesterRole: User["role"], adminId: Types.ObjectId): Promise<ApiResponse> {
         try {
 
-            if (!adminId) throw new Error("Invalid request");
+            if (!adminId || !requesterRole) throw new Error("Invalid request");
 
-            const admin = await this.userRepositoryImpl.findUserById(adminId);
-            if (!admin) throw new Error("No admin found");
-            if (admin.role !== "admin") throw new Error("Invalid request");
+            const targetAdmin = await this.userRepositoryImpl.findUserById(adminId);
+            if (!targetAdmin) {
+                throw new Error("Admin not found");
+            }
 
-            if (admin.profileImage) {
-                const response = await this.fileDeleteService.deleteFile(admin.profileImage);
-                if (!response) throw new Error("Old textimonial profile image failed");
+            if (requesterRole === Role.User || requesterRole === Role.Admin) {
+                throw new Error("You do not have permission to delete other users.");
+            }
+
+            if (requesterRole === Role.SuperAdmin && targetAdmin.role !== Role.Admin) {
+                throw new Error("Super Admin can only delete Admins.");
+            }
+
+            if (requesterRole === Role.SystemAdmin && targetAdmin._id === adminId) {
+                throw new Error("You cannot delete yourself.");
+            }
+
+            if (targetAdmin.profileImage) {
+                const deleted = await this.fileDeleteService.deleteFile(targetAdmin.profileImage);
+                if (!deleted) throw new Error("Failed to delete admin's profile image.");
             }
 
             const response = await this.userRepositoryImpl.deleteUserById(adminId);
@@ -83,6 +97,7 @@ export class DeleteAdminUseCase {
 
             return { success: true, message: 'Admin deleted successfully' };
         } catch (error) {
+            console.log("DeleteAdminUseCase Error : ", error);
             throw handleUseCaseError(error || "Unexpected error in deleting admin");
         }
     }

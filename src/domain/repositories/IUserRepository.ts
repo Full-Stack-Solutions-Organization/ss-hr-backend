@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { Role, User } from "../entities/user";
+import { User } from "../entities/user";
 import {ApiPaginationRequest,ApiResponse, FetchUsersForChatSideBar} from "../../infrastructure/dtos/common.dts";
 
 export type CreateLocalUser = Pick<User,"fullName" | "email" | "password" | "verificationToken" | "role" | "serialNumber">;
@@ -19,7 +19,7 @@ export interface IUserRepository {
 
   findUserByEmail(email: string): Promise<User | null>;
 
-  findUserByEmailWithRole(email: string, role: Role): Promise<User | null>;
+  findUserByEmailWithRole(email: string, role: User["role"]): Promise<User | null>;
 
   findAllUsers({page,limit,}: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllUsers>>;
 
@@ -35,5 +35,5 @@ export interface IUserRepository {
 
   getTotalCount():Promise<number>;
 
-  deleteUserById(id: Types.ObjectId): Promise<boolean>;
+  deleteUserById(id: Types.ObjectId): Promise<User | null>;
 }

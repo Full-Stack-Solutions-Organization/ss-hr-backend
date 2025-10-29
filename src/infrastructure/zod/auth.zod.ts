@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Role } from '../../domain/entities/user';
 
 export const fullNameFiled = z.string()
   .min(4, "FullName must be at least 4 characters")
@@ -17,7 +18,7 @@ export const passwordField = z.string()
 
 export const roleField = z.enum(["user", "admin", "superAdmin", "systemAdmin"] as const);
 
-export const limitedRoleField = z.enum(["user", "admin", "superAdmin"]);
+export const limitedRoleField = z.enum([Role.User, Role.Admin, Role.SuperAdmin]);
 
 export const otpField = z.string().length(6, "OTP must be exactly 6 digits");
 

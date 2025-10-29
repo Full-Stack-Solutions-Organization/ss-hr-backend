@@ -120,8 +120,6 @@ export class AuthController {
         role,
       });
 
-      console.log("user : ", user);
-
       res.cookie("token", user.token, {
         httpOnly: true,
         secure: isProduction,

@@ -20,7 +20,7 @@ export const appConfig = {
     port: process.env.PORT,
     nodeEnv: process.env.NODE_ENV,
     frontendUrl: process.env.NODE_ENV === "development" ? process.env.FRONTEND_BASE_URL : process.env.FRONTEND_PRODUCTION_URL,
-    frontendUrl2: process.env.NODE_ENV === "development" ? process.env.FRONTEND_BASE_URL : process.env.FRONTEND_PRODUCTION_URL2
+    frontendUrl2: process.env.NODE_ENV === "development" ? process.env.FRONTEND_BASE_URL : process.env.FRONTEND_PRODUCTION_URL_TWO
 }
 
 export const adminConfig = {

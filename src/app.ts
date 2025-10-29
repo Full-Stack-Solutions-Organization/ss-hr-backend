@@ -25,18 +25,29 @@ if (appConfig.nodeEnv === 'development') {
 
 const allowedOrigins = [appConfig.frontendUrl, appConfig.frontendUrl2];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-}));
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   credentials: true,
+//   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+// }));
+
+app.use(
+  cors({
+    origin: [
+      "https://www.sshrconsultancy.com", // your frontend domain
+      "https://sshrconsultancy.com"      // optional (without www)
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true, // if you're using cookies or Authorization headers
+  })
+);
 
 app.use(compression());
 app.use(helmet());

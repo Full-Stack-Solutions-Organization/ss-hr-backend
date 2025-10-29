@@ -12,6 +12,7 @@ console.log("Socker server consoleing");
 const allowedOrigins = [appConfig.frontendUrl, appConfig.frontendUrl2].filter(
   (url): url is string => Boolean(url)
 );
+
 const io = new Server(socketServer, {
     cors: {
         origin: allowedOrigins,

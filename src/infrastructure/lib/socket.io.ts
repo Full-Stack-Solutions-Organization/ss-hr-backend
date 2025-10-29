@@ -6,6 +6,8 @@ import { Server } from "socket.io";
 
 const socketServer = http.createServer(app);
 
+console.log("Socker server consoleing");
+
 const io = new Server(socketServer, {
     cors: {
         origin: ["http://localhost:3000"],

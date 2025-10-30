@@ -45,6 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
+// Routes
 app.use('/api/auth', authRoutes);
 app.use("/api/admin/settings", adminSettingsRoutes);
 app.use('/api/admin/jobs', adminJobRoutes);
@@ -55,6 +56,7 @@ app.use('/api/admin/packages', adminPackageRoutes);
 app.use('/api/admin/payments', adminPaymentRoutes);
 app.use('/api/message', messageRoutes);
 app.use('/api/user', userRoutes);
+
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({

@@ -11,5 +11,7 @@ router.patch('/prfileImage', authMiddleware, upload.single("profileImage"), user
 
 router.get("/testimonials", authMiddleware, userController.getTestimonilas );
 
+router.patch("/profile", authMiddleware, userController.updateProfileDetails);
+
 export default router;
 

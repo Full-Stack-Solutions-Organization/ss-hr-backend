@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Gender } from '../../domain/entities/user';
 
 export const createUserByAdminSchema = z.object({
   fullName: z.string()
@@ -43,4 +44,50 @@ export const updateUserSchema = z.object({
 
 export const getUserByIdSchema = z.object({
   id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid user ID")
+});
+
+
+// User Profile details zod schema
+const e164Regex = /^\+[1-9]\d{1,14}$/;
+
+export const updateUserInfoSchema = z.object({
+  fullName: z
+    .string()
+    .min(2, "Full name must be at least 2 characters")
+    .max(100, "Full name must be less than 100 characters"),
+
+  email: z
+    .string()
+    .email("Please enter a valid email address")
+    .nonempty("Email is required"),
+
+  phone: z.string().regex(e164Regex, "Enter a valid phone number (e.g. +971501234567)"),
+
+  phoneTwo: z.string().regex(e164Regex, "Enter a valid phone number (e.g. +971501234567)"),
+
+  gender: z.custom<Gender>((val) => val === "male" || val === "female" || val === "other", {
+    message: "Invalid gender",
+  }),
+
+  nationality: z.string().min(2, "Enter a valid nationality").max(60),
+
+  linkedInUrl: z
+  .string()
+  .trim()
+  .optional()
+  .refine(
+    (val) => !val || /^https?:\/\/.+\..+/.test(val),
+    { message: "Enter a valid LinkedIn URL (https://...)" }
+  ),
+
+portfolioUrl: z
+  .string()
+  .trim()
+  .optional()
+  .refine(
+    (val) => !val || /^https?:\/\/.+\..+/.test(val),
+    { message: "Enter a valid portfolio URL (https://...)" }
+  ),
+
+  dob: z.string(),
 });

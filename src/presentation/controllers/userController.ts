@@ -6,13 +6,15 @@ import { DecodedUser } from "../../express";
 import { S3Client } from "@aws-sdk/client-s3";
 import { aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
+import { updateUserInfoSchema } from "../../infrastructure/zod/user.zod";
 import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
-import { UseGetTestimonialsUseCase } from "../../application/userUseCase.ts/userTestimonial";
 import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
+import { UseGetTestimonialsUseCase } from "../../application/userUseCase.ts/userTestimonialUseCase";
 import { UserUpdateUserProfileImageUseCase } from "../../application/userUseCase.ts/userProfileUseCase";
+import { UserUpdatePorifleDataUseCase } from "../../application/userUseCase.ts/userProfileUpdateUseCase";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 import { TestimonialRepositoryImpl } from "../../infrastructure/database/testimonial/testimonialRepositoryImpl";
 import { GetAllUsersForChatSideBarUseCase } from "../../application/commonUse-cases/getAllUsersForChatSidebarUseCase";
@@ -30,16 +32,19 @@ const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrl
 const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
 const useGetTestimonialsUseCase = new UseGetTestimonialsUseCase(testimonialRepositoryImpl, signedUrlService);
 const userUpdateUserProfileImageUseCase = new UserUpdateUserProfileImageUseCase(userRepositoryImpl, fileDeleteService, fileUploadService, signedUrlService );
+const userUpdatePorifleDataUseCase = new UserUpdatePorifleDataUseCase(userRepositoryImpl);
 
 export class UserController {
     constructor(
         private getAllUsersForChatSideBarUseCase: GetAllUsersForChatSideBarUseCase,
         private userUpdateUserProfileImageUseCase: UserUpdateUserProfileImageUseCase,
         private useGetTestimonialsUseCase: UseGetTestimonialsUseCase,
+        private userUpdatePorifleDataUseCase: UserUpdatePorifleDataUseCase,
     ) {
         this.getAdminsForChatSidebar = this.getAdminsForChatSidebar.bind(this);
         this.updateUserProfileImage = this.updateUserProfileImage.bind(this);
         this.getTestimonilas = this.getTestimonilas.bind(this);
+        this.updateProfileDetails = this.updateProfileDetails.bind(this);
     }
 
     async getAdminsForChatSidebar(req: Request, res: Response) {
@@ -77,13 +82,30 @@ export class UserController {
         }
     }
     
+    async updateProfileDetails(req: Request, res: Response) {
+        try {
+            const userId = (req.user as DecodedUser).userId;
+            const validatedData = updateUserInfoSchema.parse(req.body);
+            const result = await this.userUpdatePorifleDataUseCase.execute({
+                _id: new Types.ObjectId(userId),
+                ...validatedData,
+                dob: new Date(validatedData.dob),
+            });
+            console.log("result : ",result);
+            res.status(200).json(result);
+        } catch (error) {
+            console.log("updateProfileDetails error : ",error);
+            HandleError.handle(error, res);
+        }
+    }
 
 }
 
 const userController = new UserController(
     getAllUsersForChatSideBarUseCase,
     userUpdateUserProfileImageUseCase,
-    useGetTestimonialsUseCase
+    useGetTestimonialsUseCase,
+    userUpdatePorifleDataUseCase
 );
 
 export { userController };

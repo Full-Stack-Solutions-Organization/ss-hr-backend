@@ -20,8 +20,18 @@ export class UserRepositoryImpl implements IUserRepository {
       user.isVerified,
       user.verificationToken,
       user.googleId,
+      user.gender,
+      user.nationality,
+      user.dob,
+      user.currentSalary,
+      user.expectedSalary,
+      user.immediateJoiner,
       user.createdAt,
-      user.updatedAt
+      user.updatedAt,
+      user.noticePeriod,
+      user.linkedInUrl,
+      user.portfolioUrl,
+      user.resumeUrl,
     );
   }
 

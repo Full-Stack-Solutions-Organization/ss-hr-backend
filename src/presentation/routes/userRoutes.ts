@@ -13,5 +13,9 @@ router.get("/testimonials", authMiddleware, userController.getTestimonilas );
 
 router.patch("/profile", authMiddleware, userController.updateProfileDetails);
 
+router.post("/address", authMiddleware, userController.createAddress);
+
+router.patch("/address/:id", authMiddleware, userController.updateAddress);
+
 export default router;
 

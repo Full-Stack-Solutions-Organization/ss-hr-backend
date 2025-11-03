@@ -6,12 +6,14 @@ import { DecodedUser } from "../../express";
 import { S3Client } from "@aws-sdk/client-s3";
 import { aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
-import { updateUserInfoSchema } from "../../infrastructure/zod/user.zod";
 import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
+import { addressSchema, updateUserInfoSchema } from "../../infrastructure/zod/user.zod";
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
+import { UserCreateAddressUseCase, UserUpdateAddressUseCase } from "../../application/userUseCase.ts/userAddressUseCase";
+import { AddressRepositoryImpl } from "../../infrastructure/database/address/addressRepositoryImpl";
 import { UseGetTestimonialsUseCase } from "../../application/userUseCase.ts/userTestimonialUseCase";
 import { UserUpdateUserProfileImageUseCase } from "../../application/userUseCase.ts/userProfileUseCase";
 import { UserUpdatePorifleDataUseCase } from "../../application/userUseCase.ts/userProfileUpdateUseCase";
@@ -23,16 +25,19 @@ const s3 = new S3Client();
 const fileDeleteService = new FileDeleteService(s3);
 const userRepositoryImpl = new UserRepositoryImpl();
 const randomStringGenerator = new RandomStringGenerator();
+const addressRepositoryImpl = new AddressRepositoryImpl();
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 const s3KeyGenerator = new S3KeyGenerator(randomStringGenerator);
 const testimonialRepositoryImpl = new TestimonialRepositoryImpl();
-const fileUploadService = new  FileUploadService(s3, s3KeyGenerator);
+const fileUploadService = new FileUploadService(s3, s3KeyGenerator);
 const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);
 
-const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
-const useGetTestimonialsUseCase = new UseGetTestimonialsUseCase(testimonialRepositoryImpl, signedUrlService);
-const userUpdateUserProfileImageUseCase = new UserUpdateUserProfileImageUseCase(userRepositoryImpl, fileDeleteService, fileUploadService, signedUrlService );
+const userCreateAddressUseCase = new UserCreateAddressUseCase(addressRepositoryImpl);
+const userUpdateAddressUseCase = new UserUpdateAddressUseCase(addressRepositoryImpl);
 const userUpdatePorifleDataUseCase = new UserUpdatePorifleDataUseCase(userRepositoryImpl);
+const useGetTestimonialsUseCase = new UseGetTestimonialsUseCase(testimonialRepositoryImpl, signedUrlService);
+const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
+const userUpdateUserProfileImageUseCase = new UserUpdateUserProfileImageUseCase(userRepositoryImpl, fileDeleteService, fileUploadService, signedUrlService);
 
 export class UserController {
     constructor(
@@ -40,11 +45,15 @@ export class UserController {
         private userUpdateUserProfileImageUseCase: UserUpdateUserProfileImageUseCase,
         private useGetTestimonialsUseCase: UseGetTestimonialsUseCase,
         private userUpdatePorifleDataUseCase: UserUpdatePorifleDataUseCase,
+        private userCreateAddressUseCase: UserCreateAddressUseCase,
+        private userUpdateAddressUseCase: UserUpdateAddressUseCase,
     ) {
         this.getAdminsForChatSidebar = this.getAdminsForChatSidebar.bind(this);
         this.updateUserProfileImage = this.updateUserProfileImage.bind(this);
         this.getTestimonilas = this.getTestimonilas.bind(this);
         this.updateProfileDetails = this.updateProfileDetails.bind(this);
+        this.createAddress = this.createAddress.bind(this);
+        this.updateAddress = this.updateAddress.bind(this);
     }
 
     async getAdminsForChatSidebar(req: Request, res: Response) {
@@ -58,13 +67,13 @@ export class UserController {
     }
 
     async updateUserProfileImage(req: Request, res: Response) {
-         try {
+        try {
             console.log("ProfileImage updating ")
             const userId = (req.user as DecodedUser).userId;
             const file = req.file;
-            if(!userId || !file) throw new Error("Invalid request.");
-            const result = await this.userUpdateUserProfileImageUseCase.execute({userId: new Types.ObjectId(userId), file});
-            console.log("result : ",result);
+            if (!userId || !file) throw new Error("Invalid request.");
+            const result = await this.userUpdateUserProfileImageUseCase.execute({ userId: new Types.ObjectId(userId), file });
+            console.log("result : ", result);
             res.status(200).json(result);
         } catch (error) {
             console.log("getTestimonilas error : ", error);
@@ -81,7 +90,7 @@ export class UserController {
             HandleError.handle(error, res);
         }
     }
-    
+
     async updateProfileDetails(req: Request, res: Response) {
         try {
             const userId = (req.user as DecodedUser).userId;
@@ -91,13 +100,40 @@ export class UserController {
                 ...validatedData,
                 dob: new Date(validatedData.dob),
             });
-            console.log("result : ",result);
             res.status(200).json(result);
         } catch (error) {
-            console.log("updateProfileDetails error : ",error);
+            console.log("updateProfileDetails error : ", error);
             HandleError.handle(error, res);
         }
     }
+
+    async createAddress(req: Request, res: Response) {
+        try {
+            const userId = (req.user as DecodedUser).userId;
+            const validatedData = addressSchema.parse(req.body);
+            const result = await this.userCreateAddressUseCase.execute({
+                userId: new Types.ObjectId(userId),
+                ...validatedData
+            });
+            res.status(201).json(result);
+        } catch (error) {
+            console.log("createAddress error : ", error);
+            HandleError.handle(error, res);
+        }
+    }
+
+    async updateAddress(req: Request, res: Response) {
+        try {
+            const {id: addressId} = req.params;
+            const validatedData = addressSchema.parse(req.body);
+            const result = await this.userUpdateAddressUseCase.execute(new Types.ObjectId(addressId), validatedData);
+            res.status(200).json(result);
+        } catch (error) {
+            console.log("updateAddress error : ", error);
+            HandleError.handle(error, res);
+        }
+    }
+
 
 }
 
@@ -105,7 +141,9 @@ const userController = new UserController(
     getAllUsersForChatSideBarUseCase,
     userUpdateUserProfileImageUseCase,
     useGetTestimonialsUseCase,
-    userUpdatePorifleDataUseCase
+    userUpdatePorifleDataUseCase,
+    userCreateAddressUseCase,
+    userUpdateAddressUseCase
 );
 
 export { userController };

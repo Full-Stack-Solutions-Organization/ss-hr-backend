@@ -2,28 +2,30 @@ name: CI/CD - Deploy ss-hr-backend to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main   # Trigger on every push or merge to main
 
 jobs:
   deploy:
+    name: 🚀 Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🚀 SSHR SSH into EC2 and deploy
+      - name: 🔑 Connect to EC2 and Deploy
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "🚀 Starting deployment..."
+            echo "🚀 Starting backend deployment on EC2..."
             cd /home/ubuntu/ss-hr-backend
 
             echo "📥 Pulling latest code from main..."
             git fetch origin main
             git reset --hard origin/main
 
-            echo "🧹 Cleaning previous build..."
+            echo "🧹 Cleaning old build and node_modules..."
             rm -rf dist node_modules
 
             echo "📦 Installing dependencies (production only)..."
@@ -32,9 +34,9 @@ jobs:
             echo "🏗️ Building TypeScript project..."
             npm run build
 
-            echo "♻️ Restarting PM2..."
+            echo "♻️ Restarting PM2 process..."
             pm2 delete ss-hr-backend || true
             pm2 start dist/server.js --name ss-hr-backend
             pm2 save
 
-            echo "✅ Deployment completed successfully!"
+            echo "✅ Deployment complete! Server is live 🚀"

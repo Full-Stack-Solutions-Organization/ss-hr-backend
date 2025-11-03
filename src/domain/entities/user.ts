@@ -7,10 +7,17 @@ export enum Role {
   SystemAdmin = "systemAdmin",
 }
 
+export enum Gender {
+  Male = "male",
+  Female = "female",
+  Other = "other",
+}
+
+
 export class User {
   constructor(
     public _id: Types.ObjectId,
-    public serialNumber : string,
+    public serialNumber: string,
     public fullName: string,
     public email: string,
     public password: string,
@@ -22,8 +29,18 @@ export class User {
     public isVerified: boolean,
     public verificationToken: string,
     public googleId: string,
+    public gender: Gender,
+    public nationality: string,
+    public dob: Date,
+    public currentSalary: number,
+    public expectedSalary: number,
+    public immediateJoiner: boolean,
     public createdAt: Date,
     public updatedAt: Date,
+    public noticePeriod?: string,
+    public linkedInUrl?: string,
+    public portfolioUrl?: string,
+    public resumeUrl?: string,
   ) {
 
   }

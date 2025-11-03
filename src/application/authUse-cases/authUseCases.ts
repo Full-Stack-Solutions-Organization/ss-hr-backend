@@ -169,6 +169,7 @@ export class LoginUseCase {
         success: true, message: 'Logged In Successfully.', user: {
           _id: user._id,
           fullName: user.fullName,
+          email: user.email,
           profileImage: updateProfileImage ? updateProfileImage : user.profileImage,
           role: role,
           token,

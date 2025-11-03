@@ -1,4 +1,4 @@
-import { User } from "../../../domain/entities/user";
+import { Gender, User } from "../../../domain/entities/user";
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IUser extends Document {
@@ -15,6 +15,18 @@ export interface IUser extends Document {
   isBlocked: boolean;
   verificationToken: string;
   googleId: string;
+
+  gender: Gender,
+  nationality: string,
+  linkedInUrl?: string,
+  portfolioUrl?: string,
+  dob: Date,
+  currentSalary: number,
+  expectedSalary: number,
+  immediateJoiner: boolean,
+  noticePeriod: string,
+  resumeUrl: string,
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -97,6 +109,59 @@ const UserSchema = new Schema<IUser>(
     },
     googleId: {
       type: String,
+      default: null,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+      required: [true, "Gender is required"],
+    },
+    nationality: {
+      type: String,
+      minlength: [2, "Enter a valid nationality"],
+      maxlength: [60, "Nationality must be less than 60 characters"],
+      required: [true, "Nationality is required"],
+    },
+    linkedInUrl: {
+      type: String,
+      trim: true,
+      match: [/^https?:\/\/.+\..+/, "Enter a valid LinkedIn URL (https://...)"],
+      default: null,
+    },
+    portfolioUrl: {
+      type: String,
+      trim: true,
+      match: [/^https?:\/\/.+\..+/, "Enter a valid portfolio URL (https://...)"],
+      default: null,
+    },
+    dob: {
+      type: Date,
+      required: [true, "Date of birth is required"],
+    },
+    currentSalary: {
+      type: Number,
+      default: null,
+      min: 0,
+      max: 10000000
+    },
+    expectedSalary: {
+      type: Number,
+      default: null,
+      min: 0,
+      max: 10000000
+    },
+    immediateJoiner: {
+      type: Boolean,
+      default: false,
+    },
+    noticePeriod: {
+      type: String,
+      default: null,
+    },
+    resumeUrl: {
+      type: String,
+      trim: true,
+      match: [/^https?:\/\/.+\..+/, "Enter a valid resume URL (https://...)"],
       default: null,
     },
   },

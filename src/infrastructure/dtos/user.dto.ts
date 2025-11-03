@@ -72,3 +72,7 @@ export interface GetUserByIdResponse {
     updatedAt: Date;
   };
 }
+
+
+export type UseUpdateProfileRequest = Pick<User, "_id" | "fullName" | "phone" | "phoneTwo" | "gender" | "nationality" | "dob" | "linkedInUrl" | "portfolioUrl">;
+export type UseUpdateProfileResponse = Pick<User, "fullName" | "phone" | "phoneTwo" | "gender" | "nationality" | "dob" | "linkedInUrl" | "portfolioUrl">;

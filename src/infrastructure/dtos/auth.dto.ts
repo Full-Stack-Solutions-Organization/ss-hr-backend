@@ -40,6 +40,7 @@ export interface LoginResponse extends CommonResponse {
     user: { 
         _id?: Types.ObjectId;
         fullName: string, 
+        email?: string,
         profileImage: string | null, 
         role: string, 
         token: string, 

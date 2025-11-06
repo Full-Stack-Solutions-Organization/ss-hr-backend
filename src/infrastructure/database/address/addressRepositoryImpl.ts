@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { AddressModel, IAddress } from "./address.model";
+import { AddressModel, IAddress } from "./addressModel";
 import { Address } from "../../../domain/entities/address";
 import { CreateAddress, UpdateAddress } from "../../dtos/address.dtos";
 import { IAddressRepository } from "../../../domain/repositories/IAddressRepository";

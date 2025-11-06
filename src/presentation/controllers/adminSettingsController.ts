@@ -10,9 +10,8 @@ import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
-import { AdminGetAllAdminsUseCase } from "../../application/adminUse-cases/adminGetAllAdminsUseCase";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
-import { CreateAdminUseCase, DeleteAdminUseCase } from "../../application/adminUse-cases/adminSettingsUseCase";
+import { AdminGetAllAdminsUseCase, CreateAdminUseCase, DeleteAdminUseCase } from "../../application/adminUse-cases/adminSettingsUseCases";
 import { DecodedUser } from "../../express";
 import { Role } from "../../domain/entities/user";
 

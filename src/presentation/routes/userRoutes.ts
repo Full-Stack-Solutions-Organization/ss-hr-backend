@@ -17,5 +17,7 @@ router.post("/address", authMiddleware, userController.createAddress);
 
 router.patch("/address/:id", authMiddleware, userController.updateAddress);
 
+router.post("/career", authMiddleware, upload.single("resume"), userController.createCareerData);
+
 export default router;
 

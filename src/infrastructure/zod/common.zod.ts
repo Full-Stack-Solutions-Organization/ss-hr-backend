@@ -192,3 +192,40 @@ export const paginationReqQuery = z.object({
   page: z.string().optional().transform((val) => val ? parseInt(val, 10) : 1),
   limit: z.string().optional().transform((val) => val ? parseInt(val, 10) : 10),
 });
+
+
+// File validation
+export type FileValidationType = "image" | "document";
+
+interface FileValidationOptions {
+  type: FileValidationType;
+  maxSizeMB?: number;
+}
+
+export const validateFileZodSchema = ({ type, maxSizeMB = 5 }: FileValidationOptions) => {
+  const allowedMimeTypes =
+    type === "image"
+      ? ["image/png", "image/jpeg", "image/jpg"]
+      : ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+  return z
+    .object({
+      fieldname: z.string(),
+      originalname: z.string(),
+      encoding: z.string(),
+      mimetype: z.string().refine(
+        (m) => allowedMimeTypes.includes(m),
+        {
+          message:
+            type === "image"
+              ? "Only PNG, JPG, or JPEG images are allowed"
+              : "Only PDF, DOC, or DOCX files are allowed",
+        }
+      ),
+      size: z.number().max(maxSizeBytes, `File size must be less than ${maxSizeMB}MB`),
+      buffer: z.instanceof(Buffer),
+    })
+    .strict();
+};

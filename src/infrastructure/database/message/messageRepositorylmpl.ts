@@ -1,4 +1,4 @@
-import { IMessage, MessageModel } from "./message.model";
+import { IMessage, MessageModel } from "./messageModel";
 import { Message } from "../../../domain/entities/message";
 import { IMessageRepository } from "../../../domain/repositories/IMessage.repository";
 import { CommonRequest, GetAllMessageResponse, SendMessageRequestForRepository } from "../../dtos/message.dtos";

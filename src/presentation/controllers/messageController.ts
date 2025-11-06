@@ -8,9 +8,9 @@ import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
 import { FileUploadService } from "../../infrastructure/service/fileUpload";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
-import { SendMessageUseCase } from "../../application/messageUse-cases/sendMessage.UseCase";
+import { SendMessageUseCase } from "../../application/messageUse-cases/sendMessageUseCase";
 import { GetAllMessagesUseCase } from "../../application/messageUse-cases/getAllMessageUseCase";
-import { MessageRepositoryImpl } from "../../infrastructure/database/message/message.repository.impl";
+import { MessageRepositoryImpl } from "../../infrastructure/database/message/messageRepositorylmpl";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 import { commonParamsZodSchema, sendMessageRequestZodSchema } from "../../infrastructure/zod/message.zod";
 

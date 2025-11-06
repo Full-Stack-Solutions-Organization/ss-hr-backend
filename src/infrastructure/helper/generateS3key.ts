@@ -19,6 +19,6 @@ export class S3KeyGenerator {
     const timestamp = Date.now();
     const randomStr = this.randomStringGenerator.generate();
 
-    return `${folder}/${userId}_${baseName}_${timestamp}_${randomStr}.${fileExtension}`;
+    return `${folder}/${userId}_startTrim_${baseName}.${fileExtension}_endTrim_${timestamp}_${randomStr}`;
   }
 }

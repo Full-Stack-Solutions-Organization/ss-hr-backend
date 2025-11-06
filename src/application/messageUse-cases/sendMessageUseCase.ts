@@ -4,7 +4,7 @@ import { FileUploadService } from "../../infrastructure/service/fileUpload";
 import { SendMessageRequest } from "../../infrastructure/dtos/message.dtos";
 import { getReceiverSocketId, io } from "../../infrastructure/lib/socket.io";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
-import { MessageRepositoryImpl } from "../../infrastructure/database/message/message.repository.impl";
+import { MessageRepositoryImpl } from "../../infrastructure/database/message/messageRepositorylmpl";
 
 
 export class SendMessageUseCase {

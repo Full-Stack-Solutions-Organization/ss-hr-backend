@@ -1,14 +1,15 @@
 import { Types } from "mongoose";
-import { ApiResponse } from "../../infrastructure/dtos/common.dts";
+import { Role, User } from "../../domain/entities/user";
 import { CreateAdmin } from "../../domain/repositories/IUserRepository";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { PasswordHasher } from "../../infrastructure/security/passwordHasher";
+import { AdminFetchAllAdmins } from "../../domain/repositories/IUserRepository";
 import { validateFile } from "../../infrastructure/validator/imageFileValidator";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
+import { ApiPaginationRequest, ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
 import { CreateAdminRequest, CreateAdminResponse } from "../../infrastructure/dtos/admin.dtos";
-import { Role, User } from "../../domain/entities/user";
 
 export class CreateAdminUseCase {
     constructor(
@@ -99,6 +100,23 @@ export class DeleteAdminUseCase {
         } catch (error) {
             console.log("DeleteAdminUseCase Error : ", error);
             throw handleUseCaseError(error || "Unexpected error in deleting admin");
+        }
+    }
+}
+
+export class AdminGetAllAdminsUseCase {
+    constructor(
+        private userRepositoryImpl: UserRepositoryImpl
+    ) { }
+
+    async execute(payload: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllAdmins>> {
+        try {
+            const admins = await this.userRepositoryImpl.findAllAdmins(payload);
+            if(!admins) throw new Error("No admins found in databse");
+
+            return { success: true, message: "Fetched all admins", data: admins as AdminFetchAllAdmins }
+        } catch (error) {
+            throw handleUseCaseError(error || "Unexpected error in AdminGetAllAdminsUseCase");
         }
     }
 }

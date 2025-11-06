@@ -72,28 +72,28 @@ export const updateUserInfoSchema = z.object({
   nationality: z.string().min(2, "Enter a valid nationality").max(60),
 
   linkedInUrl: z
-  .string()
-  .trim()
-  .optional()
-  .refine(
-    (val) => !val || /^https?:\/\/.+\..+/.test(val),
-    { message: "Enter a valid LinkedIn URL (https://...)" }
-  ),
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (val) => !val || /^https?:\/\/.+\..+/.test(val),
+      { message: "Enter a valid LinkedIn URL (https://...)" }
+    ),
 
-portfolioUrl: z
-  .string()
-  .trim()
-  .optional()
-  .refine(
-    (val) => !val || /^https?:\/\/.+\..+/.test(val),
-    { message: "Enter a valid portfolio URL (https://...)" }
-  ),
+  portfolioUrl: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (val) => !val || /^https?:\/\/.+\..+/.test(val),
+      { message: "Enter a valid portfolio URL (https://...)" }
+    ),
 
   dob: z.string(),
 });
 
 
- //* User Address zod schema */
+//* User Address zod schema */
 const postalOrPoBoxRegex = /^[0-9]{3,10}$/;
 const cityRegex = /^[A-Za-z\s]{2,50}$/;
 const countryRegex = /^[A-Za-z\s]{2,60}$/;
@@ -136,13 +136,13 @@ export const addressSchema = z
       .regex(countryRegex, "Enter a valid country name (letters and spaces only)")
       .min(2, "Country must be at least 2 characters")
       .max(60, "Country cannot exceed 60 characters"),
-      
-      postalCode: z
+
+    postalCode: z
       .string()
       .trim()
       .regex(postalOrPoBoxRegex, "Enter a valid postal code (4–10 digits)"),
-      
-      landmark: z
+
+    landmark: z
       .string()
       .trim()
       .min(4, "Landmark must be at least 4 characters")
@@ -150,3 +150,93 @@ export const addressSchema = z
 
     primary: z.boolean(),
   })
+
+
+// career Data zod schema
+export const jobTypeEnum = z.enum(["full-time", "part-time", "contract", "internship"]);
+export const workModeEnum = z.enum(["onsite", "remote", "hybrid"]);
+
+export const careerDataSchema = z
+  .object({
+    currentSalary: z
+      .coerce.number()
+      .min(0, "Current salary must be greater than or equal to 0")
+      .max(100000000, "Current salary seems too high")
+      .optional(),
+
+    expectedSalary: z
+      .coerce.number()
+      .min(0, "Expected salary must be greater than or equal to 0")
+      .max(100000000, "Expected salary seems too high")
+      .optional(),
+
+    immediateJoiner: z.coerce.boolean(),
+    noticePeriod: z
+      .coerce.number()
+      .optional()
+      .or(z.nan())
+      .refine((val) => val == null || val >= 0, "Notice period must be positive"),
+
+    experience: z
+      .string()
+      .optional(),
+
+    currentDesignation: z
+      .string()
+      .trim()
+      .min(2, "Designation must be at least 2 characters")
+      .max(100, "Designation too long")
+      .optional(),
+
+    currentCompany: z
+      .string()
+      .trim()
+      .min(2, "Company name must be at least 2 characters")
+      .max(100, "Company name too long")
+      .optional(),
+
+    industry: z
+      .string()
+      .trim()
+      .min(2, "Industry name must be at least 2 characters")
+      .max(100, "Industry name too long")
+      .optional(),
+
+    currentJobType: jobTypeEnum.optional(),
+    preferredJobTypes: z
+      .union([
+        z.string().transform((val) => {
+          try {
+            return JSON.parse(val);
+          } catch {
+            return [];
+          }
+        }),
+        z.array(jobTypeEnum),
+      ])
+      .optional(),
+
+    preferredWorkModes: z
+      .union([
+        z.string().transform((val) => {
+          try {
+            return JSON.parse(val);
+          } catch {
+            return [];
+          }
+        }),
+        z.array(workModeEnum),
+      ])
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.immediateJoiner && (data.noticePeriod === undefined || data.noticePeriod === null)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["noticePeriod"],
+        message: "Notice period is required if you are not an immediate joiner",
+      });
+    }
+  });
+
+

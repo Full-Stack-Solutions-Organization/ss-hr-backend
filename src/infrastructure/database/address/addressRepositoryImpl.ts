@@ -43,17 +43,17 @@ export class AddressRepositoryImpl implements IAddressRepository {
 
   async findAddressById(addressId: Types.ObjectId): Promise<Address | null> {
     try {
-      const found = await AddressModel.findById(addressId);
-      return found ? this.mapToEntity(found) : null;
+      const address = await AddressModel.findById(addressId);
+      return address ? this.mapToEntity(address) : null;
     } catch (error) {
       throw new Error("Address not found");
     }
   }
 
-  async findAddressesByUserId(userId: Types.ObjectId): Promise<Address[]> {
+  async findAddressesByUserId(userId: Types.ObjectId): Promise<Address | null> {
     try {
-      const list = await AddressModel.find({ userId }).sort({ createdAt: -1 });
-      return list.map((doc) => this.mapToEntity(doc));
+      const address = await AddressModel.findOne({ userId });
+      return address ? this.mapToEntity(address) : null;
     } catch (error) {
       throw new Error("Failed to fetch user addresses");
     }

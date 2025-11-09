@@ -1,6 +1,8 @@
 import { Types } from "mongoose";
-import { User } from "../../domain/entities/user";
+import { Gender, User } from "../../domain/entities/user";
 import { ApiResponse, CommonResponse } from "./common.dts";
+import { CommonCareerDataType } from "./user.dto";
+import { Address } from "../../domain/entities/address";
 
 // Register usecase
 export type RegisterRequest = Pick<User, "fullName" | "email" | "password" | "role">
@@ -43,8 +45,17 @@ export interface LoginResponse extends CommonResponse {
         email?: string,
         profileImage: string | null, 
         role: string, 
-        token: string, 
-    }
+        phone?: string;
+        phoneTwo?: string;
+        gender?: Gender;
+        nationality?: string;
+        dob?: Date;
+        linkedInUrl?: string | undefined;
+        portfolioUrl?: string | undefined;
+      } ,
+    token: string;
+    address?:  Address | null;
+    careerData?: CommonCareerDataType | null;
 }
 
 

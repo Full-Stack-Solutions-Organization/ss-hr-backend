@@ -7,7 +7,6 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
 import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
-import { validateFileZodSchema } from "../../infrastructure/zod/common.zod";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
@@ -40,7 +39,7 @@ const userUpdateAddressUseCase = new UserUpdateAddressUseCase(addressRepositoryI
 const userUpdatePorifleDataUseCase = new UserUpdatePorifleDataUseCase(userRepositoryImpl);
 const useGetTestimonialsUseCase = new UseGetTestimonialsUseCase(testimonialRepositoryImpl, signedUrlService);
 const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
-const userCreateCareerDataUseCase = new UserCreateCareerDataUseCase(careerDataRepositoryImpl, fileUploadService, signedUrlService);
+const userCreateCareerDataUseCase = new UserCreateCareerDataUseCase(careerDataRepositoryImpl);
 const userUpdateUserProfileImageUseCase = new UserUpdateUserProfileImageUseCase(userRepositoryImpl, fileDeleteService, fileUploadService, signedUrlService);
 
 class UserController {
@@ -144,11 +143,8 @@ class UserController {
         try {
             const userId = (req.user as DecodedUser).userId;
             const validatedData = careerDataSchema.parse(req.body);
-            const fileSchema = validateFileZodSchema({ type: "document", maxSizeMB: 10 });
-            fileSchema.parse(req.file);
             const result = await this.userCreateCareerDataUseCase.execute({
                 userId: new Types.ObjectId(userId),
-                resume: req.file as Express.Multer.File,
                 ...validatedData
             });
             res.status(200).json(result);

@@ -11,6 +11,10 @@ import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
 import { SignedUrlService } from '../../infrastructure/service/generateSignedUrl';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
+import { AddressRepositoryImpl } from '../../infrastructure/database/address/addressRepositoryImpl';
+import { CareerDataRepositoryImpl } from '../../infrastructure/database/careerData/careerDataRepositoryImpl';
+import { Address } from '../../domain/entities/address';
+import { CareerData } from '../../domain/entities/careerData';
 
 export class RegisterUseCase {
   constructor(
@@ -21,7 +25,7 @@ export class RegisterUseCase {
     try {
       const { email, password, fullName, role } = data;
 
-      const existingUser = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
+      const existingUser = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
       if (existingUser?.isVerified) throw new Error("User already exists with this email");
 
       const hashedPassword = await PasswordHasher.hashPassword(password);
@@ -99,7 +103,7 @@ export class ResendOtpUseCase {
 
       if (email && role) {
         if (role === Role.User) {
-          user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
+          user = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
         }
 
       } else if (verificationToken && role) {
@@ -126,7 +130,9 @@ export class ResendOtpUseCase {
 export class LoginUseCase {
   constructor(
     private userRepositoryImpl: UserRepositoryImpl,
-    private signedUrlService: SignedUrlService
+    private signedUrlService: SignedUrlService,
+    private addressRepositoryImpl: AddressRepositoryImpl,
+    private careerDataRepositoryImpl: CareerDataRepositoryImpl,
   ) { }
 
   async execute(data: LoginRequest): Promise<LoginResponse> {
@@ -137,13 +143,13 @@ export class LoginUseCase {
       let user: User | null = null;
 
       if (role === Role.User || role === Role.Admin || role === Role.SuperAdmin) {
-        user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
+        user = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
       } else if (role === Role.SystemAdmin) {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
           throw new Error("Invalid credentials.");
         }
         const token = JWTService.generateToken({ email: email, role: role });
-        return { success: true, message: "Logged In Successfully.", user: { fullName: "Super Admin", profileImage: "", role: role, token } };
+        return { success: true, message: "Logged In Successfully.", user: { fullName: "Super Admin", profileImage: "", role: role }, token };
       } else {
         throw new Error("Invalid request.");
       }
@@ -159,23 +165,45 @@ export class LoginUseCase {
 
       const token = JWTService.generateToken({ userId: user._id, role: role });
 
-      let updateProfileImage;
+      let profileImageSignedUrl: string = "";
 
       if (user.profileImage) {
-        updateProfileImage = await this.signedUrlService.generateSignedUrl(user.profileImage);
+        profileImageSignedUrl = await this.signedUrlService.generateSignedUrl(user.profileImage);
       }
 
+      let userAddress: Address | null = null;
+      let careerData: CareerData | null = null;
+
+      if (role === Role.User) {
+        userAddress = await this.addressRepositoryImpl.findAddressesByUserId(user._id);
+        careerData = await this.careerDataRepositoryImpl.findCareerDataByUserId(user._id);
+      }
+
+      console.log("careerData : ",careerData);
+
       return {
-        success: true, message: 'Logged In Successfully.', user: {
+        success: true,
+        message: 'Logged In Successfully.',
+        user: {
           _id: user._id,
           fullName: user.fullName,
           email: user.email,
-          profileImage: updateProfileImage ? updateProfileImage : user.profileImage,
+          profileImage: profileImageSignedUrl,
           role: role,
-          token,
-        }
+          dob: user.dob,
+          gender: user.gender,
+          nationality: user.nationality,
+          phone: user.phone,
+          phoneTwo: user.phoneTwo,
+          linkedInUrl: user.linkedInUrl,
+          portfolioUrl: user.portfolioUrl,
+        },
+        token,
+        address: userAddress ?? null,
+        careerData: careerData ?? null
       };
     } catch (error) {
+      console.log("LoginUseCase error : ", error);
       throw handleUseCaseError(error || "Unexpected error in VerifyOTPUseCase");
     }
   }

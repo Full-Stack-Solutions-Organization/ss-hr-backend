@@ -9,7 +9,7 @@ export interface IAddressRepository {
 
   findAddressById(addressId: Types.ObjectId): Promise<Address | null>;
 
-  findAddressesByUserId(userId: Types.ObjectId): Promise<Address[]>;
+  findAddressesByUserId(userId: Types.ObjectId): Promise<Address | null>;
 }
 
 

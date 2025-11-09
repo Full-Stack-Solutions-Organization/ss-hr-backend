@@ -2,6 +2,7 @@ import { CareerDataModel, ICareerData } from "./careerDataModel";
 import { CareerData } from "../../../domain/entities/careerData";
 import { CreateCareerDataRequest, CommonCareerDataType } from "../../dtos/user.dto";
 import { ICareerDataRepository } from "../../../domain/repositories/ICareerDataRepository";
+import { Types } from "mongoose";
 
 export class CareerDataRepositoryImpl implements ICareerDataRepository {
 
@@ -47,6 +48,15 @@ export class CareerDataRepositoryImpl implements ICareerDataRepository {
             return updatedCareerData ? this.mapToEntity(updatedCareerData) : null;
         } catch (error) {
             throw new Error("updateCareerData error")
+        }
+    }
+
+    async findCareerDataByUserId(userId: Types.ObjectId): Promise<CareerData | null> {
+        try {
+            const careerData = await CareerDataModel.findOne({ userId });
+            return careerData ? this.mapToEntity(careerData) : null;
+        } catch(error) {
+            throw new Error("findCareerDataByUserId error");
         }
     }
 

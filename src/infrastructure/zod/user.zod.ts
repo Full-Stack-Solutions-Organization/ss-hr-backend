@@ -228,6 +228,14 @@ export const careerDataSchema = z
         z.array(workModeEnum),
       ])
       .optional(),
+    resume: z
+      .string()
+      .min(5, "Resume key seems invalid")
+      .regex(
+        /^[a-zA-Z0-9/_\-\.]+$/,
+        "Resume key contains invalid characters"
+      )
+      .max(300, "Resume key too long")
   })
   .superRefine((data, ctx) => {
     if (!data.immediateJoiner && (data.noticePeriod === undefined || data.noticePeriod === null)) {

@@ -19,17 +19,21 @@ import { HandleError } from "../../infrastructure/error/error";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { GoogleAuthUseCase } from "../../application/authUse-cases/googleAuthUseCase";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
+import { AddressRepositoryImpl } from "../../infrastructure/database/address/addressRepositoryImpl";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
+import { CareerDataRepositoryImpl } from "../../infrastructure/database/careerData/careerDataRepositoryImpl";
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
+const addressRepositoryImpl = new AddressRepositoryImpl();
+const careerDataRepositoryImpl = new CareerDataRepositoryImpl();
 
 const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl); const registerUseCase = new RegisterUseCase(userRepositoryImpl);
 const verifyOTPUseCase = new VerifyOTPUseCase(userRepositoryImpl);
 const resendOtpUseCase = new ResendOtpUseCase(userRepositoryImpl);
-const loginUseCase = new LoginUseCase(userRepositoryImpl, signedUrlService);
-const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
 const googleAuthUseCase = new GoogleAuthUseCase(userRepositoryImpl);
+const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
+const loginUseCase = new LoginUseCase(userRepositoryImpl, signedUrlService, addressRepositoryImpl, careerDataRepositoryImpl);
 
 const isProduction = appConfig.nodeEnv === "production";
 
@@ -114,13 +118,13 @@ export class AuthController {
       const validateData = LoginZodSchema.parse(req.body);
       const { email, password, role } = validateData;
       if (!email || !password || !role) throw new Error("Invalid request.");
-      const { success, message, user } = await this.loginUseCase.execute({
+      const { success, message, user, token, address, careerData } = await this.loginUseCase.execute({
         email,
         password,
         role,
       });
 
-      res.cookie("token", user.token, {
+      res.cookie("token", token, {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",
@@ -128,12 +132,16 @@ export class AuthController {
         path: "/",
       });
 
-      const { token: token, ...authUserWithoutToken } = user;
       const resultWithoutToken = {
         success,
         message,
-        user: authUserWithoutToken,
+        user,
+        address,
+        careerData
       };
+
+      console.log("resultWithoutToken : ",resultWithoutToken);
+       
       res.status(200).json(resultWithoutToken);
     } catch (error) {
       HandleError.handle(error, res);
@@ -176,7 +184,7 @@ export class AuthController {
 
       const result = await this.googleAuthUseCase.execute(req.user as any);
 
-      res.cookie("token", result.user.token, {
+      res.cookie("token", result.token, {
          httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",

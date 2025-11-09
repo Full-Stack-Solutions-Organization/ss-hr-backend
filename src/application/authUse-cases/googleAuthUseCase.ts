@@ -24,8 +24,8 @@ export class GoogleAuthUseCase {
           fullName: user.fullName,
           profileImage: user.profileImage,
           role: user.role,
-          token,
-        }
+        },
+        token,
       };
       
     } catch (error) {

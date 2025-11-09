@@ -6,16 +6,17 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import { appConfig } from './config/env';
 import passport from './infrastructure/auth/passport';
-import authRoutes from './presentation/routes/authRoutes';
-import userRoutes from './presentation/routes/userRoutes';
-import messageRoutes from './presentation/routes/messageRoutes';
-import adminJobRoutes from './presentation/routes/adminJobRoutes';
-import adminChatRoutes from './presentation/routes/adminChatRoutes';
-import adminUsersRoutes from './presentation/routes/adminUserRoutes';
-import adminPaymentRoutes from "./presentation/routes/adminPaymentRoutes";
-import adminPackageRoutes from "./presentation/routes/adminPackageRoutes";
-import adminSettingsRoutes from './presentation/routes/adminSettingsRoutes';
-import adminTestimonialRoutes from './presentation/routes/adminTestimonialRoutes';
+import S3Router from './presentation/routes/s3Router';
+import authRouter from './presentation/routes/authRouter';
+import userRouter from './presentation/routes/userRouter';
+import messageRouter from './presentation/routes/messageRouter';
+import adminJobRouter from './presentation/routes/adminJobRouter';
+import adminChatRouter from './presentation/routes/adminChatRouter';
+import adminUsersRouter from './presentation/routes/adminUserRouter';
+import adminPaymentRouter from "./presentation/routes/adminPaymentRouter";
+import adminPackageRouter from "./presentation/routes/adminPackageRouter";
+import adminSettingsRouter from './presentation/routes/adminSettingsRouter';
+import adminTestimonialRouter from './presentation/routes/adminTestimonialRouter';
 
 const app = express();
 
@@ -45,16 +46,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-app.use('/api/auth', authRoutes);
-app.use("/api/admin/settings", adminSettingsRoutes);
-app.use('/api/admin/jobs', adminJobRoutes);
-app.use('/api/admin/chat', adminChatRoutes);
-app.use('/api/admin/users', adminUsersRoutes);
-app.use("/api/admin/testimonials", adminTestimonialRoutes);
-app.use('/api/admin/packages', adminPackageRoutes);
-app.use('/api/admin/payments', adminPaymentRoutes);
-app.use('/api/message', messageRoutes);
-app.use('/api/user', userRoutes);
+app.use('/api/auth', authRouter);
+app.use("/api/admin/settings", adminSettingsRouter);
+app.use('/api/admin/jobs', adminJobRouter);
+app.use('/api/admin/chat', adminChatRouter);
+app.use('/api/admin/users', adminUsersRouter);
+app.use("/api/admin/testimonials", adminTestimonialRouter);
+app.use('/api/admin/packages', adminPackageRouter);
+app.use('/api/admin/payments', adminPaymentRouter);
+app.use('/api/message', messageRouter);
+app.use('/api/user', userRouter);
+app.use("/api/s3", S3Router);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({

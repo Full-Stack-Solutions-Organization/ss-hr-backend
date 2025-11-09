@@ -49,7 +49,6 @@ export const getUserByIdSchema = z.object({
 
 // User Profile details zod schema
 const e164Regex = /^\+[1-9]\d{1,14}$/;
-
 export const updateUserInfoSchema = z.object({
   fullName: z
     .string()
@@ -61,9 +60,9 @@ export const updateUserInfoSchema = z.object({
     .email("Please enter a valid email address")
     .nonempty("Email is required"),
 
-  phone: z.string().regex(e164Regex, "Enter a valid phone number (e.g. +971501234567)"),
+  phone: z.string().regex(e164Regex, "Enter a valid phone number"),
 
-  phoneTwo: z.string().regex(e164Regex, "Enter a valid phone number (e.g. +971501234567)"),
+  phoneTwo: z.string().regex(e164Regex, "Enter a valid phone number"),
 
   gender: z.custom<Gender>((val) => val === "male" || val === "female" || val === "other", {
     message: "Invalid gender",
@@ -71,13 +70,16 @@ export const updateUserInfoSchema = z.object({
 
   nationality: z.string().min(2, "Enter a valid nationality").max(60),
 
-  linkedInUrl: z
+  linkedInUsername: z
     .string()
     .trim()
     .optional()
     .refine(
-      (val) => !val || /^https?:\/\/.+\..+/.test(val),
-      { message: "Enter a valid LinkedIn URL (https://...)" }
+      (val) => !val || /^[a-zA-Z0-9-]{5,30}$/.test(val),
+      {
+        message:
+          "Enter a valid LinkedIn username (5–30 letters, numbers, or hyphens).",
+      }
     ),
 
   portfolioUrl: z
@@ -85,11 +87,41 @@ export const updateUserInfoSchema = z.object({
     .trim()
     .optional()
     .refine(
-      (val) => !val || /^https?:\/\/.+\..+/.test(val),
-      { message: "Enter a valid portfolio URL (https://...)" }
+      (val) => !val || /^https?:\/\/[^\s]+\.[^\s]+$/.test(val),
+      {
+        message: "Enter a valid portfolio URL (must start with http:// or https://).",
+      }
     ),
+  dob: z
+  .string()
+  .refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid date format.",
+  })
+  .refine((val) => {
+    const dob = new Date(val);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const hasNotHadBirthdayThisYear =
+      today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
 
-  dob: z.string(),
+    if (hasNotHadBirthdayThisYear) age--;
+
+    return age >= 18;
+  }, {
+    message: "You must be at least 18 years old",
+  })
+  .refine((val) => new Date(val) <= new Date(), {
+    message: "DOB cannot be in the future",
+  }),
+  professionalStatus: z
+    .string()
+    .trim()
+    .min(2, "Status must be at least 2 characters long")
+    .max(50, "Status must be under 50 characters")
+    .refine(
+      (val) => /^[A-Za-z ]+$/.test(val),
+      { message: "Status can contain only letters and spaces" }
+    ),
 });
 
 
@@ -228,14 +260,6 @@ export const careerDataSchema = z
         z.array(workModeEnum),
       ])
       .optional(),
-    resume: z
-      .string()
-      .min(5, "Resume key seems invalid")
-      .regex(
-        /^[a-zA-Z0-9/_\-\.]+$/,
-        "Resume key contains invalid characters"
-      )
-      .max(300, "Resume key too long")
   })
   .superRefine((data, ctx) => {
     if (!data.immediateJoiner && (data.noticePeriod === undefined || data.noticePeriod === null)) {

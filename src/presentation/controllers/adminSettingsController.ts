@@ -16,11 +16,11 @@ import { DecodedUser } from "../../express";
 import { Role } from "../../domain/entities/user";
 
 const s3Client = new S3Client();
+const fileDeleteService = new FileDeleteService(s3Client);
 const randomStringGenerator = new RandomStringGenerator()
 const s3KeyGenerator = new S3KeyGenerator(randomStringGenerator);
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);
-const fileDeleteService = new FileDeleteService(s3Client);
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const fileUploadService = new FileUploadService(s3Client, s3KeyGenerator);

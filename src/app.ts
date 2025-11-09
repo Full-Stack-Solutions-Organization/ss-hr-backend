@@ -56,7 +56,7 @@ app.use('/api/admin/packages', adminPackageRouter);
 app.use('/api/admin/payments', adminPaymentRouter);
 app.use('/api/message', messageRouter);
 app.use('/api/user', userRouter);
-app.use("/api/s3", S3Router);
+app.use("/api/s3/file", S3Router);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({

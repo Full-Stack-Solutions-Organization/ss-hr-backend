@@ -29,9 +29,10 @@ export class UserRepositoryImpl implements IUserRepository {
       user.createdAt,
       user.updatedAt,
       user.noticePeriod,
-      user.linkedInUrl,
+      user.linkedInUsername,
       user.portfolioUrl,
-      user.resumeUrl,
+      user.resume,
+      user.professionalStatus,
     );
   }
 

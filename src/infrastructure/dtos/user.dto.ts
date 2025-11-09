@@ -75,9 +75,14 @@ export interface GetUserByIdResponse {
 }
 
 
-export type UseUpdateProfileRequest = Pick<User, "_id" | "fullName" | "phone" | "phoneTwo" | "gender" | "nationality" | "dob" | "linkedInUrl" | "portfolioUrl">;
-export type UseUpdateProfileResponse = Pick<User, "fullName" | "phone" | "phoneTwo" | "gender" | "nationality" | "dob" | "linkedInUrl" | "portfolioUrl">;
+export type UseUpdateProfileRequest = Pick<User, "_id" | "fullName" | "phone" | "phoneTwo" | "gender" | "nationality" | "dob" | "linkedInUsername" | "portfolioUrl" | "professionalStatus">;
+export type UseUpdateProfileResponse = Pick<User, "fullName" | "phone" | "phoneTwo" | "gender" | "nationality" | "dob" | "linkedInUsername" | "portfolioUrl" | "professionalStatus">;
 
 
-export type CreateCareerDataRequest = Partial<Pick<CareerData, "currentSalary" | "expectedSalary" | "currentCompany" | "currentDesignation" | "currentJobType" | "experience" | "immediateJoiner" | "industry" | "noticePeriod" | "preferredJobTypes" | "preferredWorkModes" | "resume" | "userId">>;
+export type CreateCareerDataRequest = Partial<Pick<CareerData, "currentSalary" | "expectedSalary" | "currentCompany" | "currentDesignation" | "currentJobType" | "experience" | "immediateJoiner" | "industry" | "noticePeriod" | "preferredJobTypes" | "preferredWorkModes">> & {
+ userId:  User["_id"];
+};
+export type UpdateCareerDataRequest = Partial<Pick<CareerData, "currentSalary" | "expectedSalary" | "currentCompany" | "currentDesignation" | "currentJobType" | "experience" | "immediateJoiner" | "industry" | "noticePeriod" | "preferredJobTypes" | "preferredWorkModes" >>  & {
+ _id: CareerData["_id"];
+};
 export type CommonCareerDataType = Omit<CareerData, "userId" | "createdAt">;

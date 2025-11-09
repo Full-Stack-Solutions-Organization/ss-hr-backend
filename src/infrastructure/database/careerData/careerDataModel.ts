@@ -15,7 +15,6 @@ export interface ICareerData extends Document {
     currentJobType: JobType,
     preferredJobTypes: JobType[],
     preferredWorkModes: WorkMode[],
-    resume: string,
     createdAt: Date,
     updatedAt: Date,
 }
@@ -76,10 +75,6 @@ const CareerDataSchema = new Schema<ICareerData>(
                 enum: ["onsite", "remote", "hybrid"],
             },
         ],
-        resume: {
-            type: String,
-            trim: true,
-        },
     },
     {
         timestamps: true,

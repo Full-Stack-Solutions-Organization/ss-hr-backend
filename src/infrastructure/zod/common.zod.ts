@@ -23,7 +23,7 @@ export const stringField = (
   min?: number,
   max?: number,
   regex?: RegExp,
-  regexMessage = "Invalid format"
+  regexMessage = `Invalid ${fieldName} format`
 ) => {
   let schema = z.string().min(1, { message: `${fieldName} is required` });
 

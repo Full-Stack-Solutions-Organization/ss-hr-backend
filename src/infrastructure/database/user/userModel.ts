@@ -18,14 +18,16 @@ export interface IUser extends Document {
 
   gender: Gender,
   nationality: string,
-  linkedInUrl?: string,
+  linkedInUsername?: string,
   portfolioUrl?: string,
   dob: Date,
   currentSalary: number,
   expectedSalary: number,
   immediateJoiner: boolean,
   noticePeriod: string,
-  resumeUrl: string,
+  resume: string,
+
+  professionalStatus: string,
 
   createdAt: Date;
   updatedAt: Date;
@@ -114,18 +116,18 @@ const UserSchema = new Schema<IUser>(
     gender: {
       type: String,
       enum: ["male", "female", "other"],
-      required: [true, "Gender is required"],
+      default: null,
     },
     nationality: {
       type: String,
       minlength: [2, "Enter a valid nationality"],
       maxlength: [60, "Nationality must be less than 60 characters"],
-      required: [true, "Nationality is required"],
+      default: null,
     },
-    linkedInUrl: {
+    linkedInUsername: {
       type: String,
       trim: true,
-      match: [/^https?:\/\/.+\..+/, "Enter a valid LinkedIn URL (https://...)"],
+      match: [/^[a-zA-Z0-9-]{5,30}$/, "Enter a valid LinkedIn username"],
       default: null,
     },
     portfolioUrl: {
@@ -136,7 +138,7 @@ const UserSchema = new Schema<IUser>(
     },
     dob: {
       type: Date,
-      required: [true, "Date of birth is required"],
+      default: null,
     },
     currentSalary: {
       type: Number,
@@ -158,12 +160,18 @@ const UserSchema = new Schema<IUser>(
       type: String,
       default: null,
     },
-    resumeUrl: {
+    resume: {
       type: String,
       trim: true,
-      match: [/^https?:\/\/.+\..+/, "Enter a valid resume URL (https://...)"],
+      match: [/^/, "Invalid file key"],
       default: null,
     },
+    professionalStatus: {
+      type: String,
+      trim: true,
+      match: [/^[A-Za-z ]+$/,"Enter a valid professional status"],
+      default: null,
+    }
   },
   {
     timestamps: true,

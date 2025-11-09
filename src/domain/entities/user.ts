@@ -38,9 +38,10 @@ export class User {
     public createdAt: Date,
     public updatedAt: Date,
     public noticePeriod?: string,
-    public linkedInUrl?: string,
+    public linkedInUsername?: string,
     public portfolioUrl?: string,
-    public resumeUrl?: string,
+    public resume?: string,
+    public professionalStatus?: string,
   ) {
 
   }

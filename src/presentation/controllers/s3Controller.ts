@@ -1,43 +1,41 @@
 import { Request, Response } from "express";
-import { S3Client } from "@aws-sdk/client-s3";
+import { s3Client } from "../../config/aws_s3";
 import { HandleError } from "../../infrastructure/error/error";
 import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
 import { S3FileGetUrlService } from "../../infrastructure/service/s3FileGetUrlService";
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
+import { S3FileDeleteUrlService } from "../../infrastructure/service/s3FileDeleteService";
+import { PresignedUrlZodSchema, S3FileKeyZodSchmema } from "../../infrastructure/zod/s3.zod";
 import { S3FileUploadUrlService } from "../../infrastructure/service/s3FileUploadUrlService";
+import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
+import { DeleteFileFromS3UseCase, GetFileSignedUrlUseCase, UploadFileToS3UseCase } from "../../application/commonUse-cases/s3UseCases";
 
-const s3Client = new S3Client();
 const randomStringGenerator = new RandomStringGenerator();
+const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 const s3KeyGenerator = new S3KeyGenerator(randomStringGenerator);
-
+const s3FileDeleteUrlService = new S3FileDeleteUrlService(s3Client);
 const s3FileUploadUrlService = new S3FileUploadUrlService(s3Client, s3KeyGenerator);
-const s3FileGetUrlService = new S3FileGetUrlService(s3Client);
+const s3FileGetUrlService = new S3FileGetUrlService(s3Client, signedUrlRepositoryImpl);
+
+const uploadFileToS3UseCase = new UploadFileToS3UseCase(s3FileUploadUrlService);
+const getFileSignedUrlUseCase = new GetFileSignedUrlUseCase(s3FileGetUrlService);
+const deleteFileFromS3UseCase = new DeleteFileFromS3UseCase(s3FileDeleteUrlService);
 
 export class S3Controller {
     constructor(
-        private s3FileUploadUrlService: S3FileUploadUrlService,
-        private s3FileGetUrlService: S3FileGetUrlService,
+        private uploadFileToS3UseCase: UploadFileToS3UseCase,
+        private getFileSignedUrlUseCase: GetFileSignedUrlUseCase,
+        private deleteFileFromS3UseCase: DeleteFileFromS3UseCase,
     ) {
-        this.getPresignedUrl = this.getPresignedUrl.bind(this);
-        this.getResumeUrlController = this.getResumeUrlController.bind(this);
+        this.getUploadPresignedUrl = this.getUploadPresignedUrl.bind(this);
+        this.getFileSignedUrl = this.getFileSignedUrl.bind(this);
+        this.deleteFile = this.deleteFile.bind(this);
     }
 
-    getPresignedUrl = async (req: Request, res: Response): Promise<void> => {
+    async getUploadPresignedUrl(req: Request, res: Response): Promise<void> {
         try {
-            const { folder, userId, fileName, fileType } = req.query;
-
-            if (!folder || !userId || !fileName || !fileType) {
-                res.status(400).json({ message: "Missing required query parameters" });
-                return;
-            }
-
-            const result = await this.s3FileUploadUrlService.generatePresignedUrl({
-                folder: folder as string,
-                userId: userId as string,
-                fileName: fileName as string,
-                fileType: fileType as string,
-            });
-
+            const validatedData = PresignedUrlZodSchema.parse(req.query);
+            const result = await this.uploadFileToS3UseCase.execute(validatedData);
             res.status(200).json(result);
         } catch (error: any) {
             console.error("Error generating pre-signed URL:", error);
@@ -45,18 +43,31 @@ export class S3Controller {
         }
     };
 
-     async getResumeUrlController (req: Request, res: Response) {
+    async getFileSignedUrl(req: Request, res: Response) {
         try {
-            const { key } = req.query;
-            if (!key) return res.status(400).json({ message: "Missing file key" });
-
-            const url = await s3FileGetUrlService.getFileUrl(key as string);
-            return res.json({ url });
+            const validatedData = S3FileKeyZodSchmema.parse(req.query);
+            const result = await this.getFileSignedUrlUseCase.execute(validatedData.key);
+            return res.json(result);
         } catch (error) {
             console.error("Error generating file URL:", error);
-            return res.status(500).json({ message: "Failed to generate file URL" });
+            HandleError.handle(error, res);
+        }
+    };
+
+    async deleteFile(req: Request, res: Response) {
+        try {
+            const validatedData = S3FileKeyZodSchmema.parse(req.body);
+            const result = await this.deleteFileFromS3UseCase.execute(validatedData.key);
+            return res.json(result);
+        } catch (error) {
+            console.error("deleteFile error:", error);
+            HandleError.handle(error, res);
         }
     };
 }
 
-export const s3Controller = new S3Controller(s3FileUploadUrlService, s3FileGetUrlService)
+export const s3Controller = new S3Controller(
+    uploadFileToS3UseCase,
+    getFileSignedUrlUseCase,
+    deleteFileFromS3UseCase
+);

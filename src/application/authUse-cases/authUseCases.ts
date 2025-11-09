@@ -179,8 +179,6 @@ export class LoginUseCase {
         careerData = await this.careerDataRepositoryImpl.findCareerDataByUserId(user._id);
       }
 
-      console.log("careerData : ",careerData);
-
       return {
         success: true,
         message: 'Logged In Successfully.',
@@ -195,7 +193,7 @@ export class LoginUseCase {
           nationality: user.nationality,
           phone: user.phone,
           phoneTwo: user.phoneTwo,
-          linkedInUrl: user.linkedInUrl,
+          linkedInUrl: user.linkedInUsername,
           portfolioUrl: user.portfolioUrl,
         },
         token,

@@ -76,7 +76,7 @@ export class UserUpdatePorifleDataUseCase {
 
     async execute(data: UseUpdateProfileRequest): Promise<ApiResponse<UseUpdateProfileResponse>> {
         try {
-            const { _id, dob, fullName, gender, nationality, phone, phoneTwo, linkedInUrl, portfolioUrl } = data;
+            const { _id, dob, fullName, gender, nationality, phone, phoneTwo, linkedInUsername, portfolioUrl, professionalStatus } = data;
 
             const user = await this.userRepositoryImpl.findUserById(_id);
             if (!user) throw new Error("No user found");
@@ -87,13 +87,12 @@ export class UserUpdatePorifleDataUseCase {
             user.gender = gender ?? user.gender;
             user.nationality = nationality ?? user.nationality;
             user.dob = dob ?? user.dob;
-            user.linkedInUrl = linkedInUrl ?? user.linkedInUrl;
+            user.linkedInUsername = linkedInUsername ?? user.linkedInUsername;
             user.portfolioUrl = portfolioUrl ?? user.portfolioUrl;
+            user.professionalStatus = professionalStatus ?? user.professionalStatus;
 
             const updatedUser = await this.userRepositoryImpl.updateUser(user);
             if (!updatedUser) throw new Error("User updating failed");
-
-            console.log("updatedUser : ",updatedUser);
 
             const response: UseUpdateProfileResponse = {
                 fullName: updatedUser.fullName,
@@ -102,8 +101,9 @@ export class UserUpdatePorifleDataUseCase {
                 gender: updatedUser.gender,
                 nationality: updatedUser.nationality,
                 dob: updatedUser.dob,
-                linkedInUrl: updatedUser.linkedInUrl,
+                linkedInUsername: updatedUser.linkedInUsername,
                 portfolioUrl: updatedUser.portfolioUrl,
+                professionalStatus: updatedUser.professionalStatus,
             };
 
             return { success: true, message: "", data: response };
@@ -111,6 +111,31 @@ export class UserUpdatePorifleDataUseCase {
         catch (error) {
             console.log("UserUpdatePorifleData error : ", error);
             throw handleUseCaseError(error || "Failed to get testimonials");
+        }
+    }
+}
+
+
+export class UserUpdateResumeKeyUseCase {
+    constructor(
+        private userRepositoryImpl: UserRepositoryImpl
+    ) { }
+
+    async execute(_id: User["_id"], key: string):Promise<ApiResponse> {
+        try {
+
+            const user = await this.userRepositoryImpl.findUserById(_id);
+            if (!user) throw new Error("No user found");
+
+            user.resume = key;
+
+            const updatedUser = await this.userRepositoryImpl.updateUser(user);
+            if(!updatedUser) throw new Error("Failed to update file data");
+
+            return { success: true, message: "" };
+        } catch (error) {
+            console.log("UserUpdateResumeKeyUseCase error : ", error);
+            throw handleUseCaseError(error || "Failed to update resume");
         }
     }
 }

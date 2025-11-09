@@ -18,7 +18,6 @@ export class CareerData {
         public currentJobType: JobType,
         public preferredJobTypes: JobType[],
         public preferredWorkModes: WorkMode[],
-        public resume: string | Express.Multer.File,
         public createdAt: Date,
         public updatedAt: Date,
     ) { }

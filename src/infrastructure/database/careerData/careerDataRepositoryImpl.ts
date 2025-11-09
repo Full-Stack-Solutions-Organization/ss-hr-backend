@@ -1,8 +1,8 @@
+import { Types } from "mongoose";
 import { CareerDataModel, ICareerData } from "./careerDataModel";
 import { CareerData } from "../../../domain/entities/careerData";
-import { CreateCareerDataRequest, CommonCareerDataType } from "../../dtos/user.dto";
+import { CreateCareerDataRequest, UpdateCareerDataRequest } from "../../dtos/user.dto";
 import { ICareerDataRepository } from "../../../domain/repositories/ICareerDataRepository";
-import { Types } from "mongoose";
 
 export class CareerDataRepositoryImpl implements ICareerDataRepository {
 
@@ -21,7 +21,6 @@ export class CareerDataRepositoryImpl implements ICareerDataRepository {
             careerData.currentJobType,
             careerData.preferredJobTypes,
             careerData.preferredWorkModes,
-            careerData.resume,
             careerData.createdAt,
             careerData.updatedAt,
         );
@@ -36,17 +35,22 @@ export class CareerDataRepositoryImpl implements ICareerDataRepository {
         }
     }
 
-    async updateCareerData(payload: CommonCareerDataType): Promise<CareerData | null> {
+    async updateCareerData(payload: UpdateCareerDataRequest): Promise<CareerData | null> {
         try {
             const { _id, ...updateData } = payload;
 
+            const cleanedFields = Object.fromEntries(
+                Object.entries(updateData).filter(([_, v]) => v !== undefined)
+            );
+
             const updatedCareerData = await CareerDataModel.findOneAndUpdate(
                 { _id },
-                { $set: updateData },
+                { $set: cleanedFields },
                 { new: true }
             );
             return updatedCareerData ? this.mapToEntity(updatedCareerData) : null;
         } catch (error) {
+            console.log("error : ",error);
             throw new Error("updateCareerData error")
         }
     }
@@ -55,7 +59,7 @@ export class CareerDataRepositoryImpl implements ICareerDataRepository {
         try {
             const careerData = await CareerDataModel.findOne({ userId });
             return careerData ? this.mapToEntity(careerData) : null;
-        } catch(error) {
+        } catch (error) {
             throw new Error("findCareerDataByUserId error");
         }
     }

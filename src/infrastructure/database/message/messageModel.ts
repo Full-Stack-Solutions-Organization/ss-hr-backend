@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
+import { REGEXT_CHAT_MESSAGE } from "../../zod/regex";
 
 export interface IMessage extends Document {
     _id: Types.ObjectId,
@@ -25,7 +26,7 @@ const messageSchema = new Schema<IMessage>({
         type: String,
         minlength: [1, "Text need atleast 1 character"],
         maxlength: [500, "Text maximum allowed length is 500"],
-        match: [/^[\p{L}\p{N}\p{P}\p{Zs}]+$/u, "Invalid characters in message"] 
+        match: [REGEXT_CHAT_MESSAGE, "Invalid characters in message"] 
     },
     image: {
         type: String

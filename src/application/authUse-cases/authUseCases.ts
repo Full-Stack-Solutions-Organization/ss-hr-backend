@@ -193,7 +193,7 @@ export class LoginUseCase {
           nationality: user.nationality,
           phone: user.phone,
           phoneTwo: user.phoneTwo,
-          linkedInUrl: user.linkedInUsername,
+          linkedInUsername: user.linkedInUsername,
           portfolioUrl: user.portfolioUrl,
         },
         token,

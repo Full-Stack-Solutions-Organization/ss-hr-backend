@@ -1,268 +1,87 @@
 import { z } from 'zod';
-import { Gender } from '../../domain/entities/user';
+import { addressLine1, addressLine2, city, country, currentCompany, currentDesignation, currentJobType, currentSalary, district, email, expectedSalary, experience, fullName, gender, immediateJoiner, industry, landmark, linkedInUsername, nationality, noticePeriod, phone, phoneTwo, portfolioUrl, postalCode, preferredJobTypes, preferredWorkModes, primary, professionalStatus, state, status } from './common.zod';
 
-export const createUserByAdminSchema = z.object({
-  fullName: z.string()
-    .min(4, "Full name must be at least 4 characters")
-    .max(30, "Full name must be at most 30 characters")
-    .regex(/^[a-zA-Z\s]{4,30}$/, "Invalid full name"),
-  email: z.string()
-    .email("Invalid email format")
-    .toLowerCase(),
-  password: z.string()
-    .min(8, "Password must be at least 8 characters")
-    .max(100, "Password must be at most 100 characters")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,100}$/, "Password must contain uppercase, lowercase, number and special character"),
-  role: z.enum(['user', 'admin'], "Invalid role"),
-  phone: z.string()
-    .regex(/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number")
-    .optional(),
-  phoneTwo: z.string()
-    .regex(/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number")
-    .optional()
-});
-
-export const updateUserSchema = z.object({
-  fullName: z.string()
-    .min(4, "Full name must be at least 4 characters")
-    .max(30, "Full name must be at most 30 characters")
-    .regex(/^[a-zA-Z\s]{4,30}$/, "Invalid full name")
-    .optional(),
-  email: z.string()
-    .email("Invalid email format")
-    .toLowerCase()
-    .optional(),
-  phone: z.string()
-    .regex(/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number")
-    .optional(),
-  phoneTwo: z.string()
-    .regex(/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number")
-    .optional(),
-  isBlocked: z.boolean().optional(),
-  isVerified: z.boolean().optional()
-});
-
-export const getUserByIdSchema = z.object({
-  id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid user ID")
-});
-
-
-// User Profile details zod schema
-const e164Regex = /^\+[1-9]\d{1,14}$/;
+// user update Profile details zod schema
 export const updateUserInfoSchema = z.object({
-  fullName: z
-    .string()
-    .min(2, "Full name must be at least 2 characters")
-    .max(100, "Full name must be less than 100 characters"),
-
-  email: z
-    .string()
-    .email("Please enter a valid email address")
-    .nonempty("Email is required"),
-
-  phone: z.string().regex(e164Regex, "Enter a valid phone number"),
-
-  phoneTwo: z.string().regex(e164Regex, "Enter a valid phone number"),
-
-  gender: z.custom<Gender>((val) => val === "male" || val === "female" || val === "other", {
-    message: "Invalid gender",
-  }),
-
-  nationality: z.string().min(2, "Enter a valid nationality").max(60),
-
-  linkedInUsername: z
-    .string()
-    .trim()
-    .optional()
-    .refine(
-      (val) => !val || /^[a-zA-Z0-9-]{5,30}$/.test(val),
-      {
-        message:
-          "Enter a valid LinkedIn username (5–30 letters, numbers, or hyphens).",
-      }
-    ),
-
-  portfolioUrl: z
-    .string()
-    .trim()
-    .optional()
-    .refine(
-      (val) => !val || /^https?:\/\/[^\s]+\.[^\s]+$/.test(val),
-      {
-        message: "Enter a valid portfolio URL (must start with http:// or https://).",
-      }
-    ),
+  fullName,
+  email,
+  phone,
+  phoneTwo,
+  gender,
+  nationality,
+  linkedInUsername,
+  portfolioUrl,
   dob: z
-  .string()
-  .refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid date format.",
-  })
-  .refine((val) => {
-    const dob = new Date(val);
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const hasNotHadBirthdayThisYear =
-      today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
-
-    if (hasNotHadBirthdayThisYear) age--;
-
-    return age >= 18;
-  }, {
-    message: "You must be at least 18 years old",
-  })
-  .refine((val) => new Date(val) <= new Date(), {
-    message: "DOB cannot be in the future",
-  }),
-  professionalStatus: z
     .string()
-    .trim()
-    .min(2, "Status must be at least 2 characters long")
-    .max(50, "Status must be under 50 characters")
-    .refine(
-      (val) => /^[A-Za-z ]+$/.test(val),
-      { message: "Status can contain only letters and spaces" }
-    ),
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: "Invalid date format.",
+    })
+    .refine((val) => {
+      const dob = new Date(val);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const hasNotHadBirthdayThisYear =
+        today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+
+      if (hasNotHadBirthdayThisYear) age--;
+
+      return age >= 18;
+    }, {
+      message: "You must be at least 18 years old",
+    })
+    .refine((val) => new Date(val) <= new Date(), {
+      message: "DOB cannot be in the future",
+    }),
+  professionalStatus,
+});
+
+// User create Address zod schema
+export const createAddressZodSchema = z.object({
+  addressLine1,
+  addressLine2,
+  city,
+  state,
+  district,
+  country,
+  postalCode,
+  landmark,
+  primary,
+});
+
+// User create Address zod schema
+export const updateAddressZodSchema = z.object({
+  addressLine1: addressLine1.optional(),
+  addressLine2: addressLine2.optional(),
+  city: city.optional(),
+  state: state.optional(),
+  district: district.optional(),
+  country: country.optional(),
+  postalCode: postalCode.optional(),
+  landmark: landmark.optional(),
+  primary: primary.optional(),
 });
 
 
-//* User Address zod schema */
-const postalOrPoBoxRegex = /^[0-9]{3,10}$/;
-const cityRegex = /^[A-Za-z\s]{2,50}$/;
-const countryRegex = /^[A-Za-z\s]{2,60}$/;
-
-export const addressSchema = z
+// User create Career Data zod schema
+export const createCareerDataSchema = z
   .object({
-    addressLine1: z
-      .string()
-      .trim()
-      .min(3, "Address Line 1 must be at least 3 characters")
-      .max(100, "Address Line 1 cannot exceed 100 characters"),
-
-    addressLine2: z
-      .string()
-      .trim()
-      .max(100, "Address Line 2 cannot exceed 100 characters"),
-
-    city: z
-      .string()
-      .trim()
-      .regex(cityRegex, "Enter a valid city name (letters and spaces only)")
-      .min(2, "City name must be at least 2 characters")
-      .max(50, "City name cannot exceed 50 characters"),
-
-    state: z
-      .string()
-      .trim()
-      .min(2, "State name must be at least 2 characters")
-      .max(50, "State name cannot exceed 50 characters"),
-
-    district: z
-      .string()
-      .trim()
-      .min(2, "District name must be at least 2 characters")
-      .max(50, "District name cannot exceed 50 characters"),
-
-    country: z
-      .string()
-      .trim()
-      .regex(countryRegex, "Enter a valid country name (letters and spaces only)")
-      .min(2, "Country must be at least 2 characters")
-      .max(60, "Country cannot exceed 60 characters"),
-
-    postalCode: z
-      .string()
-      .trim()
-      .regex(postalOrPoBoxRegex, "Enter a valid postal code (4–10 digits)"),
-
-    landmark: z
-      .string()
-      .trim()
-      .min(4, "Landmark must be at least 4 characters")
-      .max(100, "Landmark cannot exceed 100 characters"),
-
-    primary: z.boolean(),
-  })
-
-
-// career Data zod schema
-export const jobTypeEnum = z.enum(["full-time", "part-time", "contract", "internship"]);
-export const workModeEnum = z.enum(["onsite", "remote", "hybrid"]);
-
-export const careerDataSchema = z
-  .object({
-    currentSalary: z
-      .coerce.number()
-      .min(0, "Current salary must be greater than or equal to 0")
-      .max(100000000, "Current salary seems too high")
-      .optional(),
-
-    expectedSalary: z
-      .coerce.number()
-      .min(0, "Expected salary must be greater than or equal to 0")
-      .max(100000000, "Expected salary seems too high")
-      .optional(),
-
-    immediateJoiner: z.coerce.boolean(),
-    noticePeriod: z
-      .coerce.number()
-      .optional()
-      .or(z.nan())
-      .refine((val) => val == null || val >= 0, "Notice period must be positive"),
-
-    experience: z
-      .string()
-      .optional(),
-
-    currentDesignation: z
-      .string()
-      .trim()
-      .min(2, "Designation must be at least 2 characters")
-      .max(100, "Designation too long")
-      .optional(),
-
-    currentCompany: z
-      .string()
-      .trim()
-      .min(2, "Company name must be at least 2 characters")
-      .max(100, "Company name too long")
-      .optional(),
-
-    industry: z
-      .string()
-      .trim()
-      .min(2, "Industry name must be at least 2 characters")
-      .max(100, "Industry name too long")
-      .optional(),
-
-    currentJobType: jobTypeEnum.optional(),
-    preferredJobTypes: z
-      .union([
-        z.string().transform((val) => {
-          try {
-            return JSON.parse(val);
-          } catch {
-            return [];
-          }
-        }),
-        z.array(jobTypeEnum),
-      ])
-      .optional(),
-
-    preferredWorkModes: z
-      .union([
-        z.string().transform((val) => {
-          try {
-            return JSON.parse(val);
-          } catch {
-            return [];
-          }
-        }),
-        z.array(workModeEnum),
-      ])
-      .optional(),
+    currentSalary,
+    expectedSalary,
+    immediateJoiner,
+    noticePeriod,
+    experience,
+    currentDesignation,
+    currentCompany,
+    industry,
+    currentJobType,
+    preferredJobTypes,
+    preferredWorkModes,
   })
   .superRefine((data, ctx) => {
-    if (!data.immediateJoiner && (data.noticePeriod === undefined || data.noticePeriod === null)) {
+    if (
+      !data.immediateJoiner &&
+      (data.noticePeriod == null || Number.isNaN(data.noticePeriod))
+    ) {
       ctx.addIssue({
         code: "custom",
         path: ["noticePeriod"],
@@ -271,4 +90,35 @@ export const careerDataSchema = z
     }
   });
 
+// User update Career Data zod schema
+export const updateCareerDataSchema = z
+  .object({
+    currentSalary: currentSalary.optional(),
+    expectedSalary: expectedSalary.optional(),
+    immediateJoiner: immediateJoiner.optional(),
+    noticePeriod: noticePeriod.optional(),
+    experience: experience.optional(),
+    currentDesignation: currentDesignation.optional(),
+    currentCompany: currentCompany.optional(),
+    industry: industry.optional(),
+    currentJobType: currentJobType.optional(),
+    preferredJobTypes: preferredJobTypes.optional(),
+    preferredWorkModes: preferredWorkModes.optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      !data.immediateJoiner &&
+      (data.noticePeriod == null || Number.isNaN(data.noticePeriod))
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["noticePeriod"],
+        message: "Notice period is required if you are not an immediate joiner",
+      });
+    }
+  });
 
+// user update application zod schema
+export const updateApplicationZodSchmea = z.object({
+  status
+});

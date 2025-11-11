@@ -5,24 +5,21 @@ import { ApiPaginationRequest, ApiResponse } from "../../dtos/common.dts";
 import { AdminFetchAllPayments, CreatePayment, IPaymentRepository } from "../../../domain/repositories/IPaymentRepository";
 
 export class PaymentRepositoryImpl implements IPaymentRepository {
-  private mapToEntity(paymentData: IPayment): Payment {
+  private mapToEntity(payment: IPayment): Payment {
     return new Payment(
-      paymentData._id,
-      paymentData.customerId,
-      paymentData.packageId,
-      paymentData.customerName,
-      paymentData.packageName,
-      paymentData.totalAmount,
-      paymentData.paidAmount,
-      paymentData.balanceAmount,
-      paymentData.paymentMethod,
-      paymentData.paymentDate.toISOString(),
-      paymentData.referenceId,
-      paymentData.paymentProof,
-      paymentData.adminNotes,
-      paymentData.status,
-      paymentData.createdAt.toISOString(),
-      paymentData.updatedAt.toISOString()
+      payment._id,
+      payment.userId,
+      payment.packageId,
+      payment.totalAmount,
+      payment.paidAmount,
+      payment.balanceAmount,
+      payment.paymentMethod,
+      payment.paymentDate,
+      payment.paymentProof,
+      payment.adminNotes,
+      payment.paymentStatus,
+      payment.createdAt,
+      payment.updatedAt,
     );
   }
 
@@ -31,7 +28,7 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
       // Calculate balance amount and status before creation
       const balanceAmount = paymentData.totalAmount - paymentData.paidAmount;
       let status = "pending";
-      
+
       if (paymentData.paidAmount === 0) {
         status = "pending";
       } else if (paymentData.paidAmount >= paymentData.totalAmount) {
@@ -107,9 +104,6 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
 
   async updatePayment(paymentData: Payment): Promise<Payment | null> {
     try {
-      // Recalculate balance and status before update
-      paymentData.updatePaymentStatus();
-      
       const updatedPayment = await PaymentModel.findByIdAndUpdate(paymentData._id, paymentData, {
         new: true,
       });

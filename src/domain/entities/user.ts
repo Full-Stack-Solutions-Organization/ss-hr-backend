@@ -32,16 +32,12 @@ export class User {
     public gender: Gender,
     public nationality: string,
     public dob: Date,
-    public currentSalary: number,
-    public expectedSalary: number,
-    public immediateJoiner: boolean,
+    public linkedInUsername: string,
+    public portfolioUrl: string,
+    public resume: string,
+    public professionalStatus: string,
     public createdAt: Date,
     public updatedAt: Date,
-    public noticePeriod?: string,
-    public linkedInUsername?: string,
-    public portfolioUrl?: string,
-    public resume?: string,
-    public professionalStatus?: string,
   ) {
 
   }

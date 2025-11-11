@@ -153,7 +153,7 @@ export class PaymentController {
     }
 }
 
-const paymentController = new PaymentController(
+export const paymentController = new PaymentController(
     createPaymentUseCase,
     updatePaymentUseCase,
     deletePaymentUseCase,
@@ -164,5 +164,3 @@ const paymentController = new PaymentController(
     getPaymentsByStatusUseCase,
     getPaymentStatsUseCase
 );
-
-export { paymentController };

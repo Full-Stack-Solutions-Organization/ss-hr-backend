@@ -1,8 +1,5 @@
 import { Types } from "mongoose";
 
-
-
-
 export class Testimonial {
   constructor(
     public _id: Types.ObjectId,

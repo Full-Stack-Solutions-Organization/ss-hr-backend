@@ -1,121 +1,114 @@
 import { z } from "zod";
-import { Types } from "mongoose";
+import { Gender, Role } from '../../domain/entities/user';
+import { PackageType } from "../../domain/entities/package";
+import { JobType, WorkMode } from "../../domain/entities/careerData";
+import { PaymentMethod, PaymentStatus } from "../../domain/entities/payment";
+import { REGEX_PROFESSIONAL_STATUS, REGEX_PLACE, REGEX_COUNTRY, REGEX_FEATURE, REGEX_FULL_NAME, REGEX_LONG_TEXT, REGEX_NATIONALITY, REGEX_PASSWORD, REGEX_PHONE, REGEX_POSTAL, REGEX_PRICE, REGEX_S3_FILEKEY, REGEX_TEXT_DOT_AMP, REGEX_URL, REGEX_USERNAME, REGEX_CLIENT_NAME, REGEX_TESTIMONIAL, REGEX_ENTITY_ID, REGEX_DESCRIPTION, REGEX_INDUSTRY, REGEX_BENEFITS, REGEX_SKILLS, REGEX_EXPERIENCE, REGEX_COMPANY_NAME, REGEX_ADDRESSLINE, REGEX_LANDMARK } from "./regex";
+import { booleanField, dateField, enumField, jsonArrayParser, numberField, objectIdField, stringArrayField, stringField } from "./zodUtilities";
 
-// ****** Common zod validations for reuse ****** \\
+//*** Zod Schema Fields & Reusable Validators */
+export const fullName = stringField("fullName", 4, 30, REGEX_FULL_NAME);
+export const password = stringField("password", 8, 50, REGEX_PASSWORD);
+export const email = z.string().email("Invalid email format");
+export const phone = stringField("phone", 7, 20, REGEX_PHONE);
+export const phoneTwo = stringField("phoneTwo", 7, 20, REGEX_PHONE);
+export const gender = z.nativeEnum(Gender);
+export const nationality = stringField("nationality", 2, 60, REGEX_NATIONALITY);
+export const linkedInUsername = stringField("linkedInUsername", 5, 40, REGEX_USERNAME);
+export const portfolioUrl = stringField("portfolioUrl", 9, 200, REGEX_URL);
+export const professionalStatus = stringField("professionalStatus",2,100,REGEX_PROFESSIONAL_STATUS,"Professional status can only contain letters, numbers, spaces, dots, hyphens, and ampersands");
 
-// Object Id zod validation
-export const objectIdField = (fieldName = "ID") =>
-  z.string()
-    .min(1, { message: `${fieldName} is required` })
-    .refine((id) => Types.ObjectId.isValid(id), {
-      message: `Invalid ${fieldName} format`,
-    });
+export const role = enumField("role", [
+  Role.Admin,
+  Role.SuperAdmin,
+  Role.SystemAdmin,
+  Role.User
+]);
+export const limitedRole = enumField("role", [
+  Role.Admin,
+  Role.SuperAdmin,
+  Role.User
+]);
+export const otp = z.string().length(6, "OTP must be exactly 6 digits");
+export const verificationToken = z.string();
 
-// Boolean field zod validation
-export const booleanField = (fieldName = "Boolean") =>
-  z.boolean().refine(val => typeof val === 'boolean', {
-    message: `${fieldName} status must be boolean`,
-  });
+export const addressLine1 = stringField("addressLine1", 3, 100,REGEX_ADDRESSLINE);
+export const addressLine2 = stringField("addressLine2", 1, 100,REGEX_ADDRESSLINE);
+export const city = stringField("city", 2, 50, REGEX_PLACE);
+export const state = stringField("state", 2, 50,REGEX_PLACE);
+export const district = stringField("district", 2, 50,REGEX_PLACE);
+export const country = stringField("country", 2, 60, REGEX_COUNTRY);
+export const postalCode = stringField("postalCode", 3, 10, REGEX_POSTAL);
+export const landmark = stringField("landmark", 4, 100,REGEX_LANDMARK);
+export const primary = booleanField("primary");
 
-// String field zod validation
-export const stringField = (
-  fieldName = "Value",
-  min?: number,
-  max?: number,
-  regex?: RegExp,
-  regexMessage = `Invalid ${fieldName} format`
-) => {
-  let schema = z.string().min(1, { message: `${fieldName} is required` });
+export const jobType = z.nativeEnum(JobType);
+export const workMode = z.nativeEnum(WorkMode);
+export const currentSalary = numberField("currentSalary", 0, 100000000);
+export const expectedSalary = numberField("expectedSalary", 0, 100000000);
+export const immediateJoiner = booleanField("immediateJoiner");
+export const experience = stringField("experience", 1, 100, REGEX_EXPERIENCE);
+export const currentDesignation = stringField("currentDesignation", 2, 100,REGEX_TEXT_DOT_AMP);
+export const currentCompany = stringField("currentCompany", 2, 100, REGEX_COMPANY_NAME);
+export const currentJobType = jobType;
+export const preferredJobTypes = jsonArrayParser(jobType);
+export const preferredWorkModes = jsonArrayParser(workMode);
+export const noticePeriod = z
+  .coerce.number()
+  .or(z.nan())
+  .refine((val) => val == null || val >= 0, "Notice period must be positive");
 
-  if (min !== undefined) {
-    schema = schema.min(min, `${fieldName} must be at least ${min} characters`);
-  }
+export const companyName = stringField("companyName", 2, 100, REGEX_TEXT_DOT_AMP);
+export const designation = stringField("designation", 2, 100, REGEX_TEXT_DOT_AMP);
+export const industry = stringField("industry", 2, 100, REGEX_INDUSTRY);
+export const jobDescription = stringField("jobDescription", 10, 5000, REGEX_LONG_TEXT);
+export const benifits = stringField("benefits", 2, 1000, REGEX_BENEFITS);
+export const salary = numberField("salary", 1, 1000);
+export const skills = stringField("skills", 2, 500, REGEX_SKILLS);
+export const vacancy = numberField("vacancy", 1, 1000);
 
-  if (max !== undefined) {
-    schema = schema.max(max, `${fieldName} must be at most ${max} characters`);
-  }
+export const packageName = stringField("packageName", 2, 100, REGEX_TEXT_DOT_AMP);
+export const description = stringField("description", 10, 1000, REGEX_DESCRIPTION);
+export const priceIN = numberField("priceIN", 1, 100000000);
+export const priceUAE = numberField("priceUAE", 1, 100000000);
+export const packageType = enumField("packageType", [
+  PackageType.jobPackage,
+  PackageType.tourPackage
+]);
+export const packageDuration = numberField("packageDuration", 1, 365);
+export const features = stringArrayField("features", 1, 10, 1, 200, REGEX_FEATURE);
 
-  if (regex !== undefined) {
-    schema = schema.regex(regex, regexMessage);
-  }
+export const food = booleanField("food");
+export const accommodation = booleanField("accommodation");
+export const travelCard = booleanField("travelCard");
+export const utilityBills = booleanField("utilityBills");
+export const airportPickup = booleanField("airportPickup");
+export const jobGuidance = booleanField("jobGuidance");
 
-  return schema;
-};
+export const customerSerialNumber = stringField("customerId", 1, 100, REGEX_ENTITY_ID);
+export const totalAmount = numberField("totalAmount", 0, 100000000);
+export const paidAmount = numberField("paidAmount", 0, 100000000);
+export const balanceAmount = numberField("balanceAmount", 0, 100000000);
+export const paymentMethod = enumField("paymentMethod", [
+  PaymentMethod.bankTransfer,
+  PaymentMethod.cash,
+  PaymentMethod.googlePay
+]);
+export const paymentStatus = enumField("paymentStatus", [
+  PaymentStatus.fullyPaid,
+  PaymentStatus.partiallyPaid,
+  PaymentStatus.pending
+]);
+export const paymentDate = stringField("paymentDate", 1, 40, /^.{1,40}$/);
+export const adminNotes = stringField("adminNotes", 0, 500, /^.{0,500}$/s);
 
-// Date common field
-export const dateField = z.preprocess(
-  (val) => {
-    if (typeof val === "string" || val instanceof String) {
-      const parsed = new Date(val as string);
-      if (!isNaN(parsed.getTime())) return parsed;
-    }
-    return val;
-  },
-  z.date()
-);
+export const s3FileKey = stringField("s3FileKey", 6, 500, REGEX_S3_FILEKEY);
 
-// Number field zod validation
-export const numberField = (
-  fieldName = "Value",
-  min?: number,
-  max?: number
-) => {
-  let schema = z.number();
+export const status = booleanField("status");
+export const isVisible = booleanField("isVisible");
 
-  if (min !== undefined) {
-    schema = schema.min(min, `${fieldName} must be at least ${min}`);
-  }
-
-  if (max !== undefined) {
-    schema = schema.max(max, `${fieldName} must be at most ${max}`);
-  }
-
-  return schema;
-};
-
-// String enum field
-export const enumField = (fieldName: string, values: readonly string[]) =>
-  z.enum(values as [string, ...string[]]) // cast to tuple for TypeScript
-    .refine((val) => values.includes(val), {
-      message: `${fieldName} must be one of: ${values.join(", ")}`,
-    });
-
-// String enum field
-export const stringArrayField = (
-  fieldName = "Value",
-  arrayMin?: number,
-  arrayMax?: number,
-  itemMin?: number,
-  itemMax?: number,
-  regex?: RegExp,
-  regexMessage = "Invalid format"
-) => {
-  let itemSchema = z.string().min(1, { message: `${fieldName} is required` });
-
-  if (itemMin !== undefined) {
-    itemSchema = itemSchema.min(itemMin, `${fieldName} item must be at least ${itemMin} characters`);
-  }
-
-  if (itemMax !== undefined) {
-    itemSchema = itemSchema.max(itemMax, `${fieldName} item must be at most ${itemMax} characters`);
-  }
-
-  if (regex !== undefined) {
-    itemSchema = itemSchema.regex(regex, regexMessage);
-  }
-
-  let arraySchema = z.array(itemSchema);
-
-  if (arrayMin !== undefined) {
-    arraySchema = arraySchema.min(arrayMin, `At least ${arrayMin} ${fieldName.toLowerCase()}(s) required`);
-  }
-
-  if (arrayMax !== undefined) {
-    arraySchema = arraySchema.max(arrayMax, `At most ${arrayMax} ${fieldName.toLowerCase()}(s) allowed`);
-  }
-
-  return arraySchema;
-};
+export const clientName = stringField("clientName",2,100,REGEX_CLIENT_NAME,"Client name must contain only letters and spaces, 2–100 characters");
+export const testimonial = stringField("testimonial",20,1000,REGEX_TESTIMONIAL,"Testimonial must be between 20 and 1000 characters");
 
 
 
@@ -123,38 +116,10 @@ export const stringArrayField = (
 
 
 
-
-
-
-// **** Zod schema that is common for multiple controllers **** \\
+//*** Reuable full zod schemas */
 // Date zod validation alone for the date coming in req.query
 export const DateZodSchema = z.object({
     date: dateField,
-});
-
-// User and Provider addess adding controllerz zod validation
-export const AddAddressZodSchema = z.object({
-    addressLine: stringField("AddressLine",10,150,/^[a-zA-Z0-9 .,#-]{10,150}$/,"Address line must be 10–150 characters long and can only include letters, numbers, spaces, and the symbols . , # -") ,
-    phone: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
-    phoneTwo: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
-    place: stringField("Place",3,50,/^[a-zA-Z .-]{3,50}$/, "Place name must be 3–50 characters long and can only include letters, spaces, dots, and hyphens"),
-    city: stringField("City",3,50,/^[a-zA-Z ]{3,50}$/,"City must only contain letters and spaces"),
-    district: stringField("District",2,50,/^[a-zA-Z ]{3,50}$/,"District must only contain letters and spaces"),
-    pincode: stringField("pincode",3,12,/^[A-Za-z0-9\s-]{3,12}$/,"Invalid postal code"),
-    state: stringField("State",2,50,/^[a-zA-Z ]{2,50}$/,"State must only contain letters and spaces"),
-    country: stringField("Country",2,50,/^[a-zA-Z ]{2,50}$/,"Country must only contain letters and spaces"),
-    googleMapLink: z.string()
-    .url("Invalid Google Map link")
-    .refine((val) => val.startsWith("https://maps.app.goo.gl/"), {
-      message: "Link must be from Google Maps (maps.app.goo.gl)",
-    }),
-  });
-  
-  // user or provider username and phone updation controller
-  export const UserOrProviderUpdateInfoZodSchema = z.object({
-    username: stringField("Username",4,30,/^[a-zA-Z ]{4,30}$/,"Invalid username"),
-    phone: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
-    phoneTwo: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
 });
 
 // Stripe Payment Schema
@@ -177,7 +142,6 @@ export const RequestQueryCommonZodSchema = z.object({
     }),
 });
 
-
 // ObjectId validation
 export const ValidateObjectId = (id: string, name: string) => {
   const schema = z.object({
@@ -186,46 +150,9 @@ export const ValidateObjectId = (id: string, name: string) => {
   return schema.parse({ id });
 }
 
-
 // Pagination req.query validation
 export const paginationReqQuery = z.object({
   page: z.string().optional().transform((val) => val ? parseInt(val, 10) : 1),
   limit: z.string().optional().transform((val) => val ? parseInt(val, 10) : 10),
 });
 
-
-// File validation
-export type FileValidationType = "image" | "document";
-
-interface FileValidationOptions {
-  type: FileValidationType;
-  maxSizeMB?: number;
-}
-
-export const validateFileZodSchema = ({ type, maxSizeMB = 5 }: FileValidationOptions) => {
-  const allowedMimeTypes =
-    type === "image"
-      ? ["image/png", "image/jpeg", "image/jpg"]
-      : ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-
-  const maxSizeBytes = maxSizeMB * 1024 * 1024;
-
-  return z
-    .object({
-      fieldname: z.string(),
-      originalname: z.string(),
-      encoding: z.string(),
-      mimetype: z.string().refine(
-        (m) => allowedMimeTypes.includes(m),
-        {
-          message:
-            type === "image"
-              ? "Only PNG, JPG, or JPEG images are allowed"
-              : "Only PDF, DOC, or DOCX files are allowed",
-        }
-      ),
-      size: z.number().max(maxSizeBytes, `File size must be less than ${maxSizeMB}MB`),
-      buffer: z.instanceof(Buffer),
-    })
-    .strict();
-};

@@ -46,7 +46,7 @@ export class S3Controller {
     async getFileSignedUrl(req: Request, res: Response) {
         try {
             const validatedData = S3FileKeyZodSchmema.parse(req.query);
-            const result = await this.getFileSignedUrlUseCase.execute(validatedData.key);
+            const result = await this.getFileSignedUrlUseCase.execute(validatedData.s3FileKey);
             return res.json(result);
         } catch (error) {
             console.error("Error generating file URL:", error);
@@ -57,7 +57,7 @@ export class S3Controller {
     async deleteFile(req: Request, res: Response) {
         try {
             const validatedData = S3FileKeyZodSchmema.parse(req.body);
-            const result = await this.deleteFileFromS3UseCase.execute(validatedData.key);
+            const result = await this.deleteFileFromS3UseCase.execute(validatedData.s3FileKey);
             return res.json(result);
         } catch (error) {
             console.error("deleteFile error:", error);

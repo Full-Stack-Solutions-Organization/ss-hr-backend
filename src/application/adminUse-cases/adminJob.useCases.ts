@@ -43,7 +43,7 @@ export class GetAllJobsUseCase {
     try {
 
       const { page, limit } = payload;
-      const jobs = await this.jobRepository.findAllJobs({ page, limit },true)
+      const jobs = await this.jobRepository.adminFindAllJobs({ page, limit })
 
       return {
         success: true,

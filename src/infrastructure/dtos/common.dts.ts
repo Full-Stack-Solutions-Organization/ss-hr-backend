@@ -18,6 +18,12 @@ export interface ApiResponse<T = unknown> extends CommonResponse {
   data?: T;
 }
 
+export enum FolderNames {
+  resumes = "resumes",
+  profiles = "profiles",
+  packages = "packages",
+  payments = "payments",
+}
 
 export type FetchUsersForChatSideBar = Array<Pick<User, "_id" | "fullName" | "profileImage">>;
 

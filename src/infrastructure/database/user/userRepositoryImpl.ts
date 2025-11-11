@@ -23,16 +23,12 @@ export class UserRepositoryImpl implements IUserRepository {
       user.gender,
       user.nationality,
       user.dob,
-      user.currentSalary,
-      user.expectedSalary,
-      user.immediateJoiner,
-      user.createdAt,
-      user.updatedAt,
-      user.noticePeriod,
       user.linkedInUsername,
       user.portfolioUrl,
       user.resume,
       user.professionalStatus,
+      user.createdAt,
+      user.updatedAt,
     );
   }
 

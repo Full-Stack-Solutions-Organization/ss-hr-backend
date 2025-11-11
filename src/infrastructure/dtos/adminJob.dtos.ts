@@ -8,5 +8,5 @@ export type AdminFetchJobDetailsResponse = Omit<Job, "updatedAt">;
 
 export interface AdminUpdateJob {
     jobId: Job["_id"];
-    updatedData: AdminCreateNewJob;
+    updatedData: Partial<AdminCreateNewJob>;
 }

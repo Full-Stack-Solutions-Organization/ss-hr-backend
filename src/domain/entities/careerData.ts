@@ -1,7 +1,21 @@
 import { Types } from "mongoose";
 
-export type WorkMode = "onsite" | "remote" | "hybrid";
-export type JobType = "full-time" | "part-time" | "contract" | "internship" | "freelance";
+// export type WorkMode = "onsite" | "remote" | "hybrid";
+// export type JobType = "full-time" | "part-time" | "contract" | "internship" | "freelance";
+
+export enum WorkMode {
+  Onsite = "onsite",
+  Remote = "remote",
+  Hybrid = "hybrid",
+}
+
+export enum JobType {
+  FullTime = "full-time",
+  PartTime = "part-time",
+  Contract = "contract",
+  Internship = "internship",
+  Freelance = "freelance",
+}
 
 export class CareerData {
     constructor(

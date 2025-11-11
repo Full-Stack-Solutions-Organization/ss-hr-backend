@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { Request, Response } from "express";
 import { HandleError } from "../../infrastructure/error/error";
-import { CreateJobZodSchema} from "../../infrastructure/zod/job.zod";
+import { createJobZodSchema, updateJobZodSchema} from "../../infrastructure/zod/job.zod";
 import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
 import { paginationReqQuery, ValidateObjectId } from "../../infrastructure/zod/common.zod";
 import {CreateJobUseCase, DeleteJobUseCase, GetAllJobsUseCase, GetJobByIdUseCase, UpdateJobUseCase} from "../../application/adminUse-cases/adminJob.useCases";
@@ -30,7 +30,7 @@ export class AdminJobController {
 
   async createJob(req: Request, res: Response): Promise<void> {
     try {
-      const validatedData = CreateJobZodSchema.parse(req.body);
+      const validatedData = createJobZodSchema.parse(req.body);
       const result = await this.createJobUseCase.execute(validatedData);
       res.status(201).json(result);
     } catch (error) {
@@ -54,9 +54,7 @@ export class AdminJobController {
     try {
       const { id } = req.params;
       const { id: jobId } = ValidateObjectId(id, "Job Id");
-      console.log("jobId : ",jobId);
       const result = await this.getJobByIdUseCase.execute(new Types.ObjectId(jobId));
-      console.log("result : ",result);
       res.status(200).json(result);
     } catch (error) {
       console.log("Get job error:", error);
@@ -68,7 +66,7 @@ export class AdminJobController {
     try {
       const { id } = req.params;
       const { id: jobId } = ValidateObjectId(id, "Job Id");
-      const validatedData = CreateJobZodSchema.parse(req.body);
+      const validatedData = updateJobZodSchema.parse(req.body);
       const result = await this.updateJobUseCase.execute({jobId: new Types.ObjectId(jobId), updatedData: validatedData});
       res.status(200).json(result);
     } catch (error) {
@@ -92,12 +90,10 @@ export class AdminJobController {
 
 }
 
-const adminJobController = new AdminJobController(
+export const adminJobController = new AdminJobController(
   createJobUseCase,
   getAllJobsUseCase,
   getJobByIdUseCase,
   updateJobUseCase,
   deleteJobUseCase,
 );
-
-export { adminJobController };

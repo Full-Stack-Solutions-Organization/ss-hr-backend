@@ -7,12 +7,11 @@ import {
   GetTestimonialByIdRequest,
   GetTestimonialByIdResponse,
 } from "../../infrastructure/dtos/testimonial.dto";
-import { Testimonial } from "../../domain/entities/testimonial";
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
-import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { validateFile } from "../../infrastructure/validator/imageFileValidator";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
+import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
 import { TestimonialRepositoryImpl } from "../../infrastructure/database/testimonial/testimonialRepositoryImpl";
 
 

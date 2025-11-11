@@ -131,7 +131,7 @@ export class TestimonialController {
     }
 }
 
-const testimonialController = new TestimonialController(
+export const testimonialController = new TestimonialController(
     createTestimonialUseCase,
     updateTestimonialUseCase,
     deleteTestimonialUseCase,
@@ -139,5 +139,3 @@ const testimonialController = new TestimonialController(
     getAllTestimonialsUseCase,
     getTestimonialStatsUseCase
 );
-
-export { testimonialController };

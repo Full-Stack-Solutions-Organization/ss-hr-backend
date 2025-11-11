@@ -15,34 +15,18 @@ export enum PaymentStatus {
 export class Payment {
     constructor(
         public _id: Types.ObjectId,
-        public customerId: Types.ObjectId,
+        public userId: Types.ObjectId,
         public packageId: Types.ObjectId,
-        public customerName: string,
-        public packageName: string,
         public totalAmount: number,
         public paidAmount: number,
         public balanceAmount: number,
         public paymentMethod: PaymentMethod,
-        public paymentDate: string,
-        public referenceId: string,
+        public paymentDate: Date,
         public paymentProof: string,
         public adminNotes: string,
-        public status: PaymentStatus,
-        public createdAt: string,
-        public updatedAt: string,
+        public paymentStatus: PaymentStatus,
+        public createdAt: Date,
+        public updatedAt: Date,
     ) { }
 
-    // Business logic method to calculate and update status
-    public updatePaymentStatus(): void {
-        this.balanceAmount = this.totalAmount - this.paidAmount;
-        
-        if (this.paidAmount === 0) {
-            this.status = PaymentStatus.pending;
-        } else if (this.paidAmount >= this.totalAmount) {
-            this.status = PaymentStatus.fullyPaid;
-            this.balanceAmount = 0;
-        } else {
-            this.status = PaymentStatus.partiallyPaid;
-        }
-    }
 }

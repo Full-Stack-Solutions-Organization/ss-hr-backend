@@ -2,10 +2,10 @@ import { Types } from "mongoose";
 import { Request, Response } from "express";
 import { DecodedUser } from "../../express";
 import {
-  LoginZodSchema,
-  RegisterZodSchema,
-  ResendOTPZodSchema,
-  OTPVerificationZodSchema,
+  loginZodSchema,
+  registerZodSchema,
+  resendOTPZodSchema,
+  otpVerificationZodSchema,
 } from "../../infrastructure/zod/auth.zod";
 import {
   LoginUseCase,
@@ -56,7 +56,7 @@ export class AuthController {
 
   register = async (req: Request, res: Response): Promise<void> => {
     try {
-      const validateData = RegisterZodSchema.parse(req.body);
+      const validateData = registerZodSchema.parse(req.body);
       const result = await this.registerUseCase.execute(validateData);
 
       res.cookie("token", result.user.token, {
@@ -81,7 +81,7 @@ export class AuthController {
 
   async verifyOTP(req: Request, res: Response) {
     try {
-      const validateData = OTPVerificationZodSchema.parse(req.body);
+      const validateData = otpVerificationZodSchema.parse(req.body);
       const { otp, verificationToken, role } = validateData;
       if (!otp || !verificationToken || !role)
         throw new Error("Invalid request.");
@@ -98,7 +98,7 @@ export class AuthController {
 
   async resendOtp(req: Request, res: Response) {
     try {
-      const validateData = ResendOTPZodSchema.parse(req.body);
+      const validateData = resendOTPZodSchema.parse(req.body);
       const { role, verificationToken, email } = validateData;
       if (!role || (!verificationToken && !email))
         throw new Error("Invalid request.");
@@ -115,7 +115,7 @@ export class AuthController {
 
   async login(req: Request, res: Response) {
     try {
-      const validateData = LoginZodSchema.parse(req.body);
+      const validateData = loginZodSchema.parse(req.body);
       const { email, password, role } = validateData;
       if (!email || !password || !role) throw new Error("Invalid request.");
       const { success, message, user, token, address, careerData } = await this.loginUseCase.execute({
@@ -203,7 +203,7 @@ export class AuthController {
 }
 
 
-const authController = new AuthController(
+export const authController = new AuthController(
   registerUseCase,
   verifyOTPUseCase,
   resendOtpUseCase,
@@ -211,5 +211,3 @@ const authController = new AuthController(
   checkUserStatusUseCase,
   googleAuthUseCase
 );
-
-export { authController };

@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
-import { ITestimonial, TestimonialModel } from "./testimonialModel";
 import { Testimonial } from "../../../domain/entities/testimonial";
+import { ITestimonial, TestimonialModel } from "./testimonialModel";
 import { ApiPaginationRequest, ApiResponse } from "../../dtos/common.dts";
 import { AdminFetchAllTestimonials, CreateTestimonial, ITestimonialRepository } from "../../../domain/repositories/ITestimonialRepository";
 
@@ -39,7 +39,6 @@ export class TestimonialRepositoryImpl implements ITestimonialRepository {
             clientName: 1,
             clientPhoto: 1,
             designation: 1,
-            company: 1,
             testimonial: 1,
             isVisible: 1,
             createdAt: 1,
@@ -112,7 +111,6 @@ export class TestimonialRepositoryImpl implements ITestimonialRepository {
             clientName: 1,
             clientPhoto: 1,
             designation: 1,
-            company: 1,
             testimonial: 1,
             isVisible: 1,
             createdAt: 1,

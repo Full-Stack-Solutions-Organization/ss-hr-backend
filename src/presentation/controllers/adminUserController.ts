@@ -118,7 +118,7 @@ export class AdminUserController {
 
 }
 
-const adminUserController = new AdminUserController(
+export const adminUserController = new AdminUserController(
     getAllUsersForChatSideBarUseCase,
     createUserByAdminUseCase,
     updateUserUseCase,
@@ -127,4 +127,3 @@ const adminUserController = new AdminUserController(
     getAllUsersUseCase,
     getUserStatsUseCase
 );
-export { adminUserController };

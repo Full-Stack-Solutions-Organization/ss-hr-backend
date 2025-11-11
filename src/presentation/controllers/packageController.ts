@@ -1,7 +1,5 @@
-import { Request, Response } from "express";
 import { Types } from 'mongoose';
-import { HandleError } from "../../infrastructure/error/error";
-import { PackageRepositoryImpl } from "../../infrastructure/database/package/packageRepositoryImpl";
+import { Request, Response } from "express";
 import {
   CreatePackageUseCase,
   UpdatePackageUseCase,
@@ -11,6 +9,8 @@ import {
   GetPackagesByTypeUseCase,
   GetPackageStatsUseCase
 } from '../../application/adminUse-cases/adminPackageUseCases';
+import { HandleError } from "../../infrastructure/error/error";
+import { PackageRepositoryImpl } from "../../infrastructure/database/package/packageRepositoryImpl";
 
 const packageRepositoryImpl = new PackageRepositoryImpl();
 const createPackageUseCase = new CreatePackageUseCase(packageRepositoryImpl);
@@ -119,7 +119,7 @@ export class PackageController {
     }
 }
 
-const packageController = new PackageController(
+export const packageController = new PackageController(
     createPackageUseCase,
     updatePackageUseCase,
     deletePackageUseCase,
@@ -129,4 +129,3 @@ const packageController = new PackageController(
     getPackageStatsUseCase
 );
 
-export { packageController };

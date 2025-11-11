@@ -1,10 +1,10 @@
+import { Types } from "mongoose";
 import { IJob, JobModel } from "./jobModel";
 import { Job } from "../../../domain/entities/job";
-import { UserFetchAllJobs, UserFetchJobDetailsResponse } from "../../dtos/userJob.dtos";
 import { ApiPaginationRequest, ApiResponse } from "../../dtos/common.dts";
 import { IJobRepository } from "../../../domain/repositories/IJobRepository";
+import { UserFetchAllJobsResponse, UserFetchJobDetailsResponse } from "../../dtos/user.dto";
 import { AdminCreateNewJob, AdminFetchAllJobs, AdminFetchJobDetailsResponse } from "../../dtos/adminJob.dtos";
-import { Types } from "mongoose";
 
 export class JobRepositoryImpl implements IJobRepository {
 
@@ -34,10 +34,11 @@ export class JobRepositoryImpl implements IJobRepository {
     }
   }
 
-  async findAllJobs({ page, limit }: ApiPaginationRequest, admin: boolean): Promise<ApiResponse<AdminFetchAllJobs | UserFetchAllJobs>> {
+  async adminFindAllJobs({ page, limit }: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllJobs>> {
     try {
       const adminGetAllJobsProject = {
-        _id: 1, companyName: 1,
+        _id: 1, 
+        companyName: 1,
         industry: 1,
         vacancy: 1,
         designation: 1,
@@ -45,17 +46,9 @@ export class JobRepositoryImpl implements IJobRepository {
         createdAt: 1
       };
 
-      const userGetAllJobsProject = {
-        _id: 1,
-        industry: 1,
-        vacancy: 1,
-        designation: 1,
-        salary: 1,
-        createdAt: 1
-      };
-
-      const project = admin ? adminGetAllJobsProject : userGetAllJobsProject;
+      const project = adminGetAllJobsProject;
       const skip = (page - 1) * limit;
+
       const [jobs, totalCount] = await Promise.all([
         JobModel.find({}, project).skip(skip).limit(limit).lean(),
         JobModel.countDocuments(),
@@ -65,7 +58,7 @@ export class JobRepositoryImpl implements IJobRepository {
       return {
         data: jobs.map(job => ({
           _id: job._id,
-          companyName: job.companyName || null,
+          companyName: job.companyName,
           industry: job.industry,
           designation: job.designation,
           salary: job.salary,
@@ -118,8 +111,66 @@ export class JobRepositoryImpl implements IJobRepository {
     }
   }
 
+  async userFindAllJobs({ page, limit }: ApiPaginationRequest, userId: Types.ObjectId): Promise<ApiResponse<UserFetchAllJobsResponse>> {
+    try {
+      const [jobs, totalCount] = await Promise.all([
+        JobModel.aggregate([
+          { $sort: { createdAt: -1 } },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          {
+            $lookup: {
+              from: "applications",
+              let: { jobId: "$_id" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$jobId", "$$jobId"] },
+                        { $eq: ["$userId", userId] }
+                      ]
+                    }
+                  }
+                }
+              ],
+              as: "userApplications"
+            }
+          },
+          {
+            $addFields: {
+              applied: { $gt: [{ $size: "$userApplications" }, 0] }
+            }
+          },
+          {
+            $project: {
+              _id: 1, salary: 1, designation: 1, vacancy: 1, createdAt: 1,
+              applied: 1
+            }
+          }
+        ]),
+        JobModel.countDocuments()]);
+      const totalPages = Math.ceil(totalCount / limit);
+      return {
+        data: jobs.map(job => ({
+          _id: job._id,
+          salary: job.salary,
+          designation: job.designation,
+          vacancy: job.vacancy,
+          createdAt: job.createdAt,
+          applied: job.applied,
+        })),
+        totalPages,
+        currentPage: page,
+        totalCount
+      };
+    } catch (error) {
+      throw new Error("Failed to fetch jobs");
+    }
+  }
 
-  async updateJob(jobId: Types.ObjectId, updatedData: AdminCreateNewJob): Promise<Job | null> {
+
+  async updateJob(jobId: Types.ObjectId, updatedData: Partial<AdminCreateNewJob>): Promise<Job | null> {
     try {
       const updatedJob = await JobModel.findByIdAndUpdate({ _id: jobId }, updatedData, { new: true });
       return updatedJob ? this.mapToEntity(updatedJob) : null;

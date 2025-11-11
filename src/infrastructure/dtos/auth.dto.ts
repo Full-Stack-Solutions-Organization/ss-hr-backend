@@ -50,7 +50,7 @@ export interface LoginResponse extends CommonResponse {
         gender?: Gender;
         nationality?: string;
         dob?: Date;
-        linkedInUrl?: string | undefined;
+        linkedInUsername?: string | undefined;
         portfolioUrl?: string | undefined;
       } ,
     token: string;

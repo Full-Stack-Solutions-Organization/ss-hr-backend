@@ -4,15 +4,16 @@ import { DecodedUser } from "../../express";
 import { S3Client } from "@aws-sdk/client-s3";
 import { aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
+import { ValidateObjectId } from "../../infrastructure/zod/common.zod";
 import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
 import { FileUploadService } from "../../infrastructure/service/fileUpload";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
+import {  sendMessageRequestZodSchema } from "../../infrastructure/zod/message.zod";
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
 import { SendMessageUseCase } from "../../application/messageUse-cases/sendMessageUseCase";
 import { GetAllMessagesUseCase } from "../../application/messageUse-cases/getAllMessageUseCase";
 import { MessageRepositoryImpl } from "../../infrastructure/database/message/messageRepositorylmpl";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
-import { commonParamsZodSchema, sendMessageRequestZodSchema } from "../../infrastructure/zod/message.zod";
 
 const s3Client = new S3Client();
 const messageRepositoryIml = new MessageRepositoryImpl();
@@ -36,8 +37,7 @@ export class MessageController {
 
     async getMessages(req: Request, res: Response) {
         try {
-            const validateParams = commonParamsZodSchema.parse(req.params);
-            const { toUserId } = validateParams;
+            const { id: toUserId } = ValidateObjectId(req.params.toUserId, "toUserId");
             const fromUserId = (req.user as DecodedUser).userId;
             const result = await this.getAllMessagesUseCase.execute({ fromUserId: new Types.ObjectId(fromUserId), toUserId: new Types.ObjectId(toUserId) });
             res.status(200).json(result);
@@ -50,8 +50,7 @@ export class MessageController {
     async sendMessage(req: Request, res: Response) {
         try {
             const fromUserId = (req.user as DecodedUser).userId;
-            const validateParams = commonParamsZodSchema.parse(req.params);
-            const { toUserId } = validateParams;
+            const { id: toUserId } = ValidateObjectId(req.params.toUserId, "toUserId");
             const validateData = sendMessageRequestZodSchema.parse(req.body);
             const { text } = validateData;
             const file = req.file;
@@ -69,5 +68,4 @@ export class MessageController {
     }
 }
 
-const messageController = new MessageController(getAllMessagesUseCase,sendMessageUseCase);
-export { messageController };
+export const messageController = new MessageController(getAllMessagesUseCase,sendMessageUseCase);

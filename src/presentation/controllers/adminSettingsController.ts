@@ -1,10 +1,12 @@
 import { Types } from "mongoose";
+import { DecodedUser } from "../../express";
 import { Request, Response } from "express";
 import { S3Client } from "@aws-sdk/client-s3";
 import { aws_s3Config } from "../../config/env";
+import { Role } from "../../domain/entities/user";
 import { HandleError } from "../../infrastructure/error/error";
 import { paginationReqQuery } from "../../infrastructure/zod/common.zod";
-import { CreateAdminZodSchema } from "../../infrastructure/zod/admin.zod";
+import { createAdminZodSchema } from "../../infrastructure/zod/settings.zod";
 import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
@@ -12,8 +14,6 @@ import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepos
 import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 import { AdminGetAllAdminsUseCase, CreateAdminUseCase, DeleteAdminUseCase } from "../../application/adminUse-cases/adminSettingsUseCases";
-import { DecodedUser } from "../../express";
-import { Role } from "../../domain/entities/user";
 
 const s3Client = new S3Client();
 const fileDeleteService = new FileDeleteService(s3Client);
@@ -41,7 +41,7 @@ export class AdminSettingsController {
 
     async createNewAdmin(req: Request, res: Response) {
         try {
-            const validated = CreateAdminZodSchema.parse(req.body);
+            const validated = createAdminZodSchema.parse(req.body);
             const result = await this.createAdminUseCase.execute({ ...validated, profileImage: req.file });
             res.status(201).json(result);
         } catch (error) {
@@ -75,9 +75,8 @@ export class AdminSettingsController {
 
 }
 
-const adminSettingsController = new AdminSettingsController(
+export const adminSettingsController = new AdminSettingsController(
     createAdminUseCase, 
     adminGetAllAdminsUseCase, 
     deleteAdminUseCase
 );
-export { adminSettingsController };

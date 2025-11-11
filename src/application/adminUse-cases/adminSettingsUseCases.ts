@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
-import { Role, User } from "../../domain/entities/user";
+import { User } from "../../domain/entities/user";
+import { LimitedRole } from "../../infrastructure/zod/common.zod";
 import { CreateAdmin } from "../../domain/repositories/IUserRepository";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { PasswordHasher } from "../../infrastructure/security/passwordHasher";
@@ -76,16 +77,8 @@ export class DeleteAdminUseCase {
                 throw new Error("Admin not found");
             }
 
-            if (requesterRole === Role.User || requesterRole === Role.Admin) {
+            if (requesterRole === LimitedRole.User || requesterRole === LimitedRole.Admin) {
                 throw new Error("You do not have permission to delete other users.");
-            }
-
-            if (requesterRole === Role.SuperAdmin && targetAdmin.role !== Role.Admin) {
-                throw new Error("Super Admin can only delete Admins.");
-            }
-
-            if (requesterRole === Role.SystemAdmin && targetAdmin._id === adminId) {
-                throw new Error("You cannot delete yourself.");
             }
 
             if (targetAdmin.profileImage) {

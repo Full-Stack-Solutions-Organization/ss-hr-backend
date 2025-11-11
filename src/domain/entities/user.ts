@@ -1,18 +1,5 @@
 import { Types } from "mongoose";
-
-export enum Role {
-  User = "user",
-  Admin = "admin",
-  SuperAdmin = "superAdmin",
-  SystemAdmin = "systemAdmin",
-}
-
-export enum Gender {
-  Male = "male",
-  Female = "female",
-  Other = "other",
-}
-
+import { Gender, LimitedRole } from "../../infrastructure/zod/common.zod";
 
 export class User {
   constructor(
@@ -21,7 +8,7 @@ export class User {
     public fullName: string,
     public email: string,
     public password: string,
-    public role: Role,
+    public role: LimitedRole,
     public phone: string,
     public phoneTwo: string,
     public profileImage: string,

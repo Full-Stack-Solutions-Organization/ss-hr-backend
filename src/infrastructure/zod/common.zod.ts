@@ -1,10 +1,36 @@
 import { z } from "zod";
-import { Gender, Role } from '../../domain/entities/user';
 import { PackageType } from "../../domain/entities/package";
 import { JobType, WorkMode } from "../../domain/entities/careerData";
 import { PaymentMethod, PaymentStatus } from "../../domain/entities/payment";
-import { REGEX_PROFESSIONAL_STATUS, REGEX_PLACE, REGEX_COUNTRY, REGEX_FEATURE, REGEX_FULL_NAME, REGEX_LONG_TEXT, REGEX_NATIONALITY, REGEX_PASSWORD, REGEX_PHONE, REGEX_POSTAL, REGEX_PRICE, REGEX_S3_FILEKEY, REGEX_TEXT_DOT_AMP, REGEX_URL, REGEX_USERNAME, REGEX_CLIENT_NAME, REGEX_TESTIMONIAL, REGEX_ENTITY_ID, REGEX_DESCRIPTION, REGEX_INDUSTRY, REGEX_BENEFITS, REGEX_SKILLS, REGEX_EXPERIENCE, REGEX_COMPANY_NAME, REGEX_ADDRESSLINE, REGEX_LANDMARK } from "./regex";
 import { booleanField, dateField, enumField, jsonArrayParser, numberField, objectIdField, stringArrayField, stringField } from "./zodUtilities";
+import { REGEX_PROFESSIONAL_STATUS, REGEX_PLACE, REGEX_COUNTRY, REGEX_FEATURE, REGEX_FULL_NAME, REGEX_LONG_TEXT, REGEX_NATIONALITY, REGEX_PASSWORD, REGEX_PHONE, REGEX_POSTAL, REGEX_S3_FILEKEY, REGEX_TEXT_DOT_AMP, REGEX_URL, REGEX_USERNAME, REGEX_CLIENT_NAME, REGEX_TESTIMONIAL, REGEX_ENTITY_ID, REGEX_DESCRIPTION, REGEX_INDUSTRY, REGEX_BENEFITS, REGEX_SKILLS, REGEX_EXPERIENCE, REGEX_COMPANY_NAME, REGEX_ADDRESSLINE, REGEX_LANDMARK } from "./regex";
+
+export enum Role {
+  User = "user",
+  Admin = "admin",
+  SystemAdmin = "systemAdmin",
+}
+
+export enum LimitedRole {
+  User = "user",
+  Admin = "admin",
+}
+
+export enum Gender {
+  Male = "male",
+  Female = "female",
+  Other = "other",
+}
+
+export const roleSchema = z.nativeEnum(Role);
+export type RoleType = z.infer<typeof roleSchema>;
+
+export const limitedRoleSchema = z.nativeEnum(LimitedRole);
+export type LimitedRoleType = z.infer<typeof limitedRoleSchema>;
+
+export const genderSchema = z.nativeEnum(Gender);
+export type GenderType = z.infer<typeof genderSchema>;
+
 
 //*** Zod Schema Fields & Reusable Validators */
 export const fullName = stringField("fullName", 4, 30, REGEX_FULL_NAME);
@@ -12,23 +38,12 @@ export const password = stringField("password", 8, 50, REGEX_PASSWORD);
 export const email = z.string().email("Invalid email format");
 export const phone = stringField("phone", 7, 20, REGEX_PHONE);
 export const phoneTwo = stringField("phoneTwo", 7, 20, REGEX_PHONE);
-export const gender = z.nativeEnum(Gender);
 export const nationality = stringField("nationality", 2, 60, REGEX_NATIONALITY);
 export const linkedInUsername = stringField("linkedInUsername", 5, 40, REGEX_USERNAME);
 export const portfolioUrl = stringField("portfolioUrl", 9, 200, REGEX_URL);
 export const professionalStatus = stringField("professionalStatus",2,100,REGEX_PROFESSIONAL_STATUS,"Professional status can only contain letters, numbers, spaces, dots, hyphens, and ampersands");
 
-export const role = enumField("role", [
-  Role.Admin,
-  Role.SuperAdmin,
-  Role.SystemAdmin,
-  Role.User
-]);
-export const limitedRole = enumField("role", [
-  Role.Admin,
-  Role.SuperAdmin,
-  Role.User
-]);
+
 export const otp = z.string().length(6, "OTP must be exactly 6 digits");
 export const verificationToken = z.string();
 
@@ -42,8 +57,9 @@ export const postalCode = stringField("postalCode", 3, 10, REGEX_POSTAL);
 export const landmark = stringField("landmark", 4, 100,REGEX_LANDMARK);
 export const primary = booleanField("primary");
 
-export const jobType = z.nativeEnum(JobType);
-export const workMode = z.nativeEnum(WorkMode);
+export const jobType = enumField("jobType",[JobType.Contract, JobType.Freelance, JobType.FullTime, JobType.Internship, JobType.PartTime]);
+export const workMode = enumField("workMode",[WorkMode.Hybrid, WorkMode.Onsite, WorkMode.Remote]);
+
 export const currentSalary = numberField("currentSalary", 0, 100000000);
 export const expectedSalary = numberField("expectedSalary", 0, 100000000);
 export const immediateJoiner = booleanField("immediateJoiner");

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { addressLine1, addressLine2, city, country, currentCompany, currentDesignation, currentJobType, currentSalary, district, email, expectedSalary, experience, fullName, gender, immediateJoiner, industry, landmark, linkedInUsername, nationality, noticePeriod, phone, phoneTwo, portfolioUrl, postalCode, preferredJobTypes, preferredWorkModes, primary, professionalStatus, state, status } from './common.zod';
+import { addressLine1, addressLine2, city, country, currentCompany, currentDesignation, currentJobType, currentSalary, district, email, expectedSalary, experience, fullName, genderSchema, immediateJoiner, industry, landmark, linkedInUsername, nationality, noticePeriod, phone, phoneTwo, portfolioUrl, postalCode, preferredJobTypes, preferredWorkModes, primary, professionalStatus, state, status } from './common.zod';
 
 // user update Profile details zod schema
 export const updateUserInfoSchema = z.object({
@@ -7,7 +7,7 @@ export const updateUserInfoSchema = z.object({
   email,
   phone,
   phoneTwo,
-  gender,
+  genderSchema,
   nationality,
   linkedInUsername,
   portfolioUrl,

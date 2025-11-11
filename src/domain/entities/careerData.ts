@@ -1,8 +1,5 @@
 import { Types } from "mongoose";
 
-// export type WorkMode = "onsite" | "remote" | "hybrid";
-// export type JobType = "full-time" | "part-time" | "contract" | "internship" | "freelance";
-
 export enum WorkMode {
   Onsite = "onsite",
   Remote = "remote",

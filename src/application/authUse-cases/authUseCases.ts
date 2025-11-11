@@ -1,20 +1,21 @@
 import { Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { adminConfig } from '../../config/env';
-import { Role, User } from '../../domain/entities/user';
+import { User } from '../../domain/entities/user';
+import { Address } from '../../domain/entities/address';
+import { CareerData } from '../../domain/entities/careerData';
 import { JWTService } from '../../infrastructure/security/jwt';
 import { ApiResponse } from '../../infrastructure/dtos/common.dts';
 import { OTPService } from '../../infrastructure/service/otpService';
+import { LimitedRole, Role } from '../../infrastructure/zod/common.zod';
 import { CreateLocalUser } from '../../domain/repositories/IUserRepository';
 import { handleUseCaseError } from '../../infrastructure/error/useCaseError';
 import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
 import { SignedUrlService } from '../../infrastructure/service/generateSignedUrl';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
-import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
 import { AddressRepositoryImpl } from '../../infrastructure/database/address/addressRepositoryImpl';
 import { CareerDataRepositoryImpl } from '../../infrastructure/database/careerData/careerDataRepositoryImpl';
-import { Address } from '../../domain/entities/address';
-import { CareerData } from '../../domain/entities/careerData';
+import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse, UpdatePasswordRequest, VerifyEmailRequest, VerifyEmailResponse } from '../../infrastructure/dtos/auth.dto';
 
 export class RegisterUseCase {
   constructor(
@@ -102,7 +103,7 @@ export class ResendOtpUseCase {
       let user: User | null = null;
 
       if (email && role) {
-        if (role === Role.User) {
+        if (role === LimitedRole.User) {
           user = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
         }
 
@@ -138,11 +139,12 @@ export class LoginUseCase {
   async execute(data: LoginRequest): Promise<LoginResponse> {
     try {
       const { email, password, role } = data;
+      console.log("data : ", data);
       if (!email || !password || !role) throw new Error("Invalid request.");
 
       let user: User | null = null;
 
-      if (role === Role.User || role === Role.Admin || role === Role.SuperAdmin) {
+      if (role === LimitedRole.User || role === LimitedRole.Admin) {
         user = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
       } else if (role === Role.SystemAdmin) {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
@@ -174,7 +176,7 @@ export class LoginUseCase {
       let userAddress: Address | null = null;
       let careerData: CareerData | null = null;
 
-      if (role === Role.User) {
+      if (role === LimitedRole.User) {
         userAddress = await this.addressRepositoryImpl.findAddressesByUserId(user._id);
         careerData = await this.careerDataRepositoryImpl.findCareerDataByUserId(user._id);
       }
@@ -224,3 +226,64 @@ export class CheckUserStatusUseCase {
   }
 }
 
+
+export class VerifyEmailUseCase {
+  constructor(
+    private userRepositoryImpl: UserRepositoryImpl,
+  ) { }
+
+  async execute(data: VerifyEmailRequest): Promise<VerifyEmailResponse> {
+    try {
+      const { email } = data;
+
+      const user = await this.userRepositoryImpl.findUserByEmail(email);
+      if (!user) throw new Error("Invalid credential");
+
+      const otp = await OTPService.setOtp(user.verificationToken);
+      if (!otp) throw new Error("Failed to generate otp.");
+
+      await OTPService.sendOTP(email, otp);
+      return {
+        success: true, message: "Otp has been sent.", data: {
+          email: user.email,
+          verificationToken: user.verificationToken,
+          role: user.role
+        }
+      }
+    } catch (error) {
+      console.log("VerifyEmailUseCase error : ", error);
+      throw handleUseCaseError(error || "Unexpected error in VerifyEmailUseCase");
+    }
+  }
+}
+
+
+export class UpdatePasswordUseCase {
+  constructor(
+    private userRepositoryImpl: UserRepositoryImpl
+  ) { }
+
+  async execute(data: UpdatePasswordRequest): Promise<ApiResponse> {
+    try {
+      const { email, password, role, verificationToken } = data;
+
+      const user = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
+      if (user?.verificationToken !== verificationToken.toString()) {
+        throw new Error("You are not able to update password, please try again");
+      }
+
+      const hashedPassword = await PasswordHasher.hashPassword(password);
+      if (!hashedPassword) throw new Error("Failed to update password");
+
+      user.password = hashedPassword;
+
+      const updatedUser = await this.userRepositoryImpl.updateUser(user);
+      if (!updatedUser) throw new Error("Failed to update password");
+
+      return { success: true, message: "Password has been updated successfully." };
+    } catch (error) {
+      console.log("UpdatePasswordUseCase error : ", error);
+      throw handleUseCaseError(error || "Unexpected error in UpdatePasswordUseCase");
+    }
+  }
+}

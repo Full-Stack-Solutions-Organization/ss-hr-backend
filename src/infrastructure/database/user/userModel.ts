@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
-import { Gender, Role } from "../../../domain/entities/user";
-import { REGEX_EMAIL, REGEX_FULL_NAME, REGEX_NATIONALITY, REGEX_PASSWORD, REGEX_PHONE, REGEX_PROFESSIONAL_STATUS, REGEX_S3_FILEKEY, REGEX_URL, REGEX_USERNAME } from "../../zod/regex";
+import { REGEX_EMAIL, REGEX_FULL_NAME, REGEX_HASHED_PASSWORD, REGEX_NATIONALITY, REGEX_PHONE, REGEX_PROFESSIONAL_STATUS, REGEX_S3_FILEKEY, REGEX_URL, REGEX_USERNAME } from "../../zod/regex";
+import { Gender, GenderType, Role, RoleType } from "../../zod/common.zod";
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
@@ -8,7 +8,7 @@ export interface IUser extends Document {
   fullName: string;
   email: string;
   password: string;
-  role: Role;
+  role: RoleType;
   phone: string;
   phoneTwo: string;
   profileImage: string;
@@ -16,7 +16,7 @@ export interface IUser extends Document {
   isBlocked: boolean;
   verificationToken: string;
   googleId: string;
-  gender: Gender,
+  gender: GenderType,
   dob: Date,
   nationality: string,
   linkedInUsername: string,
@@ -58,7 +58,7 @@ const UserSchema = new Schema<IUser>(
       required: [true, "Password is required"],
       minlength: [8, "Password must be at least 8 characters"],
       maxlength: [100, "Password must be at most 100 characters"],
-      match: [REGEX_PASSWORD,"Invalid password"],
+      match: [REGEX_HASHED_PASSWORD,"Invalid password"],
     },
 
     role: {

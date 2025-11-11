@@ -23,14 +23,15 @@ export const REGEX_URL = /^https?:\/\/[^\s]{9,250}$/;
 export const REGEX_PASSWORD =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,50}$/;
 
+export const REGEX_HASHED_PASSWORD =
+  /^\$2[aby]?\$\d{2}\$[./A-Za-z0-9]{53}$/;
+
 export const REGEX_TEXT_DOT_AMP =
   /^[A-Za-z0-9\s.&-]{2,100}$/;
 
 export const REGEX_LONG_TEXT = /^.{10,5000}$/s;
 
 export const REGEX_FEATURE = /^[A-Za-z0-9 .&-]{1,200}$/;
-
-export const REGEX_PRICE = /^\d+(\.\d{1,2})?$/;
 
 export const REGEX_POSTAL = /^[0-9]{3,10}$/;
 

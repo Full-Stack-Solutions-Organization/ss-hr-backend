@@ -6,6 +6,8 @@ import {
   registerZodSchema,
   resendOTPZodSchema,
   otpVerificationZodSchema,
+  verifyEmailZodSchema,
+  updatePasswordZodSchema,
 } from "../../infrastructure/zod/auth.zod";
 import {
   LoginUseCase,
@@ -13,6 +15,8 @@ import {
   ResendOtpUseCase,
   VerifyOTPUseCase,
   CheckUserStatusUseCase,
+  VerifyEmailUseCase,
+  UpdatePasswordUseCase,
 } from "../../application/authUse-cases/authUseCases";
 import { appConfig, aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
@@ -24,15 +28,17 @@ import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl
 import { CareerDataRepositoryImpl } from "../../infrastructure/database/careerData/careerDataRepositoryImpl";
 
 const userRepositoryImpl = new UserRepositoryImpl();
-const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 const addressRepositoryImpl = new AddressRepositoryImpl();
+const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 const careerDataRepositoryImpl = new CareerDataRepositoryImpl();
 
-const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl); const registerUseCase = new RegisterUseCase(userRepositoryImpl);
 const verifyOTPUseCase = new VerifyOTPUseCase(userRepositoryImpl);
 const resendOtpUseCase = new ResendOtpUseCase(userRepositoryImpl);
 const googleAuthUseCase = new GoogleAuthUseCase(userRepositoryImpl);
+const verifyEmailUseCase = new VerifyEmailUseCase(userRepositoryImpl);
+const updatePasswordUseCase = new UpdatePasswordUseCase(userRepositoryImpl);
 const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
+const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl); const registerUseCase = new RegisterUseCase(userRepositoryImpl);
 const loginUseCase = new LoginUseCase(userRepositoryImpl, signedUrlService, addressRepositoryImpl, careerDataRepositoryImpl);
 
 const isProduction = appConfig.nodeEnv === "production";
@@ -44,7 +50,9 @@ export class AuthController {
     private resendOtpUseCase: ResendOtpUseCase,
     private loginUseCase: LoginUseCase,
     private checkUserStatusUseCase: CheckUserStatusUseCase,
-    private googleAuthUseCase: GoogleAuthUseCase
+    private googleAuthUseCase: GoogleAuthUseCase,
+    private verifyEmailUseCase: VerifyEmailUseCase,
+    private updatePasswordUseCase: UpdatePasswordUseCase,
   ) {
     this.register = this.register.bind(this);
     this.verifyOTP = this.verifyOTP.bind(this);
@@ -52,6 +60,8 @@ export class AuthController {
     this.login = this.login.bind(this);
     this.checkUserStatus = this.checkUserStatus.bind(this);
     this.googleCallback = this.googleCallback.bind(this);
+    this.verifyEmail = this.verifyEmail.bind(this);
+    this.updatePassword = this.updatePassword.bind(this);
   }
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -140,8 +150,8 @@ export class AuthController {
         careerData
       };
 
-      console.log("resultWithoutToken : ",resultWithoutToken);
-       
+      console.log("resultWithoutToken : ", resultWithoutToken);
+
       res.status(200).json(resultWithoutToken);
     } catch (error) {
       HandleError.handle(error, res);
@@ -185,7 +195,7 @@ export class AuthController {
       const result = await this.googleAuthUseCase.execute(req.user as any);
 
       res.cookie("token", result.token, {
-         httpOnly: true,
+        httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",
         maxAge: 2 * 24 * 60 * 60 * 1000,
@@ -200,6 +210,28 @@ export class AuthController {
       res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
     }
   }
+
+  async verifyEmail(req: Request, res: Response) {
+    try {
+      const validatedData = verifyEmailZodSchema.parse(req.body);
+      const result = await this.verifyEmailUseCase.execute({ email: validatedData.email });
+      res.status(200).json(result);
+    } catch (error) {
+      console.log("verifyEmail error : ", error);
+      HandleError.handle(error, res);
+    }
+  }
+
+  async updatePassword(req: Request, res: Response) {
+    try {
+      const validatedDate = updatePasswordZodSchema.parse(req.body);
+      const result = await this.updatePasswordUseCase.execute(validatedDate);
+      res.status(200).json(result);
+    } catch (error) {
+      console.log("updatePassword error : ", error);
+      HandleError.handle(error, res);
+    }
+  }
 }
 
 
@@ -209,5 +241,7 @@ export const authController = new AuthController(
   resendOtpUseCase,
   loginUseCase,
   checkUserStatusUseCase,
-  googleAuthUseCase
+  googleAuthUseCase,
+  verifyEmailUseCase,
+  updatePasswordUseCase
 );

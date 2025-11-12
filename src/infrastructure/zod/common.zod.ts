@@ -11,10 +11,16 @@ export enum Role {
   SystemAdmin = "systemAdmin",
 }
 
+export const roleSchema = z.nativeEnum(Role);
+export type RoleType = z.infer<typeof roleSchema>;
+
 export enum LimitedRole {
   User = "user",
   Admin = "admin",
 }
+
+export const limitedRoleSchema = z.nativeEnum(LimitedRole);
+export type LimitedRoleType = z.infer<typeof limitedRoleSchema>;
 
 export enum Gender {
   Male = "male",
@@ -22,14 +28,18 @@ export enum Gender {
   Other = "other",
 }
 
-export const roleSchema = z.nativeEnum(Role);
-export type RoleType = z.infer<typeof roleSchema>;
-
-export const limitedRoleSchema = z.nativeEnum(LimitedRole);
-export type LimitedRoleType = z.infer<typeof limitedRoleSchema>;
-
 export const genderSchema = z.nativeEnum(Gender);
 export type GenderType = z.infer<typeof genderSchema>;
+
+export enum FolderNames {
+  resumes = "resumes",
+  profiles = "profiles",
+  packages = "packages",
+  payments = "payments",
+}
+
+export const folderNameSchema = z.nativeEnum(FolderNames);
+export type FolderNmaeType = z.infer<typeof folderNameSchema>;
 
 
 //*** Zod Schema Fields & Reusable Validators */
@@ -115,6 +125,7 @@ export const paymentStatus = enumField("paymentStatus", [
   PaymentStatus.partiallyPaid,
   PaymentStatus.pending
 ]);
+
 export const paymentDate = stringField("paymentDate", 1, 40, /^.{1,40}$/);
 export const adminNotes = stringField("adminNotes", 0, 500, /^.{0,500}$/s);
 

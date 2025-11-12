@@ -1,10 +1,9 @@
 import z from "zod";
-import { s3FileKey } from "./common.zod";
-import { FolderNames } from "../dtos/common.dts";
+import { folderNameSchema, s3FileKey } from "./common.zod";
 import { enumField, objectIdField, stringField } from "./zodUtilities";
 
 export const PresignedUrlZodSchema = z.object({
-  folder: enumField("folder",[FolderNames.packages, FolderNames.payments, FolderNames.profiles, FolderNames.resumes]),
+  folder: folderNameSchema,
   userId: objectIdField("userId"),
   fileName: stringField("filename", 1, 100),
   fileType: enumField("fileType", [
@@ -17,4 +16,8 @@ export const PresignedUrlZodSchema = z.object({
 ]),
 });
 
-export const S3FileKeyZodSchmema = z.object({s3FileKey})
+export const S3FileKeyZodSchmema = z.object({s3FileKey});
+
+export const deleteFileZodSchema = z.object({
+  folder: folderNameSchema,
+});

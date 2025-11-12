@@ -76,6 +76,12 @@ export interface GetUserByIdResponse {
   };
 }
 
+// user update profile image
+export type UserUpdateUserProfileImageRequest = Pick<User, "_id" | "profileImage">;
+
+// user update resume
+export type UserUpdateUserResumeRequest = Pick<User, "_id" | "resume">;
+
 // User profile data
 export type UseUpdateProfileRequest = Pick<User, "_id" | "fullName" | "phone" | "phoneTwo" | "gender" | "nationality" | "dob" | "professionalStatus"> & Partial<Pick<User, "linkedInUsername" | "portfolioUrl">>;
 export type UseUpdateProfileResponse = Pick<User, "fullName" | "phone" | "phoneTwo" | "gender" | "nationality" | "dob" | "linkedInUsername" | "portfolioUrl" | "professionalStatus">;

@@ -1,12 +1,11 @@
 import { Router } from 'express';
-import { upload } from '../../config/multerConfig';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { userController } from '../controllers/userController';
 import { userProfileController } from '../controllers/userProfileController';
 
 const router = Router();
 
-router.patch('/prfileImage', authMiddleware, upload.single("profileImage"), userProfileController.updateUserProfileImage );
+router.patch('/prfileImage', authMiddleware, userProfileController.updateUserProfileImage );
 
 router.patch("/profile", authMiddleware, userProfileController.updateProfileDetails);
 

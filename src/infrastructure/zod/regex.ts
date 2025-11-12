@@ -36,7 +36,7 @@ export const REGEX_FEATURE = /^[A-Za-z0-9 .&-]{1,200}$/;
 export const REGEX_POSTAL = /^[0-9]{3,10}$/;
 
 export const REGEX_S3_FILEKEY =
-/^(resumes|profiles|packages|payments)\/[A-Za-z0-9._\-/]{1,500}$/;
+/^(resumes|profiles|packages|payments)\/[A-Za-z0-9._\-/]{6,500}$/;
 
 export const REGEX_PROFESSIONAL_STATUS = /^[A-Za-z0-9\s.&-]{2,100}$/;
 
@@ -61,3 +61,6 @@ export const REGEX_SKILLS = /^[A-Za-z0-9\s,.\-&+()]{1,500}$/;
 export const REGEX_EXPERIENCE = /^[A-Za-z0-9\s.,&()\-_/+#!@]{2,500}$/;
 
 export const REGEX_COMPANY_NAME = /^[A-Za-z0-9\s.&\-()]{2,100}$/;
+
+
+// profiles\6913053b2681539695b29862_startTrim__DSC1366.JPG_endTrim_1762934372750_TpzRzE5VEg

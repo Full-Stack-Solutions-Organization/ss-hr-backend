@@ -168,9 +168,14 @@ export class LoginUseCase {
       const token = JWTService.generateToken({ userId: user._id, role: role });
 
       let profileImageSignedUrl: string = "";
+      let resumeSignedUrl: string = "";
 
       if (user.profileImage) {
         profileImageSignedUrl = await this.signedUrlService.generateSignedUrl(user.profileImage);
+      }
+
+      if (user.resume) {
+        resumeSignedUrl = await this.signedUrlService.generateSignedUrl(user.resume);
       }
 
       let userAddress: Address | null = null;
@@ -197,6 +202,7 @@ export class LoginUseCase {
           phoneTwo: user.phoneTwo,
           linkedInUsername: user.linkedInUsername,
           portfolioUrl: user.portfolioUrl,
+          resume: resumeSignedUrl,
         },
         token,
         address: userAddress ?? null,

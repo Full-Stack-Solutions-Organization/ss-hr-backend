@@ -53,6 +53,7 @@ export interface LoginResponse extends CommonResponse {
     dob?: Date;
     linkedInUsername?: string;
     portfolioUrl?: string;
+    resume?: string;
   },
   token: string;
   address?: Address | null;

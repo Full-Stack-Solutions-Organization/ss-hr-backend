@@ -1,65 +1,24 @@
-import { User } from "../../domain/entities/user";
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
-import { validateFile } from "../../infrastructure/validator/imageFileValidator";
-import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
-import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
-import { UseUpdateProfileRequest, UseUpdateProfileResponse } from "../../infrastructure/dtos/user.dto";
-
-export interface UserUpdateUserProfileImageRequest {
-    userId: User["_id"];
-    file: Express.Multer.File
-}
+import { UserUpdateUserProfileImageRequest, UserUpdateUserResumeRequest, UseUpdateProfileRequest, UseUpdateProfileResponse } from "../../infrastructure/dtos/user.dto";
 
 export class UserUpdateUserProfileImageUseCase {
     constructor(
         private userRepositoryImpl: UserRepositoryImpl,
-        private fileDeleteService: FileDeleteService,
-        private fileUploadService: FileUploadService,
-        private signedUrlService: SignedUrlService
     ) { }
 
     async execute(data: UserUpdateUserProfileImageRequest): Promise<ApiResponse<{ profileImage: string }>> {
         try {
-            const { userId, file } = data;
-            if (!userId || !file) throw new Error("Invalid request.");
+            const user = await this.userRepositoryImpl.findUserById(data._id);
+            if (!user) throw new Error("No user found");
 
-            const isValidFile = validateFile(file);
-            if (!isValidFile) throw new Error("Invalid profile image file");
+            user.profileImage = data.profileImage;
 
-            const user = await this.userRepositoryImpl.findUserById(userId);
-            if (!user) throw new Error("User not found.");
+            const updatedUser = await this.userRepositoryImpl.updateUser(user);
+            if(!updatedUser) throw new Error("Failed to update profile image data");
 
-            let profileImageUrl: string = "";
-            if (user.profileImage) {
-                const response = await this.fileDeleteService.deleteFile(user.profileImage);
-                if (!response) throw new Error("Profile image updating failed");
-            } else {
-                profileImageUrl = await this.fileUploadService.uploadFile({
-                    folder: "ss-hr-users-profileImage",
-                    userId: "user",
-                    file: file,
-                });
-            }
-
-            const updatedUser = await this.userRepositoryImpl.updateUser({
-                ...user,
-                profileImage: profileImageUrl
-            });
-            if (!updatedUser) throw new Error("profile image updating failed");
-
-            const signedUrl = await this.signedUrlService.generateSignedUrl(
-                updatedUser.profileImage
-            );
-
-            return {
-                success: true,
-                message: "Profile image updated",
-                data: {
-                    profileImage: signedUrl
-                }
-            };
+            return { success: true, message: "Profile image updated" };
         } catch (error) {
             console.log("UserUpdateUserProfileImageUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to get testimonials");
@@ -121,18 +80,18 @@ export class UserUpdateResumeKeyUseCase {
         private userRepositoryImpl: UserRepositoryImpl
     ) { }
 
-    async execute(_id: User["_id"], key: string):Promise<ApiResponse> {
+    async execute(data: UserUpdateUserResumeRequest):Promise<ApiResponse> {
         try {
 
-            const user = await this.userRepositoryImpl.findUserById(_id);
+            const user = await this.userRepositoryImpl.findUserById(data._id);
             if (!user) throw new Error("No user found");
 
-            user.resume = key;
+            user.resume = data.resume;
 
             const updatedUser = await this.userRepositoryImpl.updateUser(user);
             if(!updatedUser) throw new Error("Failed to update file data");
 
-            return { success: true, message: "" };
+            return { success: true, message: "Resume updated" };
         } catch (error) {
             console.log("UserUpdateResumeKeyUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to update resume");

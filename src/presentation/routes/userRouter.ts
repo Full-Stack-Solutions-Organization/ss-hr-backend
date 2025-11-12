@@ -7,6 +7,8 @@ const router = Router();
 
 router.patch('/prfileImage', authMiddleware, userProfileController.updateUserProfileImage );
 
+router.patch('/resume', authMiddleware, userProfileController.updateResumeKey);
+
 router.patch("/profile", authMiddleware, userProfileController.updateProfileDetails);
 
 router.post("/address", authMiddleware, userProfileController.createAddress);
@@ -17,11 +19,9 @@ router.post("/career", authMiddleware, userProfileController.createCareerData);
 
 router.patch("/career/:id", authMiddleware, userProfileController.updateCareerData);
 
-router.patch('/resume', authMiddleware, userProfileController.updateResumeKey);
-
 router.get('/chat/admins', authMiddleware, userController.getAdminsForChatSidebar);
 
-router.get("/testimonials", authMiddleware, userController.getTestimonilas );
+router.get("/testimonials", authMiddleware, userController.getTestimonilas);
 
 router.get('/jobs', authMiddleware, userController.getAllJobs);
 

@@ -88,7 +88,7 @@ export type UseUpdateProfileResponse = Pick<User, "fullName" | "phone" | "phoneT
 
 
 // User Career data
-export type CreateCareerDataRequest = Partial<Pick<CareerData, "currentSalary" | "expectedSalary" | "currentCompany" | "currentDesignation" | "currentJobType" | "experience" | "immediateJoiner" | "industry" | "noticePeriod" | "preferredJobTypes" | "preferredWorkModes">> & {
+export type CreateCareerDataRequest = Pick<CareerData, "currentSalary" | "expectedSalary" | "currentJobType" | "experience" | "immediateJoiner" | "noticePeriod"> & Partial<Pick<CareerData, "industry" | "preferredJobTypes" | "preferredWorkModes" | "currentDesignation" | "currentCompany">> & {
   userId: User["_id"];
 };
 export type UpdateCareerDataRequest = Partial<Pick<CareerData, "currentSalary" | "expectedSalary" | "currentCompany" | "currentDesignation" | "currentJobType" | "experience" | "immediateJoiner" | "industry" | "noticePeriod" | "preferredJobTypes" | "preferredWorkModes">> & {

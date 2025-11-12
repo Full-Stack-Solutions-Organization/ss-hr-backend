@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 import { REGEX_S3_FILEKEY, REGEXT_NOTE_TEXT } from "../../zod/regex";
-import { PaymentMethod, PaymentStatus } from "../../../domain/entities/payment";
+import { PaymentMethod, PaymentMethodType, PaymentStatus, PaymentStatusType } from "../../zod/common.zod";
 
 export interface IPayment extends Document {
   _id: Types.ObjectId;
@@ -9,11 +9,11 @@ export interface IPayment extends Document {
   totalAmount: number;
   paidAmount: number;
   balanceAmount: number;
-  paymentMethod: PaymentMethod;
+  paymentMethod: PaymentMethodType;
   paymentDate: Date;
   paymentProof: string;
   adminNotes: string;
-  paymentStatus: PaymentStatus;
+  paymentStatus: PaymentStatusType;
   createdAt: Date;
   updatedAt: Date;
 }

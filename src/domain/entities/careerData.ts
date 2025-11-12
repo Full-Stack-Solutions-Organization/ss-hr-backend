@@ -1,18 +1,5 @@
 import { Types } from "mongoose";
-
-export enum WorkMode {
-  Onsite = "onsite",
-  Remote = "remote",
-  Hybrid = "hybrid",
-}
-
-export enum JobType {
-  FullTime = "full-time",
-  PartTime = "part-time",
-  Contract = "contract",
-  Internship = "internship",
-  Freelance = "freelance",
-}
+import { JobtypeType, WorkModeType } from "../../infrastructure/zod/common.zod";
 
 export class CareerData {
     constructor(
@@ -26,9 +13,9 @@ export class CareerData {
         public currentDesignation: string,
         public currentCompany: string,
         public industry: string,
-        public currentJobType: JobType,
-        public preferredJobTypes: JobType[],
-        public preferredWorkModes: WorkMode[],
+        public currentJobType: JobtypeType,
+        public preferredJobTypes: JobtypeType[],
+        public preferredWorkModes: WorkModeType[],
         public createdAt: Date,
         public updatedAt: Date,
     ) { }

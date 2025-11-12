@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
-import { PackageType } from "../../../domain/entities/package";
+import { Package, packageSchema, PackageType } from "../../zod/common.zod";
 import { REGEX_DESCRIPTION, REGEX_FEATURE, REGEX_TEXT_DOT_AMP } from "../../zod/regex";
 
 export interface IPackage extends Document {
@@ -52,7 +52,7 @@ const PackageSchema = new Schema<IPackage>({
   },
   packageType: {
     type: String,
-    enum: Object.values(PackageType),
+    enum: Object.values(Package),
     required: [true, "Package type is required"],
   },
   packageDuration: {

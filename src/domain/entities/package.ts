@@ -1,9 +1,5 @@
 import { Types } from "mongoose";
-
-export enum PackageType {
-    jobPackage = "jobpackage",
-    tourPackage = "tourpackage"
-}
+import { PackageType } from "../../infrastructure/zod/common.zod";
 
 export class Package {
     constructor(

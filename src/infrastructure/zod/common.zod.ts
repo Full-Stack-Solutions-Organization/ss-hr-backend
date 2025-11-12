@@ -1,7 +1,4 @@
 import { z } from "zod";
-import { PackageType } from "../../domain/entities/package";
-import { JobType, WorkMode } from "../../domain/entities/careerData";
-import { PaymentMethod, PaymentStatus } from "../../domain/entities/payment";
 import { booleanField, dateField, enumField, jsonArrayParser, numberField, objectIdField, stringArrayField, stringField } from "./zodUtilities";
 import { REGEX_PROFESSIONAL_STATUS, REGEX_PLACE, REGEX_COUNTRY, REGEX_FEATURE, REGEX_FULL_NAME, REGEX_LONG_TEXT, REGEX_NATIONALITY, REGEX_PASSWORD, REGEX_PHONE, REGEX_POSTAL, REGEX_S3_FILEKEY, REGEX_TEXT_DOT_AMP, REGEX_URL, REGEX_USERNAME, REGEX_CLIENT_NAME, REGEX_TESTIMONIAL, REGEX_ENTITY_ID, REGEX_DESCRIPTION, REGEX_INDUSTRY, REGEX_BENEFITS, REGEX_SKILLS, REGEX_EXPERIENCE, REGEX_COMPANY_NAME, REGEX_ADDRESSLINE, REGEX_LANDMARK } from "./regex";
 
@@ -28,8 +25,8 @@ export enum Gender {
   Other = "other",
 }
 
-export const genderSchema = z.nativeEnum(Gender);
-export type GenderType = z.infer<typeof genderSchema>;
+export const gender = z.nativeEnum(Gender);
+export type GenderType = z.infer<typeof gender>;
 
 export enum FolderNames {
   resumes = "resumes",
@@ -40,6 +37,52 @@ export enum FolderNames {
 
 export const folderNameSchema = z.nativeEnum(FolderNames);
 export type FolderNmaeType = z.infer<typeof folderNameSchema>;
+
+export enum WorkMode {
+  Onsite = "onsite",
+  Remote = "remote",
+  Hybrid = "hybrid",
+}
+
+export const workModeSchema = z.nativeEnum(WorkMode);
+export type WorkModeType = z.infer<typeof workModeSchema>;
+
+export enum JobType {
+  FullTime = "full-time",
+  PartTime = "part-time",
+  Contract = "contract",
+  Internship = "internship",
+  Freelance = "freelance",
+}
+
+export const jobtypeSchema = z.nativeEnum(JobType);
+export type JobtypeType = z.infer<typeof jobtypeSchema>;
+
+export enum Package {
+    jobPackage = "jobpackage",
+    tourPackage = "tourpackage"
+}
+
+export const packageSchema = z.nativeEnum(Package);
+export type PackageType = z.infer<typeof packageSchema>;
+
+export enum PaymentMethod {
+    googlePay = "googlepay",
+    bankTransfer = "banktransfer", 
+    cash = "cash"
+}
+
+export const paymentMethodSchema = z.nativeEnum(PaymentMethod);
+export type PaymentMethodType = z.infer<typeof paymentMethodSchema>;
+
+export enum PaymentStatus {
+    pending = "pending",
+    partiallyPaid = "partiallypaid",
+    fullyPaid = "fullypaid"
+}
+
+export const paymentStatusSchema = z.nativeEnum(PaymentStatus);
+export type PaymentStatusType = z.infer<typeof paymentStatusSchema>;
 
 
 //*** Zod Schema Fields & Reusable Validators */
@@ -52,7 +95,6 @@ export const nationality = stringField("nationality", 2, 60, REGEX_NATIONALITY);
 export const linkedInUsername = stringField("linkedInUsername", 5, 40, REGEX_USERNAME);
 export const portfolioUrl = stringField("portfolioUrl", 9, 200, REGEX_URL);
 export const professionalStatus = stringField("professionalStatus",2,100,REGEX_PROFESSIONAL_STATUS,"Professional status can only contain letters, numbers, spaces, dots, hyphens, and ampersands");
-
 
 export const otp = z.string().length(6, "OTP must be exactly 6 digits");
 export const verificationToken = z.string();
@@ -67,18 +109,14 @@ export const postalCode = stringField("postalCode", 3, 10, REGEX_POSTAL);
 export const landmark = stringField("landmark", 4, 100,REGEX_LANDMARK);
 export const primary = booleanField("primary");
 
-export const jobType = enumField("jobType",[JobType.Contract, JobType.Freelance, JobType.FullTime, JobType.Internship, JobType.PartTime]);
-export const workMode = enumField("workMode",[WorkMode.Hybrid, WorkMode.Onsite, WorkMode.Remote]);
-
 export const currentSalary = numberField("currentSalary", 0, 100000000);
 export const expectedSalary = numberField("expectedSalary", 0, 100000000);
 export const immediateJoiner = booleanField("immediateJoiner");
 export const experience = stringField("experience", 1, 100, REGEX_EXPERIENCE);
 export const currentDesignation = stringField("currentDesignation", 2, 100,REGEX_TEXT_DOT_AMP);
 export const currentCompany = stringField("currentCompany", 2, 100, REGEX_COMPANY_NAME);
-export const currentJobType = jobType;
-export const preferredJobTypes = jsonArrayParser(jobType);
-export const preferredWorkModes = jsonArrayParser(workMode);
+export const preferredJobTypes = jsonArrayParser(jobtypeSchema);
+export const preferredWorkModes = jsonArrayParser(workModeSchema);
 export const noticePeriod = z
   .coerce.number()
   .or(z.nan())
@@ -98,33 +136,23 @@ export const description = stringField("description", 10, 1000, REGEX_DESCRIPTIO
 export const priceIN = numberField("priceIN", 1, 100000000);
 export const priceUAE = numberField("priceUAE", 1, 100000000);
 export const packageType = enumField("packageType", [
-  PackageType.jobPackage,
-  PackageType.tourPackage
+  Package.jobPackage,
+  Package.tourPackage
 ]);
 export const packageDuration = numberField("packageDuration", 1, 365);
 export const features = stringArrayField("features", 1, 10, 1, 200, REGEX_FEATURE);
 
 export const food = booleanField("food");
-export const accommodation = booleanField("accommodation");
 export const travelCard = booleanField("travelCard");
+export const jobGuidance = booleanField("jobGuidance");
 export const utilityBills = booleanField("utilityBills");
 export const airportPickup = booleanField("airportPickup");
-export const jobGuidance = booleanField("jobGuidance");
+export const accommodation = booleanField("accommodation");
 
-export const customerSerialNumber = stringField("customerId", 1, 100, REGEX_ENTITY_ID);
 export const totalAmount = numberField("totalAmount", 0, 100000000);
 export const paidAmount = numberField("paidAmount", 0, 100000000);
 export const balanceAmount = numberField("balanceAmount", 0, 100000000);
-export const paymentMethod = enumField("paymentMethod", [
-  PaymentMethod.bankTransfer,
-  PaymentMethod.cash,
-  PaymentMethod.googlePay
-]);
-export const paymentStatus = enumField("paymentStatus", [
-  PaymentStatus.fullyPaid,
-  PaymentStatus.partiallyPaid,
-  PaymentStatus.pending
-]);
+export const customerSerialNumber = stringField("customerId", 1, 100, REGEX_ENTITY_ID);
 
 export const paymentDate = stringField("paymentDate", 1, 40, /^.{1,40}$/);
 export const adminNotes = stringField("adminNotes", 0, 500, /^.{0,500}$/s);

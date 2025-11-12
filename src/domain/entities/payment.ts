@@ -1,16 +1,5 @@
 import { Types } from "mongoose";
-
-export enum PaymentMethod {
-    googlePay = "googlepay",
-    bankTransfer = "banktransfer", 
-    cash = "cash"
-}
-
-export enum PaymentStatus {
-    pending = "pending",
-    partiallyPaid = "partiallypaid",
-    fullyPaid = "fullypaid"
-}
+import { PaymentMethodType, PaymentStatusType } from "../../infrastructure/zod/common.zod";
 
 export class Payment {
     constructor(
@@ -20,11 +9,11 @@ export class Payment {
         public totalAmount: number,
         public paidAmount: number,
         public balanceAmount: number,
-        public paymentMethod: PaymentMethod,
+        public paymentMethod: PaymentMethodType,
         public paymentDate: Date,
         public paymentProof: string,
         public adminNotes: string,
-        public paymentStatus: PaymentStatus,
+        public paymentStatus: PaymentStatusType,
         public createdAt: Date,
         public updatedAt: Date,
     ) { }

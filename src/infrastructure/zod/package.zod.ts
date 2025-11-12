@@ -18,21 +18,3 @@ export const createPackageSchema = z.object({
   packageDuration,
 });
 
-export const updatePackageSchema = z.object({
-  food: food.optional(),
-  image: s3FileKey.optional(),
-  features: features.optional(),
-  priceIN: priceIN.optional(),
-  priceUAE: priceUAE.optional(),
-  travelCard: travelCard.optional(),
-  description: description.optional(),
-  packageName: packageName.optional(),
-  packageType: packageType.optional(),
-  jobGuidance: jobGuidance.optional(),
-  utilityBills: utilityBills.optional(),
-  accommodation: accommodation.optional(),
-  airportPickup: airportPickup.optional(),
-  packageDuration: packageDuration.optional(),
-});
-
-

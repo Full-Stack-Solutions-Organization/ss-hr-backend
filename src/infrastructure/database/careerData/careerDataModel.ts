@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
-import { JobType, WorkMode } from "../../../domain/entities/careerData";
+import { JobType, JobtypeType, WorkMode, WorkModeType } from "../../zod/common.zod";
 import { REGEX_COMPANY_NAME, REGEX_EXPERIENCE, REGEX_INDUSTRY, REGEX_TEXT_DOT_AMP } from "../../zod/regex";
 
 export interface ICareerData extends Document {
@@ -13,9 +13,9 @@ export interface ICareerData extends Document {
   currentDesignation: string;
   currentCompany: string;
   industry: string;
-  currentJobType: JobType;
-  preferredJobTypes: JobType[];
-  preferredWorkModes: WorkMode[];
+  currentJobType: JobtypeType;
+  preferredJobTypes: JobtypeType[];
+  preferredWorkModes: WorkModeType[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { addressLine1, addressLine2, city, country, currentCompany, currentDesignation, currentJobType, currentSalary, district, email, expectedSalary, experience, fullName, genderSchema, immediateJoiner, industry, landmark, linkedInUsername, nationality, noticePeriod, phone, phoneTwo, portfolioUrl, postalCode, preferredJobTypes, preferredWorkModes, primary, professionalStatus, state, status } from './common.zod';
+import { addressLine1, addressLine2, city, country, currentCompany, currentDesignation, currentSalary, district, email, expectedSalary, experience, fullName, gender, immediateJoiner, industry, jobtypeSchema, landmark, linkedInUsername, nationality, noticePeriod, phone, phoneTwo, portfolioUrl, postalCode, preferredJobTypes, preferredWorkModes, primary, professionalStatus, state, status } from './common.zod';
 
 // user update Profile details zod schema
 export const updateUserInfoSchema = z.object({
@@ -7,10 +7,10 @@ export const updateUserInfoSchema = z.object({
   email,
   phone,
   phoneTwo,
-  genderSchema,
+  gender,
   nationality,
-  linkedInUsername,
-  portfolioUrl,
+  linkedInUsername: linkedInUsername.optional(),
+  portfolioUrl: portfolioUrl.optional(),
   dob: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), {
@@ -48,20 +48,6 @@ export const createAddressZodSchema = z.object({
   primary,
 });
 
-// User create Address zod schema
-export const updateAddressZodSchema = z.object({
-  addressLine1: addressLine1.optional(),
-  addressLine2: addressLine2.optional(),
-  city: city.optional(),
-  state: state.optional(),
-  district: district.optional(),
-  country: country.optional(),
-  postalCode: postalCode.optional(),
-  landmark: landmark.optional(),
-  primary: primary.optional(),
-});
-
-
 // User create Career Data zod schema
 export const createCareerDataSchema = z
   .object({
@@ -70,38 +56,10 @@ export const createCareerDataSchema = z
     immediateJoiner,
     noticePeriod,
     experience,
-    currentDesignation,
-    currentCompany,
-    industry,
-    currentJobType,
-    preferredJobTypes,
-    preferredWorkModes,
-  })
-  .superRefine((data, ctx) => {
-    if (
-      !data.immediateJoiner &&
-      (data.noticePeriod == null || Number.isNaN(data.noticePeriod))
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["noticePeriod"],
-        message: "Notice period is required if you are not an immediate joiner",
-      });
-    }
-  });
-
-// User update Career Data zod schema
-export const updateCareerDataSchema = z
-  .object({
-    currentSalary: currentSalary.optional(),
-    expectedSalary: expectedSalary.optional(),
-    immediateJoiner: immediateJoiner.optional(),
-    noticePeriod: noticePeriod.optional(),
-    experience: experience.optional(),
+    currentJobType: jobtypeSchema,
     currentDesignation: currentDesignation.optional(),
     currentCompany: currentCompany.optional(),
     industry: industry.optional(),
-    currentJobType: currentJobType.optional(),
     preferredJobTypes: preferredJobTypes.optional(),
     preferredWorkModes: preferredWorkModes.optional(),
   })

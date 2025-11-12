@@ -13,16 +13,3 @@ export const createJobZodSchema = z.object({
   nationality,
   jobDescription,
 });
-
-// admin update job zod schema
-export const updateJobZodSchema = z.object({
-  salary: salary.optional(),
-  skills: skills.optional(),
-  industry: industry.optional(),
-  benifits: benifits.optional(),
-  vacancy: vacancy.optional(),
-  companyName: companyName.optional(),
-  designation: designation.optional(),
-  nationality: nationality.optional(),
-  jobDescription: jobDescription.optional(),
-});

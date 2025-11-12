@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { Gender, LimitedRole } from "../../infrastructure/zod/common.zod";
+import { GenderType, LimitedRoleType } from "../../infrastructure/zod/common.zod";
 
 export class User {
   constructor(
@@ -8,7 +8,7 @@ export class User {
     public fullName: string,
     public email: string,
     public password: string,
-    public role: LimitedRole,
+    public role: LimitedRoleType,
     public phone: string,
     public phoneTwo: string,
     public profileImage: string,
@@ -16,7 +16,7 @@ export class User {
     public isVerified: boolean,
     public verificationToken: string,
     public googleId: string,
-    public gender: Gender,
+    public gender: GenderType,
     public nationality: string,
     public dob: Date,
     public linkedInUsername: string,

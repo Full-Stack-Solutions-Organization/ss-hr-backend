@@ -235,10 +235,10 @@ export class UserRepositoryImpl implements IUserRepository {
     }
   }
 
-  async deleteUserById(id: Types.ObjectId): Promise<User | null> {
+  async deleteUserById(id: Types.ObjectId): Promise<boolean> {
     try {
       const result = await UserModel.findByIdAndDelete(id);
-      return result || null;
+      return result ? true : false;
     } catch (error) {
       throw new Error("Failed to delete user.");
     }

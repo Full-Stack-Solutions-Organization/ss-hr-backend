@@ -21,11 +21,11 @@ import {
 import { appConfig, aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
-import { GoogleAuthUseCase } from "../../application/authUse-cases/googleAuthUseCase";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { AddressRepositoryImpl } from "../../infrastructure/database/address/addressRepositoryImpl";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 import { CareerDataRepositoryImpl } from "../../infrastructure/database/careerData/careerDataRepositoryImpl";
+import { JWTService } from "../../infrastructure/security/jwt";
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const addressRepositoryImpl = new AddressRepositoryImpl();
@@ -34,7 +34,6 @@ const careerDataRepositoryImpl = new CareerDataRepositoryImpl();
 
 const verifyOTPUseCase = new VerifyOTPUseCase(userRepositoryImpl);
 const resendOtpUseCase = new ResendOtpUseCase(userRepositoryImpl);
-const googleAuthUseCase = new GoogleAuthUseCase(userRepositoryImpl);
 const verifyEmailUseCase = new VerifyEmailUseCase(userRepositoryImpl);
 const updatePasswordUseCase = new UpdatePasswordUseCase(userRepositoryImpl);
 const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
@@ -50,7 +49,6 @@ export class AuthController {
     private resendOtpUseCase: ResendOtpUseCase,
     private loginUseCase: LoginUseCase,
     private checkUserStatusUseCase: CheckUserStatusUseCase,
-    private googleAuthUseCase: GoogleAuthUseCase,
     private verifyEmailUseCase: VerifyEmailUseCase,
     private updatePasswordUseCase: UpdatePasswordUseCase,
   ) {
@@ -192,9 +190,14 @@ export class AuthController {
         return res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
       }
 
-      const result = await this.googleAuthUseCase.execute(req.user as any);
+      const user = (req.user as DecodedUser);
 
-      res.cookie("token", result.token, {
+      const token = JWTService.generateToken({
+        email: user.email,
+        role: user.role
+      });
+
+      res.cookie("token", token, {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",
@@ -207,6 +210,7 @@ export class AuthController {
     } catch (error) {
       console.log("Google auth error:", error);
       const frontendUrl = appConfig.frontendUrl;
+      console.log("frontendUrl : ", frontendUrl);
       res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
     }
   }
@@ -241,7 +245,6 @@ export const authController = new AuthController(
   resendOtpUseCase,
   loginUseCase,
   checkUserStatusUseCase,
-  googleAuthUseCase,
   verifyEmailUseCase,
   updatePasswordUseCase
 );

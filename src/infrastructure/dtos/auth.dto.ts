@@ -44,15 +44,15 @@ export interface LoginResponse extends CommonResponse {
     _id?: Types.ObjectId;
     fullName: string,
     email?: string,
-    profileImage: string | null,
+    profileImage?: string,
     role: Role | LimitedRole,
     phone?: string;
     phoneTwo?: string;
     gender?: Gender;
     nationality?: string;
     dob?: Date;
-    linkedInUsername?: string | undefined;
-    portfolioUrl?: string | undefined;
+    linkedInUsername?: string;
+    portfolioUrl?: string;
   },
   token: string;
   address?: Address | null;

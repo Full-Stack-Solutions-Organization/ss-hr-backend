@@ -6,8 +6,8 @@ export interface IPackage extends Document {
   _id: Types.ObjectId;
   packageName: string;
   description: string;
-  priceIN: number;
-  priceUAE: number;
+  priceIN: string;
+  priceUAE: string;
   packageType: PackageType;
   packageDuration: number;
   features: string[];
@@ -39,16 +39,12 @@ const PackageSchema = new Schema<IPackage>({
     trim: true,
   },
   priceIN: {
-    type: Number,
+    type: String,
     required: [true, "Price in INR is required"],
-    min: [1, "Price in INR must be at least 1"],
-    max: [100000000, "Price in INR cannot exceed 100,000,000"],
   },
   priceUAE: {
-    type: Number,
+    type: String,
     required: [true, "Price in AED is required"],
-    min: [1, "Price in AED must be at least 1"],
-    max: [100000000, "Price in AED cannot exceed 100,000,000"],
   },
   packageType: {
     type: String,

@@ -21,7 +21,7 @@ const getAllPackagesUseCase = new GetAllPackagesUseCase(packageRepositoryImpl);
 const getPackagesByTypeUseCase = new GetPackagesByTypeUseCase(packageRepositoryImpl);
 const getPackageStatsUseCase = new GetPackageStatsUseCase(packageRepositoryImpl);
 
-export class PackageController {
+export class AdminPackageController {
     constructor(
         private createPackageUseCase: CreatePackageUseCase,
         private updatePackageUseCase: UpdatePackageUseCase,
@@ -119,7 +119,7 @@ export class PackageController {
     }
 }
 
-export const packageController = new PackageController(
+export const adminPackageController = new AdminPackageController(
     createPackageUseCase,
     updatePackageUseCase,
     deletePackageUseCase,

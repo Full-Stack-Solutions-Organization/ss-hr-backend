@@ -77,8 +77,8 @@ export type PaymentMethodType = z.infer<typeof paymentMethodSchema>;
 
 export enum PaymentStatus {
     pending = "pending",
-    partiallyPaid = "partiallypaid",
-    fullyPaid = "fullypaid"
+    partiallyPaid = "partiallyPaid",
+    fullyPaid = "fullyPaid"
 }
 
 export const paymentStatusSchema = z.nativeEnum(PaymentStatus);

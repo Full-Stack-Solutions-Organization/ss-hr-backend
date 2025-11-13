@@ -1,33 +1,34 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
-import { REGEX_S3_FILEKEY, REGEXT_NOTE_TEXT } from "../../zod/regex";
 import { PaymentMethod, PaymentMethodType, PaymentStatus, PaymentStatusType } from "../../zod/common.zod";
+import { REGEXT_NOTE_TEXT } from "../../zod/regex";
 
 export interface IPayment extends Document {
-  _id: Types.ObjectId;
-  userId: Types.ObjectId;
-  packageId: Types.ObjectId;
-  totalAmount: number;
-  paidAmount: number;
-  balanceAmount: number;
-  paymentMethod: PaymentMethodType;
-  paymentDate: Date;
-  paymentProof: string;
-  adminNotes: string;
-  paymentStatus: PaymentStatusType;
-  createdAt: Date;
-  updatedAt: Date;
+  _id: Types.ObjectId,
+  customerName: string,
+  packageName: string,
+  totalAmount: number,
+  paidAmount: number,
+  balanceAmount: number,
+  paymentMethod: PaymentMethodType,
+  paymentDate: Date,
+  adminNotes: string,
+  referenceId: string,
+  paymentProof: string,
+  paymentStatus: PaymentStatusType,
+  createdAt: Date,
+  updatedAt: Date,
 }
 
 const PaymentSchema = new Schema<IPayment>(
   {
-    userId: {
-      type: Schema.Types.ObjectId,
-      required: [true, "User ID is required"],
+    customerName: {
+      type: String,
+      required: [true, "Customer name is required"],
       ref: "User",
     },
-    packageId: {
-      type: Schema.Types.ObjectId,
-      required: [true, "Package ID is required"],
+    packageName: {
+      type: String,
+      required: [true, "Package name is required"],
       ref: "Package",
     },
     totalAmount: {
@@ -58,16 +59,22 @@ const PaymentSchema = new Schema<IPayment>(
       type: Date,
       required: [true, "Payment date is required"],
     },
-    paymentProof: {
-      type: String,
-      required: [true, "Payment proof is required"],
-      match: [REGEX_S3_FILEKEY, "Enter a valid S3 key for payment proof"],
-      trim: true,
-    },
     adminNotes: {
       type: String,
       maxlength: [500, "Admin notes must be at most 500 characters"],
       match: [REGEXT_NOTE_TEXT, "Admin notes contain invalid characters"],
+      trim: true,
+      default: null,
+    },
+    referenceId: {
+      type: String,
+      maxlength: [500, "Reference must be at most 500 characters"],
+      trim: true,
+      default: null,
+    },
+    paymentProof: {
+      type: String,
+      maxlength: [600, "Payment proof must be at most 500 characters"],
       trim: true,
       default: null,
     },

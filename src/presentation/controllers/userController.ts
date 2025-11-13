@@ -88,7 +88,8 @@ class UserController {
             const result = await this.userCreateApplicationUseCase.execute({
                 jobId: new Types.ObjectId(validatedParams.id),
                 userId: new Types.ObjectId(userId)
-            })
+            });
+            console.log("result : ",result);
             res.status(200).json(result);
         } catch (error) {
             console.log("applyJob error : ", error);

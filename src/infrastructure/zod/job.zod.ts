@@ -3,13 +3,13 @@ import { benifits, companyName, designation, industry, jobDescription, nationali
 
 // admin create job zod schema
 export const createJobZodSchema = z.object({
-  salary,
-  skills,
-  industry,
-  benifits,
-  vacancy,
   companyName,
   designation,
-  nationality,
+  industry,
   jobDescription,
+  benifits,
+  salary,
+  skills,
+  nationality,
+  vacancy,
 });

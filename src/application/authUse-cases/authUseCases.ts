@@ -203,6 +203,7 @@ export class LoginUseCase {
           linkedInUsername: user.linkedInUsername,
           portfolioUrl: user.portfolioUrl,
           resume: resumeSignedUrl,
+          professionalStatus: user.professionalStatus
         },
         token,
         address: userAddress ?? null,

@@ -15,8 +15,9 @@ import adminChatRouter from './presentation/routes/adminChatRouter';
 import adminUsersRouter from './presentation/routes/adminUserRouter';
 import adminPaymentRouter from "./presentation/routes/adminPaymentRouter";
 import adminPackageRouter from "./presentation/routes/adminPackageRouter";
-import adminSettingsRouter from './presentation/routes/adminSettingsRouter';
+// import adminSettingsRouter from './presentation/routes/adminSettingsRouter';
 import adminTestimonialRouter from './presentation/routes/adminTestimonialRouter';
+import adminApplicationRouter from './presentation/routes/adminApplicationRouter';
 
 const app = express();
 
@@ -47,11 +48,12 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 app.use('/api/auth', authRouter);
-app.use("/api/admin/settings", adminSettingsRouter);
+// app.use("/api/admin/settings", adminSettingsRouter);
 app.use('/api/admin/jobs', adminJobRouter);
 app.use('/api/admin/chat', adminChatRouter);
 app.use('/api/admin/users', adminUsersRouter);
 app.use("/api/admin/testimonials", adminTestimonialRouter);
+app.use("/api/admin/applications", adminApplicationRouter);
 app.use('/api/admin/packages', adminPackageRouter);
 app.use('/api/admin/payments', adminPaymentRouter);
 app.use('/api/message', messageRouter);

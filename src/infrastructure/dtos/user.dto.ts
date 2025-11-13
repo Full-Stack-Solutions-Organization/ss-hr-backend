@@ -27,12 +27,12 @@ export interface CreateUserByAdminResponse {
 
 export interface UpdateUserRequest {
   _id: Types.ObjectId;
-  fullName?: string;
-  email?: string;
-  phone?: string;
-  phoneTwo?: string;
-  isBlocked?: boolean;
-  isVerified?: boolean;
+  fullName: string;
+  email: string;
+  phone: string;
+  phoneTwo: string;
+  isBlocked: boolean;
+  isVerified: boolean;
 }
 
 export interface UpdateUserResponse {
@@ -65,14 +65,11 @@ export interface GetUserByIdResponse {
     serialNumber: string;
     fullName: string;
     email: string;
-    role: User["role"];
     phone: string;
     phoneTwo: string;
-    profileImage: string;
     isBlocked: boolean;
     isVerified: boolean;
     createdAt: Date;
-    updatedAt: Date;
   };
 }
 
@@ -118,4 +115,3 @@ export type UserFetchAllApplicationsResponse = Array<{
   updatedAt: Application["updatedAt"];
   status: Application["status"];
 } & UserFetchApplicationsJobFields>;
-

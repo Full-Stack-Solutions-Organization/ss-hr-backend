@@ -1,15 +1,15 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/authMiddleware";
-import { packageController } from "../controllers/packageController";
+import { adminPackageController } from "../controllers/adminPackageController";
 
 const router = Router();
 
-router.post("/", authMiddleware, packageController.createPackage);
-router.get("/", authMiddleware, packageController.getAllPackages);
-router.get("/stats", authMiddleware, packageController.getPackageStats);
-router.get("/type/:type", authMiddleware, packageController.getPackagesByType);
-router.get("/:id", authMiddleware, packageController.getPackageById);
-router.put("/:id", authMiddleware, packageController.updatePackage);
-router.delete("/:id", authMiddleware, packageController.deletePackage);
+router.post("/", authMiddleware, adminPackageController.createPackage);
+router.get("/", authMiddleware, adminPackageController.getAllPackages);
+router.get("/stats", authMiddleware, adminPackageController.getPackageStats);
+router.get("/type/:type", authMiddleware, adminPackageController.getPackagesByType);
+router.get("/:id", authMiddleware, adminPackageController.getPackageById);
+router.put("/:id", authMiddleware, adminPackageController.updatePackage);
+router.delete("/:id", authMiddleware, adminPackageController.deletePackage);
 
 export default router;

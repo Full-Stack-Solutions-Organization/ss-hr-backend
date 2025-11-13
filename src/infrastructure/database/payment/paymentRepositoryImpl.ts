@@ -8,15 +8,16 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
   private mapToEntity(payment: IPayment): Payment {
     return new Payment(
       payment._id,
-      payment.userId,
-      payment.packageId,
+      payment.customerName,
+      payment.packageName,
       payment.totalAmount,
       payment.paidAmount,
       payment.balanceAmount,
       payment.paymentMethod,
       payment.paymentDate,
-      payment.paymentProof,
       payment.adminNotes,
+      payment.referenceId,
+      payment.paymentProof,
       payment.paymentStatus,
       payment.createdAt,
       payment.updatedAt,
@@ -25,7 +26,6 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
 
   async createPayment(paymentData: CreatePayment): Promise<Payment> {
     try {
-      // Calculate balance amount and status before creation
       const balanceAmount = paymentData.totalAmount - paymentData.paidAmount;
       let status = "pending";
 
@@ -53,27 +53,9 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
     try {
       const skip = (page - 1) * limit;
       const [payments, totalCount] = await Promise.all([
-        PaymentModel.find(
-          {},
-          {
-            _id: 1,
-            customerId: 1,
-            packageId: 1,
-            customerName: 1,
-            packageName: 1,
-            totalAmount: 1,
-            paidAmount: 1,
-            balanceAmount: 1,
-            paymentMethod: 1,
-            paymentDate: 1,
-            referenceId: 1,
-            paymentProof: 1,
-            adminNotes: 1,
-            status: 1,
-            createdAt: 1,
-            updatedAt: 1,
-          }
-        )
+        PaymentModel.find({}, {
+          _id: 1, customerName: 1, packageName: 1, totalAmount: 1, paidAmount: 1, balanceAmount: 1, paymentStatus: 1
+        })
           .skip(skip)
           .limit(limit)
           .sort({ createdAt: -1 })
@@ -135,25 +117,7 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
       const skip = (page - 1) * limit;
       const [payments, totalCount] = await Promise.all([
         PaymentModel.find(
-          { customerId },
-          {
-            _id: 1,
-            customerId: 1,
-            packageId: 1,
-            customerName: 1,
-            packageName: 1,
-            totalAmount: 1,
-            paidAmount: 1,
-            balanceAmount: 1,
-            paymentMethod: 1,
-            paymentDate: 1,
-            referenceId: 1,
-            paymentProof: 1,
-            adminNotes: 1,
-            status: 1,
-            createdAt: 1,
-            updatedAt: 1,
-          }
+          { customerId }
         )
           .skip(skip)
           .limit(limit)
@@ -179,25 +143,7 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
       const skip = (page - 1) * limit;
       const [payments, totalCount] = await Promise.all([
         PaymentModel.find(
-          { packageId },
-          {
-            _id: 1,
-            customerId: 1,
-            packageId: 1,
-            customerName: 1,
-            packageName: 1,
-            totalAmount: 1,
-            paidAmount: 1,
-            balanceAmount: 1,
-            paymentMethod: 1,
-            paymentDate: 1,
-            referenceId: 1,
-            paymentProof: 1,
-            adminNotes: 1,
-            status: 1,
-            createdAt: 1,
-            updatedAt: 1,
-          }
+          { packageId }
         )
           .skip(skip)
           .limit(limit)
@@ -223,25 +169,7 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
       const skip = (page - 1) * limit;
       const [payments, totalCount] = await Promise.all([
         PaymentModel.find(
-          { status },
-          {
-            _id: 1,
-            customerId: 1,
-            packageId: 1,
-            customerName: 1,
-            packageName: 1,
-            totalAmount: 1,
-            paidAmount: 1,
-            balanceAmount: 1,
-            paymentMethod: 1,
-            paymentDate: 1,
-            referenceId: 1,
-            paymentProof: 1,
-            adminNotes: 1,
-            status: 1,
-            createdAt: 1,
-            updatedAt: 1,
-          }
+          { status }
         )
           .skip(skip)
           .limit(limit)

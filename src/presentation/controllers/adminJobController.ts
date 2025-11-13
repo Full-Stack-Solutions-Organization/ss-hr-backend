@@ -1,10 +1,10 @@
 import { Types } from "mongoose";
 import { Request, Response } from "express";
 import { HandleError } from "../../infrastructure/error/error";
-import { createJobZodSchema, updateJobZodSchema} from "../../infrastructure/zod/job.zod";
+import { createJobZodSchema } from "../../infrastructure/zod/job.zod";
 import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
 import { paginationReqQuery, ValidateObjectId } from "../../infrastructure/zod/common.zod";
-import {CreateJobUseCase, DeleteJobUseCase, GetAllJobsUseCase, GetJobByIdUseCase, UpdateJobUseCase} from "../../application/adminUse-cases/adminJob.useCases";
+import {CreateJobUseCase, DeleteJobUseCase, GetAllJobsUseCase, GetJobByIdUseCase, UpdateJobUseCase} from "../../application/adminUse-cases/adminJobUseCases";
 
 const jobRepositoryImpl = new JobRepositoryImpl();
 const createJobUseCase = new CreateJobUseCase(jobRepositoryImpl);
@@ -66,7 +66,7 @@ export class AdminJobController {
     try {
       const { id } = req.params;
       const { id: jobId } = ValidateObjectId(id, "Job Id");
-      const validatedData = updateJobZodSchema.parse(req.body);
+      const validatedData = createJobZodSchema.parse(req.body);
       const result = await this.updateJobUseCase.execute({jobId: new Types.ObjectId(jobId), updatedData: validatedData});
       res.status(200).json(result);
     } catch (error) {

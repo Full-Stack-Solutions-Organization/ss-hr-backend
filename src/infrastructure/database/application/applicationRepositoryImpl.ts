@@ -1,9 +1,10 @@
+import { Types } from "mongoose";
 import { Application } from "../../../domain/entities/application";
 import { ApplicationModel, IApplication } from "./applicationModel";
-import { IApplicationRepository } from "../../../domain/repositories/IApplicationRepository";
-import { UserCreateApplicationRequest, UserFetchAllApplicationsResponse, UserFetchApplicationsJobFields, UserUpdateApplicationRequest } from "../../dtos/user.dto";
-import { Types } from "mongoose";
 import { ApiPaginationRequest, ApiResponse } from "../../dtos/common.dts";
+import { IApplicationRepository } from "../../../domain/repositories/IApplicationRepository";
+import { AdminFetchAllApplicationsResponse, AdminFetchApplicationDetailsRequest, AdminFetchApplicationDetailsResponse, adminfetchApplicationJobDetailFields, adminFetchApplicationsJobFields, adminFetchApplicationUserDetails } from "../../dtos/admin.dtos";
+import { UserCreateApplicationRequest, UserFetchAllApplicationsResponse, UserFetchApplicationsJobFields, UserUpdateApplicationRequest } from "../../dtos/user.dto";
 
 export class ApplicationRepositoryImpl implements IApplicationRepository {
 
@@ -45,7 +46,7 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
             const { page, limit } = data;
             const [applications, totalCount] = await Promise.all([
                 ApplicationModel.find({ userId })
-                    .populate<{jobId: UserFetchApplicationsJobFields}>("jobId")
+                    .populate<{ jobId: UserFetchApplicationsJobFields }>("jobId")
                     .skip((page - 1) * limit)
                     .limit(limit),
                 ApplicationModel.countDocuments({ userId })
@@ -67,6 +68,104 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
             };
         } catch (error) {
             throw new Error("Failed to fetch applications")
+        }
+    }
+
+    async adminFindAllApplications(data: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllApplicationsResponse>> {
+        try {
+            const { page, limit } = data;
+            const [applications, totalCount] = await Promise.all([
+                ApplicationModel.find({})
+                    .populate<{ jobId: adminFetchApplicationsJobFields }>("jobId")
+                    .skip((page - 1) * limit)
+                    .limit(limit),
+                ApplicationModel.countDocuments()
+            ]);
+
+            const totalPages = Math.ceil(totalCount / limit);
+
+            return {
+                data: applications.map(application => ({
+                    _id: application._id,
+                    updatedAt: application.updatedAt,
+                    status: application.status,
+                    jobId: application.jobId._id,
+                    designation: application.jobId.designation,
+                    companyName: application.jobId.companyName
+                })),
+                totalPages,
+                currentPage: page,
+                totalCount
+            }
+        } catch (error) {
+            throw new Error("Failed to fetch applications");
+        }
+    }
+
+    async adminFetchApplicationDetails(data: AdminFetchApplicationDetailsRequest): Promise<AdminFetchApplicationDetailsResponse> {
+        try {
+            const application = await ApplicationModel.findById(data._id)
+                .select("createdAt updatedAt status")
+                .populate<{ jobId: adminfetchApplicationJobDetailFields }>({
+                    path: "jobId",
+                    select:
+                        "designation companyName vacancy createdAt benifits industry jobDescription nationality salary skills",
+                })
+                .populate<{ userId: adminFetchApplicationUserDetails }>({
+                    path: "userId",
+                    select:
+                        "fullName email dob gender linkedInUsername nationality phone serialNumber portfolioUrl profileImage phoneTwo professionalStatus resume",
+                });
+
+            if (!application) throw new Error("Application not found");
+
+            const result: AdminFetchApplicationDetailsResponse = {
+                createdAt: application.createdAt,
+                updatedAt: application.updatedAt,
+                status: application.status,
+                jobId: {
+                    designation: application.jobId?.designation,
+                    companyName: application.jobId?.companyName,
+                    vacancy: application.jobId?.vacancy,
+                    benifits: application.jobId?.benifits,
+                    industry: application.jobId?.industry,
+                    jobDescription: application.jobId?.jobDescription,
+                    nationality: application.jobId?.nationality,
+                    salary: application.jobId?.salary,
+                    skills: application.jobId?.skills,
+                    createdAt: application.jobId?.createdAt,
+                },
+                userId: {
+                    fullName: application.userId?.fullName,
+                    email: application.userId?.email,
+                    dob: application.userId?.dob,
+                    gender: application.userId?.gender,
+                    linkedInUsername: application.userId?.linkedInUsername,
+                    phone: application.userId?.phone,
+                    serialNumber: application.userId?.serialNumber,
+                    portfolioUrl: application.userId?.portfolioUrl,
+                    profileImage: application.userId?.profileImage,
+                    phoneTwo: application.userId?.phoneTwo,
+                    professionalStatus: application.userId?.professionalStatus,
+                    nationality: application.userId?.nationality,
+                    resume: application.userId?.resume,
+                }
+            };
+            return result
+        } catch (error) {
+            throw new Error("Failed to fetch application details");
+        }
+    }
+
+    async findApplicationByUserIdWithApplicationId(data: UserCreateApplicationRequest): Promise<Application | null> {
+        try {
+            const application = await ApplicationModel.findOne({
+                jobId: data.jobId,
+                userId:  data.userId
+            });
+            return application ? this.mapToEntity(application) : null;
+        } catch (error) {
+            throw new Error("Failed to fetch application");
         }
     }
 

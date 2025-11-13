@@ -26,30 +26,15 @@ export class CreateTestimonialUseCase {
     try {
       const { clientName, clientPhoto, designation, testimonial } = data;
 
-      const isValidFile = validateFile(clientPhoto);
-      if (!isValidFile) throw new Error("Invalid profile image file");
-
-      let clientProfileImage: string = "";
-      if(clientPhoto) { 
-        clientProfileImage = await this.fileUploadService.uploadFile({
-          folder: "ss-hr-testimonial",
-          userId: "user",
-          file: clientPhoto,
-        });
-      }
-
       const createdTestimonial = await this.testimonialRepository.createTestimonial({
         clientName,
-        clientPhoto: clientProfileImage,
+        clientPhoto,
         designation,
         testimonial,
       });
 
       if(!createdTestimonial) throw new Error("Testimonial adding failed");
 
-      const signedUrl = await this.signedUrlService.generateSignedUrl(
-                createdTestimonial.clientPhoto
-            );
 
       return {
         success: true,
@@ -57,7 +42,7 @@ export class CreateTestimonialUseCase {
         testimonial: {
           _id: createdTestimonial._id,
           clientName: createdTestimonial.clientName,
-          clientPhoto: signedUrl,
+          clientPhoto: createdTestimonial.clientName,
           designation: createdTestimonial.designation,
           testimonial: createdTestimonial.testimonial,
         },
@@ -82,24 +67,9 @@ export class UpdateTestimonialUseCase {
       const existingTestimonial = await this.testimonialRepository.findTestimonialById(_id);
       if (!existingTestimonial) throw new Error("Testimonial not found");
 
-      if (clientPhoto) {
-        if (existingTestimonial.clientPhoto) {
-          const response = await this.fileDeleteService.deleteFile(existingTestimonial.clientPhoto);
-          if (!response) throw new Error("Old profile image deletion failed");
-        }
-
-        const isValidFile = validateFile(clientPhoto);
-        if (!isValidFile) throw new Error("Invalid profile image file");
-
-        existingTestimonial.clientPhoto = await this.fileUploadService.uploadFile({
-          folder: "ss-hr-testimonial",
-          userId: "user",
-          file: clientPhoto,
-        });
-      }
-
       existingTestimonial.clientName = clientName || existingTestimonial.clientName;
       existingTestimonial.designation = designation || existingTestimonial.designation;
+      existingTestimonial.clientPhoto = clientPhoto || existingTestimonial.clientPhoto;
       existingTestimonial.isVisible = isVisible ?? existingTestimonial.isVisible;
       existingTestimonial.testimonial = testimonial || existingTestimonial.testimonial;
 
@@ -131,11 +101,6 @@ export class DeleteTestimonialUseCase {
       const existingTestimonial = await this.testimonialRepository.findTestimonialById(testimonialId);
       if (!existingTestimonial) throw new Error("Testimonial not found");
 
-      if(existingTestimonial.clientPhoto) {
-         const response = await this.fileDeleteService.deleteFile(existingTestimonial.clientPhoto);
-          if (!response) throw new Error("Old textimonial profile image failed");
-      }
-
       const deleted = await this.testimonialRepository.deleteTestimonial(testimonialId);
       if (!deleted) throw new Error("Failed to delete testimonial");
 
@@ -159,17 +124,13 @@ export class GetTestimonialByIdUseCase {
       const testimonial = await this.testimonialRepository.findTestimonialById(testimonialId);
       if (!testimonial) throw new Error("Testimonial not found");
 
-      const signedUrl = await this.signedUrlService.generateSignedUrl(
-                testimonial.clientPhoto
-            );
-
       return {
         success: true,
         message: "Testimonial retrieved successfully",
         testimonial: {
           _id: testimonial._id,
           clientName: testimonial.clientName,
-          clientPhoto: signedUrl,
+          clientPhoto: testimonial.clientPhoto,
           designation: testimonial.designation,
           testimonial: testimonial.testimonial,
           isVisible: testimonial.isVisible,

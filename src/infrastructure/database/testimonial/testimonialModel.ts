@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
-import { REGEX_CLIENT_NAME, REGEX_S3_FILEKEY, REGEX_TESTIMONIAL, REGEX_TEXT_DOT_AMP } from "../../zod/regex";
+import { REGEX_CLIENT_NAME, REGEX_TESTIMONIAL, REGEX_TEXT_DOT_AMP } from "../../zod/regex";
 
 export interface ITestimonial extends Document {
   _id: Types.ObjectId;
@@ -26,8 +26,7 @@ const TestimonialSchema = new Schema<ITestimonial>(
     clientPhoto: {
       type: String,
       minlength: [1, "Client photo must be at least 1 characters"],
-      maxlength: [500, "Client photo must be at most 500 characters"],
-      match: [REGEX_S3_FILEKEY, "Invalid s3 file key for resume"],
+      maxlength: [600, "Client photo must be at most 500 characters"],
     },
 
     designation: {

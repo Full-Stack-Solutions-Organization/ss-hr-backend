@@ -37,7 +37,7 @@ export class JobRepositoryImpl implements IJobRepository {
   async adminFindAllJobs({ page, limit }: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllJobs>> {
     try {
       const adminGetAllJobsProject = {
-        _id: 1, 
+        _id: 1,
         companyName: 1,
         industry: 1,
         vacancy: 1,
@@ -128,7 +128,8 @@ export class JobRepositoryImpl implements IJobRepository {
                     $expr: {
                       $and: [
                         { $eq: ["$jobId", "$$jobId"] },
-                        { $eq: ["$userId", userId] }
+                        { $eq: ["$userId", userId] },
+                        { $eq: ["$status", true] }
                       ]
                     }
                   }

@@ -54,6 +54,7 @@ export interface LoginResponse extends CommonResponse {
     linkedInUsername?: string;
     portfolioUrl?: string;
     resume?: string;
+    professionalStatus?: string;
   },
   token: string;
   address?: Address | null;

@@ -34,7 +34,7 @@ const getAllTestimonialsUseCase = new GetAllTestimonialsUseCase(testimonialRepos
 const updateTestimonialUseCase = new UpdateTestimonialUseCase(testimonialRepositoryImpl, fileUploadService, fileDeleteService);
 const createTestimonialUseCase = new CreateTestimonialUseCase(testimonialRepositoryImpl, fileUploadService, signedUrlService);
 
-export class TestimonialController {
+export class AdminTestimonialController {
     constructor(
         private createTestimonialUseCase: CreateTestimonialUseCase,
         private updateTestimonialUseCase: UpdateTestimonialUseCase,
@@ -53,13 +53,8 @@ export class TestimonialController {
 
     async createTestimonial(req: Request, res: Response) {
         try {
-            const { clientName, designation, testimonial } = req.body;
-            const result = await this.createTestimonialUseCase.execute({
-                clientName,
-                designation,
-                testimonial,
-                clientPhoto: req.file
-            });
+            console.log("req.body : ",req.body);
+            const result = await this.createTestimonialUseCase.execute(req.body);
             return res.status(201).json(result);
         } catch (error) {
             console.log("createTestimonial error : ", error);
@@ -69,7 +64,7 @@ export class TestimonialController {
 
     async updateTestimonial(req: Request, res: Response) {
         try {
-            const { clientName, designation, isVisible, testimonial } = req.body;
+            const { clientName, designation, isVisible, testimonial, clientPhoto } = req.body;
             const testimonialId = new Types.ObjectId(req.params.id);
             const result = await this.updateTestimonialUseCase.execute({
                 _id: testimonialId,
@@ -77,7 +72,7 @@ export class TestimonialController {
                 designation,
                 isVisible,
                 testimonial,
-                clientPhoto: req.file
+                clientPhoto
             });
             return res.status(200).json(result);
         } catch (error) {
@@ -131,7 +126,7 @@ export class TestimonialController {
     }
 }
 
-export const testimonialController = new TestimonialController(
+export const adminTestimonialController = new AdminTestimonialController(
     createTestimonialUseCase,
     updateTestimonialUseCase,
     deleteTestimonialUseCase,

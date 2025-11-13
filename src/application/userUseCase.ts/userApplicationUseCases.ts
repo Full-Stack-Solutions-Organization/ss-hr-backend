@@ -15,36 +15,51 @@ export class UserCreateApplicationUseCase {
 
     async execute(data: UserCreateApplicationRequest): Promise<ApiResponse<UserCreateOrUpdateApplicationResponse>> {
         try {
-
             const userDetails = await this.userRepositoryImpl.findUserById(data.userId);
+            if (!userDetails) throw new Error("User not found.");
 
-            if(userDetails?.isBlocked) {
-                throw new Error("Your account has been blocked.");
+            if (userDetails.isBlocked) throw new Error("Your account has been blocked.");
+            if (!userDetails.isVerified) throw new Error("Your account is not verified.");
+
+            const requiredFields = [
+                userDetails.phone,
+                userDetails.phoneTwo,
+                userDetails.resume,
+                userDetails.gender,
+                userDetails.nationality,
+                userDetails.dob,
+                userDetails.professionalStatus
+            ];
+            if (requiredFields.some(field => !field)) {
+                throw new Error("Please complete your profile details before applying to jobs.");
             }
-            
-            if(!userDetails?.isVerified) {
-                throw new Error("You account is not verified");
-            }
 
-            if(!userDetails?.phone || !userDetails.phoneTwo || !userDetails.resume || userDetails.gender || 
-                !userDetails.nationality || !userDetails.dob || !userDetails.professionalStatus) {
-                    throw new Error("Please complete your profile details before applying to jobs.");
-                }
-
-
-            
             const userAddress = await this.addressRepositoryImpl.findAddressesByUserId(data.userId);
-            if(!userAddress) throw new Error("Please save your address before applying to jobs.");
+            if (!userAddress || !userAddress) {
+                throw new Error("Please save your address before applying to jobs.");
+            }
 
-            const application = await this.applicationRepositoryImpl.createApplication(data);
-            if (!application) throw new Error("Failed to save application");
+            let application = await this.applicationRepositoryImpl.findApplicationByUserIdWithApplicationId(data);
+
+            if (application) {
+                if (!application.status) {
+                    application.status = true;
+                    await this.applicationRepositoryImpl.updateApplication(application);
+                }
+            } else {
+                application = await this.applicationRepositoryImpl.createApplication(data);
+                if (!application) throw new Error("Failed to save application.");
+            }
 
             return {
-                success: true, message: "Your application has been saved.", data: {
+                success: true,
+                message: "Your application has been saved.",
+                data: {
                     jobId: application.jobId,
                     status: application.status
                 }
             };
+
 
         } catch (error) {
             console.log("UserCreateApplicationUseCase error : ", error);
@@ -65,23 +80,21 @@ export class UserUpdateApplicationUseCase {
 
             const userDetails = await this.userRepositoryImpl.findUserById(data.userId);
 
-            if(userDetails?.isBlocked) {
+            if (userDetails?.isBlocked) {
                 throw new Error("Your account has been blocked.");
             }
-            
-            if(!userDetails?.isVerified) {
+
+            if (!userDetails?.isVerified) {
                 throw new Error("You account is not verified");
             }
 
-            if(!userDetails?.phone || !userDetails.phoneTwo || !userDetails.resume || userDetails.gender || 
+            if (!userDetails?.phone || !userDetails.phoneTwo || !userDetails.resume || !userDetails.gender ||
                 !userDetails.nationality || !userDetails.dob || !userDetails.professionalStatus) {
-                    throw new Error("Please complete your profile details before applying to jobs.");
-                }
+                throw new Error("Please complete your profile details before applying to jobs.");
+            }
 
-
-            
             const userAddress = await this.addressRepositoryImpl.findAddressesByUserId(data.userId);
-            if(!userAddress) throw new Error("Please save your address before applying to jobs.");
+            if (!userAddress) throw new Error("Please save your address before applying to jobs.");
 
             const updatedApplication = await this.applicationRepositoryImpl.updateApplication(data);
             if (!updatedApplication) throw new Error("Failed to update application");
@@ -109,8 +122,8 @@ export class UserFetchAllApplicationsUseCase {
     async execute(data: ApiPaginationRequest, userId: Types.ObjectId): Promise<ApiResponse<UserFetchAllApplicationsResponse>> {
         try {
             const result = await this.applicationRepositoryImpl.userFindAllApplications(data, userId);
-            if(!result) throw new Error("Failed to fetch applications");
-            return{
+            if (!result) throw new Error("Failed to fetch applications");
+            return {
                 success: true,
                 message: "Applications",
                 currentPage: result.currentPage,

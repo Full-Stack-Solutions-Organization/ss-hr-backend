@@ -25,7 +25,7 @@ const getPaymentsByPackageUseCase = new GetPaymentsByPackageUseCase(paymentRepos
 const getPaymentsByStatusUseCase = new GetPaymentsByStatusUseCase(paymentRepositoryImpl);
 const getPaymentStatsUseCase = new GetPaymentStatsUseCase(paymentRepositoryImpl);
 
-export class PaymentController {
+export class AdminPaymentController {
     constructor(
         private createPaymentUseCase: CreatePaymentUseCase,
         private updatePaymentUseCase: UpdatePaymentUseCase,
@@ -50,6 +50,7 @@ export class PaymentController {
 
     async createPayment(req: Request, res: Response) {
         try {
+            console.log("req.body : ",req.body);
             const result = await this.createPaymentUseCase.execute(req.body);
             return res.status(201).json(result);
         } catch (error) {
@@ -60,6 +61,7 @@ export class PaymentController {
 
     async updatePayment(req: Request, res: Response) {
         try {
+            console.log("req.body : ",req.body);
             const paymentId = new Types.ObjectId(req.params.id);
             const result = await this.updatePaymentUseCase.execute({ _id: paymentId, ...req.body });
             return res.status(200).json(result);
@@ -153,7 +155,7 @@ export class PaymentController {
     }
 }
 
-export const paymentController = new PaymentController(
+export const adminPaymentController = new AdminPaymentController(
     createPaymentUseCase,
     updatePaymentUseCase,
     deletePaymentUseCase,

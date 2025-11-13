@@ -35,14 +35,11 @@ export class CreateAdminUseCase {
                 });
             }
 
-            const serialNumber: string = await this.userRepositoryImpl.generateNextSerialNumber();
-
             password = await PasswordHasher.hashPassword(password);
             const adminData = { fullName, email, password, phone, role }
 
             const createdAdmin = await this.userRepositoryImpl.createUser<CreateAdmin>({
                 ...adminData,
-                serialNumber,
                 profileImage: profileImageUrl,
                 isVerified: true,
             });

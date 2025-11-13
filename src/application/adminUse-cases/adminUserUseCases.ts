@@ -24,13 +24,10 @@ export class CreateUserByAdminUseCase {
       if (existingUser) throw new Error("User already exists with this email");
 
       const hashedPassword = await PasswordHasher.hashPassword(password);
-      
-      const serialNumber = await this.userRepository.generateNextSerialNumber();
-      
+            
       const createdUser = await this.userRepository.createUser<CreateLocalUserByAdmin>({
         fullName,
         email,
-        serialNumber,
         password: hashedPassword,
         role,
         phone: phone || "",

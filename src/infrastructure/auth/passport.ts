@@ -37,7 +37,6 @@ if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret
           }
 
           const verificationToken = uuidv4();
-          const serialNumber = await userRepositoryImpl.generateNextSerialNumber();
       
             const user: CreateGoogleUser = { 
               email,
@@ -46,7 +45,6 @@ if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret
               isVerified: true,
               role: LimitedRole.User,
               verificationToken,
-              serialNumber,
             };
       
             const newUser = await userRepositoryImpl.createUser<CreateGoogleUser>(user);

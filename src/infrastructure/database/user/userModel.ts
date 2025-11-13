@@ -1,3 +1,4 @@
+import { CounterModel } from "../counter/counterModel";
 import mongoose, { Document, Schema, Types } from "mongoose";
 import { Gender, GenderType, LimitedRole, LimitedRoleType } from "../../zod/common.zod";
 import { REGEX_EMAIL, REGEX_FULL_NAME, REGEX_HASHED_PASSWORD, REGEX_NATIONALITY, REGEX_PHONE, REGEX_PROFESSIONAL_STATUS, REGEX_S3_FILEKEY, REGEX_URL, REGEX_USERNAME } from "../../zod/regex";
@@ -32,7 +33,6 @@ const UserSchema = new Schema<IUser>(
     serialNumber: {
       type: String,
       unique: true,
-      required: [true, "Serial number is required"],
     },
 
     fullName: {
@@ -50,17 +50,17 @@ const UserSchema = new Schema<IUser>(
       unique: true,
       trim: true,
       lowercase: true,
-      match: [REGEX_EMAIL, "Enter a valid email address"],
+      match: [REGEX_EMAIL,"Enter a valid email address"],
     },
 
     password: {
       type: String,
       required: function (this: IUser) {
-        return !this.googleId;
-      },
+    return !this.googleId;
+  },
       minlength: [8, "Password must be at least 8 characters"],
       maxlength: [100, "Password must be at most 100 characters"],
-      match: [REGEX_HASHED_PASSWORD, "Invalid password"],
+      match: [REGEX_HASHED_PASSWORD,"Invalid password"],
     },
 
     role: {
@@ -87,7 +87,7 @@ const UserSchema = new Schema<IUser>(
       default: null,
       minlength: [7, "Phone number must be at least 7 characters"],
       maxlength: [20, "Phone number must be at most 20 characters"],
-      match: [REGEX_PHONE, "Enter a valid phone number"],
+      match: [REGEX_PHONE,"Enter a valid phone number"],
     },
 
     phoneTwo: {
@@ -95,7 +95,7 @@ const UserSchema = new Schema<IUser>(
       default: null,
       minlength: [7, "Phone number must be at least 7 characters"],
       maxlength: [20, "Phone number must be at most 20 characters"],
-      match: [REGEX_PHONE, "Enter a valid phone number"],
+      match: [REGEX_PHONE,"Enter a valid phone number"],
     },
 
     profileImage: {
@@ -103,7 +103,7 @@ const UserSchema = new Schema<IUser>(
       default: null,
       minlength: [1, "s3 key must be at least 1 character"],
       maxlength: [500, "s3 key must be at most 500 characters"],
-      match: [REGEX_S3_FILEKEY, "Enter a valid s3 key for profile image"]
+      match: [REGEX_S3_FILEKEY,"Enter a valid s3 key for profile image"]
     },
 
     verificationToken: {
@@ -116,7 +116,6 @@ const UserSchema = new Schema<IUser>(
     googleId: {
       type: String,
       default: null,
-      sparse: true,
       minlength: [1, "googleId must be at least 1 character"],
       maxlength: [500, "googleId must be at most 500 characters"],
     },
@@ -152,7 +151,7 @@ const UserSchema = new Schema<IUser>(
       trim: true,
       minlength: [9, "Portfolio URL must be at least 9 characters"],
       maxlength: [250, "Portfolio URL must be at most 250 characters"],
-      match: [REGEX_URL, "Enter a valid portfolio URL (must start with http:// or https://)"],
+      match: [REGEX_URL,"Enter a valid portfolio URL (must start with http:// or https://)"],
       default: null,
     },
 
@@ -175,7 +174,7 @@ const UserSchema = new Schema<IUser>(
       trim: true,
       minlength: [4, "Professional status must be at least 4 characters"],
       maxlength: [50, "Professional status must be at most 50 characters"],
-      match: [REGEX_PROFESSIONAL_STATUS, "Enter a valid professional status"],
+      match: [REGEX_PROFESSIONAL_STATUS,"Enter a valid professional status"],
       default: null,
     },
   },
@@ -184,5 +183,24 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
+UserSchema.pre<IUser>("save", async function (next) {
+  if (!this.serialNumber) {
+    try {
+      const counter = await CounterModel.findOneAndUpdate(
+        { name: "job" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true } 
+      );
+
+      const seqNumber = counter.seq.toString().padStart(6, "1");
+      this.serialNumber = `SH-${seqNumber}`;
+      next();
+    } catch (error) {
+      next(error as Error);
+    }
+  } else {
+    next();
+  }
+});
 
 export const UserModel = mongoose.model<IUser>("User", UserSchema);

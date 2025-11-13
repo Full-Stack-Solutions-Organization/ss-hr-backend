@@ -34,8 +34,6 @@ export class RegisterUseCase {
       const verificationToken = uuidv4();
       if (!verificationToken) throw new Error("Unexpected error, please try again.");
 
-      const serialNumber: string = await this.userRepositoryImpl.generateNextSerialNumber();
-
       const otp = await OTPService.setOtp(verificationToken);
       if (!otp) throw new Error("Unexpected error, please try again.");
 
@@ -52,7 +50,6 @@ export class RegisterUseCase {
           password: hashedPassword,
           verificationToken: verificationToken,
           role: role,
-          serialNumber: serialNumber
         });
       }
 

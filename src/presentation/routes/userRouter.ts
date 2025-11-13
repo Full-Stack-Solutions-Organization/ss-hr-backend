@@ -25,6 +25,8 @@ router.get("/testimonials", authMiddleware, userController.getTestimonilas);
 
 router.get('/jobs', authMiddleware, userController.getAllJobs);
 
+router.get('/jobs/:id', authMiddleware, userController.userGetJobById);
+
 router.post('/apply-job/:id', authMiddleware, userController.applyJob);
 
 router.patch('/cancel-job/:id', authMiddleware, userController.cancelJobApplication);

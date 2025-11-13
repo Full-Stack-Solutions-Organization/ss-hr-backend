@@ -12,6 +12,7 @@ export class Job {
         public skills: string,
         public jobDescription: string,
         public nationality: string,
+        public jobUniqueId: string,
         public createdAt: Date,
         public updatedAt: Date,
     ) { }

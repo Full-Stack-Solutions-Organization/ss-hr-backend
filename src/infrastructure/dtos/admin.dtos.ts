@@ -11,18 +11,19 @@ export type CreateAdminRequest = Pick<User, "fullName" | "email" | "password" | 
 export type CreateAdminResponse = Pick<User, "_id" | "fullName" | "email" | "phone" | "profileImage" | "role" | "isBlocked" | "createdAt">;
 
 
-export type adminFetchApplicationsJobFields = Pick<Job, "_id" | "designation" | "companyName">; 
+export type adminFetchApplicationsJobFields = Pick<Job, "_id" | "designation" | "companyName" | "jobUniqueId">; 
 
 export type AdminFetchAllApplicationsResponse = Array<{
   _id: Application["_id"];
   updatedAt: Application["updatedAt"];
   status: Application["status"];
+  applicationUniqueId: Application["applicationUniqueId"];
 } & adminFetchApplicationsJobFields>;
 
 export type AdminFetchApplicationDetailsRequest = Pick<Application, "_id">;
-export type adminfetchApplicationJobDetailFields = Pick<Job, "designation" | "companyName" | "vacancy" | "createdAt" | "benifits" | "industry" | "jobDescription" | "nationality" | "salary" | "skills">;
+export type adminfetchApplicationJobDetailFields = Pick<Job, "designation" | "companyName" | "vacancy" | "createdAt" | "benifits" | "industry" | "jobDescription" | "nationality" | "salary" | "skills" | "jobUniqueId">;
 export type adminFetchApplicationUserDetails = Pick<User, "fullName" | "email" | "dob" | "gender" | "linkedInUsername" | "nationality" | "phone" | "serialNumber" | "portfolioUrl" | "profileImage" | "phoneTwo" | "professionalStatus" | "resume">;
-export type AdminFetchApplicationDetailsResponse = Pick<Application, "createdAt" | "status" | "updatedAt"> & {
+export type AdminFetchApplicationDetailsResponse = Pick<Application, "createdAt" | "status" | "updatedAt" | "applicationUniqueId"> & {
     jobId: adminfetchApplicationJobDetailFields;
     userId: adminFetchApplicationUserDetails;
   };
@@ -37,3 +38,6 @@ export interface AdminFetchUserDetailsResponse {
   address: AdminFetchUserAddressDetails | null,
   careerData: AdminFetchUserCareerDataDetailsResponse | null,
 }
+
+
+export type AdminUpdateApplicationStatusRequest = Pick<Application, "_id" | "status">;

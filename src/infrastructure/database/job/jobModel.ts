@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 import { REGEX_BENEFITS, REGEX_INDUSTRY, REGEX_LONG_TEXT, REGEX_NATIONALITY, REGEX_SKILLS, REGEX_TEXT_DOT_AMP } from "../../zod/regex";
+import { CounterModel } from "../counter/counterModel";
 
 export interface IJob extends Document {
   _id: Types.ObjectId;
@@ -12,6 +13,7 @@ export interface IJob extends Document {
   skills: string;
   jobDescription: string;
   nationality: string;
+  jobUniqueId: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,10 +81,35 @@ const JobSchema = new Schema<IJob>(
       maxlength: [60, "Nationality must be at most 60 characters"],
       match: [REGEX_NATIONALITY, "Nationality contains invalid characters"],
     },
+    jobUniqueId: {
+      type: String,
+      unique: true,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+JobSchema.pre<IJob>("save", async function (next) {
+  if (!this.jobUniqueId) {
+    try {
+      const counter = await CounterModel.findOneAndUpdate(
+        { name: "job" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true } 
+      );
+
+      const seqNumber = counter.seq.toString().padStart(5, "0");
+      this.jobUniqueId = `SHJ-${seqNumber}`;
+      next();
+    } catch (error) {
+      next(error as Error);
+    }
+  } else {
+    next();
+  }
+});
 
 export const JobModel = mongoose.model<IJob>("Job", JobSchema);

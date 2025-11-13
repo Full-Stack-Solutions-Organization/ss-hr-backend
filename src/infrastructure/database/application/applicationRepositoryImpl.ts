@@ -3,8 +3,8 @@ import { Application } from "../../../domain/entities/application";
 import { ApplicationModel, IApplication } from "./applicationModel";
 import { ApiPaginationRequest, ApiResponse } from "../../dtos/common.dts";
 import { IApplicationRepository } from "../../../domain/repositories/IApplicationRepository";
-import { AdminFetchAllApplicationsResponse, AdminFetchApplicationDetailsRequest, AdminFetchApplicationDetailsResponse, adminfetchApplicationJobDetailFields, adminFetchApplicationsJobFields, adminFetchApplicationUserDetails } from "../../dtos/admin.dtos";
 import { UserCreateApplicationRequest, UserFetchAllApplicationsResponse, UserFetchApplicationsJobFields, UserUpdateApplicationRequest } from "../../dtos/user.dto";
+import { AdminFetchAllApplicationsResponse, AdminFetchApplicationDetailsRequest, AdminFetchApplicationDetailsResponse, adminfetchApplicationJobDetailFields, adminFetchApplicationsJobFields, adminFetchApplicationUserDetails, AdminUpdateApplicationStatusRequest } from "../../dtos/admin.dtos";
 
 export class ApplicationRepositoryImpl implements IApplicationRepository {
 
@@ -14,6 +14,7 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
             application.jobId,
             application.userId,
             application.status,
+            application.applicationUniqueId,
             application.createdAt,
             application.updatedAt,
         );
@@ -21,7 +22,7 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
 
     async createApplication(data: UserCreateApplicationRequest): Promise<Application | null> {
         try {
-            const application = await ApplicationModel.create({ userId: data.userId, jobId: data.jobId, status: true });
+            const application = await ApplicationModel.create({ userId: data.userId, jobId: data.jobId });
             return application ? this.mapToEntity(application) : null;
         } catch (error) {
             throw new Error("Failed to create application");
@@ -59,7 +60,9 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
                     _id: application._id,
                     updatedAt: application.updatedAt,
                     status: application.status,
+                    applicationUniqueId: application.applicationUniqueId,
                     jobId: application.jobId._id,
+                    jobUniqueId: application.jobId.jobUniqueId,
                     designation: application.jobId.designation,
                 })),
                 totalPages,
@@ -89,7 +92,9 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
                     _id: application._id,
                     updatedAt: application.updatedAt,
                     status: application.status,
+                    applicationUniqueId: application.applicationUniqueId,
                     jobId: application.jobId._id,
+                    jobUniqueId: application.jobId.jobUniqueId,
                     designation: application.jobId.designation,
                     companyName: application.jobId.companyName
                 })),
@@ -109,7 +114,7 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
                 .populate<{ jobId: adminfetchApplicationJobDetailFields }>({
                     path: "jobId",
                     select:
-                        "designation companyName vacancy createdAt benifits industry jobDescription nationality salary skills",
+                        "designation companyName vacancy createdAt benifits industry jobDescription nationality salary skills jobUniqueId",
                 })
                 .populate<{ userId: adminFetchApplicationUserDetails }>({
                     path: "userId",
@@ -123,6 +128,7 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
                 createdAt: application.createdAt,
                 updatedAt: application.updatedAt,
                 status: application.status,
+                applicationUniqueId: application.applicationUniqueId,
                 jobId: {
                     designation: application.jobId?.designation,
                     companyName: application.jobId?.companyName,
@@ -134,6 +140,7 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
                     salary: application.jobId?.salary,
                     skills: application.jobId?.skills,
                     createdAt: application.jobId?.createdAt,
+                    jobUniqueId: application.jobId?.jobUniqueId,
                 },
                 userId: {
                     fullName: application.userId?.fullName,
@@ -166,6 +173,19 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
             return application ? this.mapToEntity(application) : null;
         } catch (error) {
             throw new Error("Failed to fetch application");
+        }
+    }
+
+    async adminUpdateApplicationStatus(data: AdminUpdateApplicationStatusRequest): Promise<Application | null> {
+        try {
+            const updatedApplication = await ApplicationModel.findByIdAndUpdate(
+                { _id: data._id },
+                { $set: { status: data.status } },
+                { new : true }
+            );
+            return updatedApplication ? this.mapToEntity(updatedApplication) : null;
+        } catch (error) {
+            throw new Error("Application status updating failed.");
         }
     }
 

@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { ApplicationStatus } from "../../infrastructure/zod/common.zod";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { ApiPaginationRequest, ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
@@ -42,8 +43,8 @@ export class UserCreateApplicationUseCase {
             let application = await this.applicationRepositoryImpl.findApplicationByUserIdWithApplicationId(data);
 
             if (application) {
-                if (!application.status) {
-                    application.status = true;
+                if (application.status === ApplicationStatus.cancelledByUser) {
+                    application.status = ApplicationStatus.applied;
                     await this.applicationRepositoryImpl.updateApplication(application);
                 }
             } else {
@@ -100,7 +101,7 @@ export class UserUpdateApplicationUseCase {
             if (!updatedApplication) throw new Error("Failed to update application");
 
             return {
-                success: true, message: `Your application has been ${updatedApplication.status ? "saved" : "cancelled"}.`, data: {
+                success: true, message: `Your application status has been updated .`, data: {
                     jobId: updatedApplication.jobId,
                     status: updatedApplication.status,
                 }

@@ -20,6 +20,7 @@ export class JobRepositoryImpl implements IJobRepository {
       job.skills,
       job.jobDescription,
       job.nationality,
+      job.jobUniqueId,
       job.createdAt,
       job.updatedAt,
     );
@@ -30,6 +31,7 @@ export class JobRepositoryImpl implements IJobRepository {
       const newJob = await JobModel.create(payload);
       return newJob ? this.mapToEntity(newJob) : null;
     } catch (error) {
+      console.log("createJob error : ",error);
       throw new Error("Unable to create job, please try again.");
     }
   }
@@ -43,6 +45,7 @@ export class JobRepositoryImpl implements IJobRepository {
         vacancy: 1,
         designation: 1,
         salary: 1,
+        jobUniqueId: 1,
         createdAt: 1
       };
 
@@ -63,6 +66,7 @@ export class JobRepositoryImpl implements IJobRepository {
           designation: job.designation,
           salary: job.salary,
           vacancy: job.vacancy,
+          jobUniqueId: job.jobUniqueId,
           createdAt: job.createdAt,
         })),
         totalPages,
@@ -88,6 +92,7 @@ export class JobRepositoryImpl implements IJobRepository {
         skills: 1,
         jobDescription: 1,
         nationality: 1,
+        jobUniqueId: 1,
         createdAt: 1
       };
 
@@ -101,6 +106,7 @@ export class JobRepositoryImpl implements IJobRepository {
         skills: 1,
         jobDescription: 1,
         nationality: 1,
+        jobUniqueId: 1,
         createdAt: 1
       };
       const project = admin ? adminGetAllJobsProject : userGetAllJobsProject;
@@ -113,11 +119,12 @@ export class JobRepositoryImpl implements IJobRepository {
 
   async userFindAllJobs({ page, limit }: ApiPaginationRequest, userId: Types.ObjectId): Promise<ApiResponse<UserFetchAllJobsResponse>> {
     try {
-      const [jobs, totalCount] = await Promise.all([
+         const [jobs, totalCount] = await Promise.all([
         JobModel.aggregate([
           { $sort: { createdAt: -1 } },
           { $skip: (page - 1) * limit },
           { $limit: limit },
+
           {
             $lookup: {
               from: "applications",
@@ -128,30 +135,52 @@ export class JobRepositoryImpl implements IJobRepository {
                     $expr: {
                       $and: [
                         { $eq: ["$jobId", "$$jobId"] },
-                        { $eq: ["$userId", userId] },
-                        { $eq: ["$status", true] }
+                        { $eq: ["$userId", userId] }
                       ]
                     }
                   }
+                },
+                {
+                  $project: { status: 1, _id: 0 }
                 }
               ],
               as: "userApplications"
             }
           },
+
           {
             $addFields: {
-              applied: { $gt: [{ $size: "$userApplications" }, 0] }
+              applied: { $gt: [{ $size: "$userApplications" }, 0] },
+              status: {
+                $cond: {
+                  if: { $gt: [{ $size: "$userApplications" }, 0] },
+                  then: { $arrayElemAt: ["$userApplications.status", 0] },
+                  else: null
+                }
+              }
             }
           },
+
+          { $match: { applied: false } },
+
           {
             $project: {
-              _id: 1, salary: 1, designation: 1, vacancy: 1, createdAt: 1,
-              applied: 1
+              _id: 1,
+              salary: 1,
+              designation: 1,
+              vacancy: 1,
+              createdAt: 1,
+              applied: 1,
+              jobUniqueId: 1,
+              status: 1
             }
           }
         ]),
-        JobModel.countDocuments()]);
+        JobModel.countDocuments()
+      ]);
+
       const totalPages = Math.ceil(totalCount / limit);
+
       return {
         data: jobs.map(job => ({
           _id: job._id,
@@ -160,6 +189,8 @@ export class JobRepositoryImpl implements IJobRepository {
           vacancy: job.vacancy,
           createdAt: job.createdAt,
           applied: job.applied,
+          jobUniqueId: job.jobUniqueId,
+          status: job.status
         })),
         totalPages,
         currentPage: page,

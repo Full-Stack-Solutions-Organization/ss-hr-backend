@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { Application } from "../entities/application";
 import { ApiPaginationRequest, ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { UserCreateApplicationRequest, UserFetchAllApplicationsResponse, UserUpdateApplicationRequest } from "../../infrastructure/dtos/user.dto";
-import { AdminFetchAllApplicationsResponse, AdminFetchApplicationDetailsRequest, AdminFetchApplicationDetailsResponse } from "../../infrastructure/dtos/admin.dtos";
+import { AdminFetchAllApplicationsResponse, AdminFetchApplicationDetailsRequest, AdminFetchApplicationDetailsResponse, AdminUpdateApplicationStatusRequest } from "../../infrastructure/dtos/admin.dtos";
 
 export interface IApplicationRepository {
     createApplication(data: UserCreateApplicationRequest): Promise<Application | null>;
@@ -16,5 +16,7 @@ export interface IApplicationRepository {
     adminFetchApplicationDetails(data: AdminFetchApplicationDetailsRequest): Promise<AdminFetchApplicationDetailsResponse>;
 
     findApplicationByUserIdWithApplicationId(data: UserCreateApplicationRequest): Promise<Application | null>;
+
+    adminUpdateApplicationStatus(data: AdminUpdateApplicationStatusRequest): Promise<Application | null>;
 
 }

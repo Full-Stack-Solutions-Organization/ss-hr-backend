@@ -2,7 +2,7 @@ import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { ApiPaginationRequest, ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { ApplicationRepositoryImpl } from "../../infrastructure/database/application/applicationRepositoryImpl";
-import { AdminFetchAllApplicationsResponse, AdminFetchApplicationDetailsRequest, AdminFetchApplicationDetailsResponse } from "../../infrastructure/dtos/admin.dtos";
+import { AdminFetchAllApplicationsResponse, AdminFetchApplicationDetailsRequest, AdminFetchApplicationDetailsResponse, AdminUpdateApplicationStatusRequest } from "../../infrastructure/dtos/admin.dtos";
 
 export class AdminFetchAllApplicationsUseCase {
     constructor(
@@ -53,3 +53,19 @@ export class AdminFetchApplicationDetailsUseCase {
     }
 }
 
+
+export class AdminUpdateApplicationStatusUseCase {
+    constructor(
+        private applicationRepositoryImpl: ApplicationRepositoryImpl
+    ) { }
+
+    async execute(data: AdminUpdateApplicationStatusRequest): Promise<ApiResponse> {
+        try {
+            const updatedApplication = await this.applicationRepositoryImpl.adminUpdateApplicationStatus(data);
+            if(!updatedApplication) throw new Error("Failed to update application status");
+            return { success: true, message: "Application status updated sucessfully." };
+        } catch (error) {
+            throw handleUseCaseError(error || "Admin spplication status updating failed");
+        }
+    }
+}

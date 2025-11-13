@@ -84,6 +84,17 @@ export enum PaymentStatus {
 export const paymentStatusSchema = z.nativeEnum(PaymentStatus);
 export type PaymentStatusType = z.infer<typeof paymentStatusSchema>;
 
+export enum ApplicationStatus {
+    applied = "applied",
+    cancelledByUser = "cancelledByUser",
+    reviewing = "revewing",
+    rejected = "rejected",
+    placed = "placed"
+}
+
+export const applicationStatusSchema = z.nativeEnum(ApplicationStatus);
+export type ApplicationStatusType = z.infer<typeof applicationStatusSchema>;
+
 
 //*** Zod Schema Fields & Reusable Validators */
 export const fullName = stringField("fullName", 4, 30, REGEX_FULL_NAME);

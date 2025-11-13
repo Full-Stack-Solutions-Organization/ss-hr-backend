@@ -94,11 +94,13 @@ export type UpdateCareerDataRequest = Partial<Pick<CareerData, "currentSalary" |
 export type CommonCareerDataType = Omit<CareerData, "userId" | "createdAt">;
 
 // user jobs
-export type UserFetchAllJobsResponse = Array<Pick<Job, "_id" | "salary" | "designation" | "vacancy" | "createdAt"> & {
+export type UserFetchAllJobsResponse = Array<Pick<Job, "_id" | "salary" | "designation" | "vacancy" | "createdAt" | "jobUniqueId"> & {
   applied: boolean;
 }>;
 
 export type UserFetchJobDetailsResponse = Omit<Job, "updatedAt" | "companyName">;
+
+
 
 // User Application
 export type UserCreateApplicationRequest = Pick<Application, "jobId" | "userId">;
@@ -108,10 +110,11 @@ export type UserUpdateApplicationRequest = Pick<Application, "_id" | "status"> &
   userId: User["_id"]
 };
 
-export type UserFetchApplicationsJobFields = Pick<Job, "_id" | "designation">; 
+export type UserFetchApplicationsJobFields = Pick<Job, "_id" | "designation" | "jobUniqueId">; 
 
 export type UserFetchAllApplicationsResponse = Array<{
   _id: Application["_id"];
   updatedAt: Application["updatedAt"];
   status: Application["status"];
+  applicationUniqueId: Application["applicationUniqueId"];
 } & UserFetchApplicationsJobFields>;

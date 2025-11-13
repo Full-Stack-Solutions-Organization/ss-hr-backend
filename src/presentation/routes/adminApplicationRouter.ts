@@ -8,4 +8,6 @@ router.get("/", authMiddleware, adminApplicationController.fetchAllApplications)
 
 router.get("/:id", authMiddleware, adminApplicationController.fetchApplication);
 
+router.patch("/:id", authMiddleware, adminApplicationController.updateApplicationStatus);
+
 export default router;

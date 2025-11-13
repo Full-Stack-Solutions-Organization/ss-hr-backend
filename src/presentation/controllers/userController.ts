@@ -5,7 +5,7 @@ import { aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
 import { updateApplicationZodSchmea } from "../../infrastructure/zod/user.zod";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
-import { UserGetAllJobsUseCase } from "../../application/userUseCase.ts/useJobUseCases";
+import { UserGetAllJobsUseCase, UserGetJobByIdUseCase } from "../../application/userUseCase.ts/useJobUseCases";
 import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
 import { paginationReqQuery, ValidateObjectId } from "../../infrastructure/zod/common.zod";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
@@ -30,7 +30,8 @@ const userFetchAllApplicationsUseCase = new UserFetchAllApplicationsUseCase(appl
 const useGetTestimonialsUseCase = new UseGetTestimonialsUseCase(testimonialRepositoryImpl, signedUrlService);
 const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
 const userCreateApplicationUseCase = new UserCreateApplicationUseCase(userRepositoryImpl, addressRepositoryImpl, applicationRepositoryImpl);
-const userUpdateApplicationUseCase = new UserUpdateApplicationUseCase(userRepositoryImpl, addressRepositoryImpl,  applicationRepositoryImpl);
+const userUpdateApplicationUseCase = new UserUpdateApplicationUseCase(userRepositoryImpl, addressRepositoryImpl, applicationRepositoryImpl);
+const userGetJobByIdUseCase = new UserGetJobByIdUseCase(jobRepositoryImpl);
 
 class UserController {
     constructor(
@@ -40,6 +41,7 @@ class UserController {
         private userCreateApplicationUseCase: UserCreateApplicationUseCase,
         private userUpdateApplicationUseCase: UserUpdateApplicationUseCase,
         private userFetchAllApplicationsUseCase: UserFetchAllApplicationsUseCase,
+        private userGetJobByIdUseCase: UserGetJobByIdUseCase
     ) {
         this.getAdminsForChatSidebar = this.getAdminsForChatSidebar.bind(this);
         this.getTestimonilas = this.getTestimonilas.bind(this);
@@ -47,6 +49,7 @@ class UserController {
         this.applyJob = this.applyJob.bind(this);
         this.cancelJobApplication = this.cancelJobApplication.bind(this);
         this.getApplications = this.getApplications.bind(this);
+        this.userGetJobById = this.userGetJobById.bind(this);
     }
 
     async getAdminsForChatSidebar(req: Request, res: Response) {
@@ -89,7 +92,7 @@ class UserController {
                 jobId: new Types.ObjectId(validatedParams.id),
                 userId: new Types.ObjectId(userId)
             });
-            console.log("result : ",result);
+            console.log("result : ", result);
             res.status(200).json(result);
         } catch (error) {
             console.log("applyJob error : ", error);
@@ -113,7 +116,7 @@ class UserController {
             HandleError.handle(error, res);
         }
     }
-    
+
     async getApplications(req: Request, res: Response) {
         try {
             const userId = (req.user as DecodedUser).userId;
@@ -122,6 +125,18 @@ class UserController {
             res.status(200).json(result);
         } catch (error) {
             console.log("getApplications error : ", error);
+            HandleError.handle(error, res);
+        }
+    }
+
+    async userGetJobById(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const { id: jobId } = ValidateObjectId(id, "Job Id");
+            const result = await this.userGetJobByIdUseCase.execute(new Types.ObjectId(jobId));
+            res.status(200).json(result);
+        } catch (error) {
+            console.log("Get job error:", error);
             HandleError.handle(error, res);
         }
     }
@@ -135,5 +150,6 @@ export const userController = new UserController(
     userCreateApplicationUseCase,
     userUpdateApplicationUseCase,
     userFetchAllApplicationsUseCase,
+    userGetJobByIdUseCase
 );
 

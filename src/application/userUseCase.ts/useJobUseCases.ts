@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { UserFetchAllJobsResponse } from "../../infrastructure/dtos/user.dto";
+import { UserFetchAllJobsResponse, UserFetchJobDetailsResponse } from "../../infrastructure/dtos/user.dto";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
 import { ApiPaginationRequest, ApiResponse } from "../../infrastructure/dtos/common.dts";
@@ -26,4 +26,29 @@ export class UserGetAllJobsUseCase {
             throw handleUseCaseError(error || "Failed to get all jobs");
         }
     }
+}
+
+
+export class UserGetJobByIdUseCase {
+  constructor(private jobRepository: JobRepositoryImpl) { }
+
+  async execute(jobId: Types.ObjectId ): Promise<ApiResponse<UserFetchJobDetailsResponse>> {
+    try {
+
+      if (!jobId) {
+        throw new Error("Job ID is required");
+      }
+
+      const job = await this.jobRepository.findJobById(jobId, true);
+      if (!job) throw new Error("Job not found");
+
+      return {
+        success: true,
+        message: "Job retrieved successfully",
+        data: job
+      };
+    } catch (error) {
+      throw handleUseCaseError(error || "Unexpected error in GetJobByIdUseCase");
+    }
+  }
 }

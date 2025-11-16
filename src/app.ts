@@ -3,8 +3,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import express from 'express';
 import compression from 'compression';
+import { HttpError } from './express';
 import cookieParser from 'cookie-parser';
 import { appConfig } from './config/env';
+import logger from './infrastructure/logger/logger';
 import passport from './infrastructure/auth/passport';
 import S3Router from './presentation/routes/s3Router';
 import authRouter from './presentation/routes/authRouter';
@@ -20,12 +22,33 @@ import adminApplicationRouter from './presentation/routes/adminApplicationRouter
 
 const app = express();
 
-if (appConfig.nodeEnv === 'development') {
-  app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
+if (appConfig.nodeEnv !== 'development') {
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(`https://${req.get('Host')}${req.url}`);
+    }
+    next();
+  });
 }
 
-const allowedOrigins = [appConfig.frontendUrl, appConfig.frontendUrl2];
+app.use(helmet());
 
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; " +
+    "script-src 'self'; " +
+    "style-src 'self'; " +
+    "img-src 'self' data:; " +
+    "frame-src 'self' https://maps.app.goo.gl; " +
+    "object-src 'none'; " +
+    "frame-ancestors 'none';"
+  );
+  res.setHeader("Referrer-Policy", "origin");
+  next();
+});
+
+const allowedOrigins = [appConfig.frontendUrl, appConfig.frontendUrl2];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -46,16 +69,27 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-app.use('/api/auth', authRoutes);
-app.use("/api/admin/settings", adminSettingsRoutes);
-app.use('/api/admin/jobs', adminJobRoutes);
-app.use('/api/admin/chat', adminChatRoutes);
-app.use('/api/admin/users', adminUsersRoutes);
-app.use("/api/admin/testimonials", adminTestimonialRoutes);
-app.use('/api/admin/packages', adminPackageRoutes);
-app.use('/api/admin/payments', adminPaymentRoutes);
-app.use('/api/message', messageRoutes);
-app.use('/api/user', userRoutes);
+if (appConfig.nodeEnv === 'development') {
+  app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
+} else {
+   app.use(morgan('combined', {
+    stream: {
+      write: (message) => logger.info(message.trim()),
+    },
+  }));
+}
+
+app.use('/api/s3', S3Router);
+app.use('/api/auth', authRouter);
+app.use('/api/user', userRouter);
+app.use('/api/message', messageRouter);
+app.use('/api/admin/jobs', adminJobRouter);
+app.use('/api/admin/chat', adminChatRouter);
+app.use('/api/admin/users', adminUsersRouter);
+app.use('/api/admin/testimonials', adminTestimonialRouter);
+app.use('/api/admin/packages', adminPackageRouter);
+app.use('/api/admin/payments', adminPaymentRouter);
+app.use('/api/admin/applications', adminApplicationRouter);
 
 
 app.get('/api/health', (req, res) => {
@@ -65,5 +99,12 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+app.use(
+  (err: HttpError, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    logger.error(`${err.message} - ${req.method} ${req.originalUrl} - ${err.stack}`);
+    res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
+  }
+);
 
 export default app;

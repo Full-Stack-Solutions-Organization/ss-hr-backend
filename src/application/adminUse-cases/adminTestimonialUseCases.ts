@@ -9,17 +9,12 @@ import {
 } from "../../infrastructure/dtos/testimonial.dto";
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
-import { validateFile } from "../../infrastructure/validator/imageFileValidator";
-import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
-import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
 import { TestimonialRepositoryImpl } from "../../infrastructure/database/testimonial/testimonialRepositoryImpl";
 
 
 export class CreateTestimonialUseCase {
   constructor(
     private testimonialRepository: TestimonialRepositoryImpl,
-    private fileUploadService: FileUploadService,
-    private signedUrlService: SignedUrlService
   ) { }
 
   async execute(data: CreateTestimonialRequest): Promise<CreateTestimonialResponse> {
@@ -56,8 +51,6 @@ export class CreateTestimonialUseCase {
 export class UpdateTestimonialUseCase {
   constructor(
     private testimonialRepository: TestimonialRepositoryImpl,
-    private fileUploadService: FileUploadService,
-    private fileDeleteService: FileDeleteService
   ) {}
 
   async execute(data: UpdateTestimonialRequest): Promise<UpdateTestimonialResponse> {
@@ -90,7 +83,6 @@ export class UpdateTestimonialUseCase {
 export class DeleteTestimonialUseCase {
   constructor(
     private testimonialRepository: TestimonialRepositoryImpl,
-    private fileDeleteService: FileDeleteService
   ) { }
 
   async execute(data: DeleteTestimonialRequest): Promise<ApiResponse> {
@@ -113,7 +105,6 @@ export class DeleteTestimonialUseCase {
 export class GetTestimonialByIdUseCase {
   constructor(
     private testimonialRepository: TestimonialRepositoryImpl,
-    private signedUrlService: SignedUrlService
   ) { }
 
   async execute(data: GetTestimonialByIdRequest): Promise<GetTestimonialByIdResponse> {
@@ -146,34 +137,16 @@ export class GetTestimonialByIdUseCase {
 export class GetAllTestimonialsUseCase {
   constructor(
     private testimonialRepository: TestimonialRepositoryImpl,
-    private signedUrlService: SignedUrlService
   ) { }
 
   async execute(data: { page: number; limit: number }) {
     try {
       const result = await this.testimonialRepository.findAllTestimonials(data);
 
-      const updatedResult = await Promise.all(
-        result.data?.map(async (testimonial) => {
-          let updateProfileImage = testimonial.clientPhoto;
-
-          if (testimonial.clientPhoto) {
-            updateProfileImage = await this.signedUrlService.generateSignedUrl(
-              testimonial.clientPhoto
-            );
-          }
-
-          return {
-            ...testimonial,
-            clientPhoto: updateProfileImage,
-          };
-        }) ?? []
-      );
-
       return {
         success: true,
         message: "Testimonials retrieved successfully",
-        data: updatedResult ?? [],
+        data: result,
       };
     } catch (error) {
       throw handleUseCaseError(error || "Failed to get testimonials");

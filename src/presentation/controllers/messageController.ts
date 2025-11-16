@@ -1,29 +1,21 @@
 import { Types } from "mongoose";
 import { Request, Response } from "express";
 import { DecodedUser } from "../../express";
-import { S3Client } from "@aws-sdk/client-s3";
 import { aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
 import { ValidateObjectId } from "../../infrastructure/zod/common.zod";
-import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
-import { FileUploadService } from "../../infrastructure/service/fileUpload";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import {  sendMessageRequestZodSchema } from "../../infrastructure/zod/message.zod";
-import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
 import { SendMessageUseCase } from "../../application/messageUse-cases/sendMessageUseCase";
 import { GetAllMessagesUseCase } from "../../application/messageUse-cases/getAllMessageUseCase";
 import { MessageRepositoryImpl } from "../../infrastructure/database/message/messageRepositorylmpl";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 
-const s3Client = new S3Client();
 const messageRepositoryIml = new MessageRepositoryImpl();
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
-const randomStringGenerator = new RandomStringGenerator();
-const s3KeyGenerator = new S3KeyGenerator(randomStringGenerator);
 const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);
-const fileUploadService = new FileUploadService(s3Client, s3KeyGenerator);
 
-const sendMessageUseCase = new SendMessageUseCase(messageRepositoryIml, signedUrlService, fileUploadService);
+const sendMessageUseCase = new SendMessageUseCase(messageRepositoryIml, signedUrlService);
 const getAllMessagesUseCase = new GetAllMessagesUseCase(messageRepositoryIml, signedUrlService);
 
 export class MessageController {
@@ -51,12 +43,11 @@ export class MessageController {
             const fromUserId = (req.user as DecodedUser).userId;
             const { id: toUserId } = ValidateObjectId(req.params.toUserId, "toUserId");
             const validateData = sendMessageRequestZodSchema.parse(req.body);
-            const { text } = validateData;
-            const file = req.file;
+            const { text, image } = validateData;
             const result = await this.sendMessageUseCase.execute({
                 senderId: new Types.ObjectId(fromUserId),
                 receiverId: new Types.ObjectId(toUserId),
-                file: file,
+                image: image,
                 text: text
             });
             res.status(200).json(result);

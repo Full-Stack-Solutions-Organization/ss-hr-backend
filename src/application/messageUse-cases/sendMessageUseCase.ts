@@ -1,6 +1,5 @@
 import { Message } from "../../domain/entities/message";
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
-import { FileUploadService } from "../../infrastructure/service/fileUpload";
 import { SendMessageRequest } from "../../infrastructure/dtos/message.dtos";
 import { getReceiverSocketId, io } from "../../infrastructure/lib/socket.io";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
@@ -11,28 +10,13 @@ export class SendMessageUseCase {
     constructor(
         private messageRepositoryImpl: MessageRepositoryImpl,
         private signedUrlService: SignedUrlService,
-        private fileUploadService: FileUploadService,
     ) { }
 
     async execute(payload: SendMessageRequest): Promise<ApiResponse<Message>> {
         try {
-            const { senderId, receiverId, text, file } = payload;
+            const { receiverId } = payload;
             
-            let imageKey: string | undefined;
-            if (file) {
-                imageKey = await this.fileUploadService.uploadFile({
-                    folder: `slotflow-chat-${senderId+"to"+receiverId}`,
-                    userId: senderId.toString(),
-                    file: file,
-                });
-            }
-            
-            const newMessage = await this.messageRepositoryImpl.createMessage({
-                senderId,
-                receiverId,
-                text,
-                image: imageKey
-            });
+            const newMessage = await this.messageRepositoryImpl.createMessage({...payload});
             
             if (newMessage.image) {
                 newMessage.image = await this.signedUrlService.generateSignedUrl(newMessage.image);

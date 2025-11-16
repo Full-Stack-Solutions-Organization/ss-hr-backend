@@ -1,7 +1,7 @@
 import { IMessage, MessageModel } from "./messageModel";
 import { Message } from "../../../domain/entities/message";
 import { IMessageRepository } from "../../../domain/repositories/IMessage.repository";
-import { CommonRequest, GetAllMessageResponse, SendMessageRequestForRepository } from "../../dtos/message.dtos";
+import { CommonRequest, GetAllMessageResponse, SendMessageRequest } from "../../dtos/message.dtos";
 
 export class MessageRepositoryImpl implements IMessageRepository {
     private mapToEntity(message: IMessage): Message {
@@ -31,12 +31,10 @@ export class MessageRepositoryImpl implements IMessageRepository {
         return messages.map(message => this.mapToEntity(message));
     }
 
-    async createMessage(payload: SendMessageRequestForRepository): Promise<Message> {
+    async createMessage(payload: SendMessageRequest): Promise<Message> {
         const newMessage = await MessageModel.create(payload);
         return this.mapToEntity(newMessage);
     }
 
-    // deleteMessage(): Promise<ApiResponse> {
-
-    // }
+    // deleteMessage(): Promise<ApiResponse> {}
 }

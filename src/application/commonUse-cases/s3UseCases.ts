@@ -67,7 +67,6 @@ export class GetFileSignedUrlUseCase {
             return { success: true, message: "Signed Url", data: signedUrl };
 
         } catch (error) {
-            console.log("GetFileSignedUrlUseCase error : ",error);
             throw handleUseCaseError(error || "Failed to generated signed url.");
         }
     }

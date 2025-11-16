@@ -63,7 +63,6 @@ export class UserCreateApplicationUseCase {
 
 
         } catch (error) {
-            console.log("UserCreateApplicationUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to save application");
         }
     }
@@ -108,8 +107,6 @@ export class UserUpdateApplicationUseCase {
             };
 
         } catch (error) {
-            console.log("Error : ", error);
-            console.log("UserCreateApplicationUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to update application");
         }
     }
@@ -133,7 +130,6 @@ export class UserFetchAllApplicationsUseCase {
                 totalPages: result.totalPages,
             }
         } catch (error) {
-            console.log("UserFetchAllApplicationsUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to fetch applications");
         }
     }

@@ -53,11 +53,9 @@ export class AdminTestimonialController {
 
     async createTestimonial(req: Request, res: Response) {
         try {
-            console.log("req.body : ",req.body);
             const result = await this.createTestimonialUseCase.execute(req.body);
             return res.status(201).json(result);
         } catch (error) {
-            console.log("createTestimonial error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -76,7 +74,6 @@ export class AdminTestimonialController {
             });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("updateTestimonial error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -87,7 +84,6 @@ export class AdminTestimonialController {
             const result = await this.deleteTestimonialUseCase.execute({ testimonialId });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("deleteTestimonial error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -98,7 +94,6 @@ export class AdminTestimonialController {
             const result = await this.getTestimonialByIdUseCase.execute({ testimonialId });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getTestimonialById error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -110,7 +105,6 @@ export class AdminTestimonialController {
             const result = await this.getAllTestimonialsUseCase.execute({ page, limit });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getAllTestimonials error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -120,7 +114,6 @@ export class AdminTestimonialController {
             const result = await this.getTestimonialStatsUseCase.execute();
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getTestimonialStats error : ", error);
             HandleError.handle(error, res);
         }
     }

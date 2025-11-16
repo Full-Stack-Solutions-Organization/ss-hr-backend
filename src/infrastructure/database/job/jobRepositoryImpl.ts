@@ -31,7 +31,6 @@ export class JobRepositoryImpl implements IJobRepository {
       const newJob = await JobModel.create(payload);
       return newJob ? this.mapToEntity(newJob) : null;
     } catch (error) {
-      console.log("createJob error : ",error);
       throw new Error("Unable to create job, please try again.");
     }
   }

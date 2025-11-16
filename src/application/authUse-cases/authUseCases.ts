@@ -136,7 +136,6 @@ export class LoginUseCase {
   async execute(data: LoginRequest): Promise<LoginResponse> {
     try {
       const { email, password, role } = data;
-      console.log("data : ", data);
       if (!email || !password || !role) throw new Error("Invalid request.");
 
       let user: User | null = null;
@@ -207,7 +206,6 @@ export class LoginUseCase {
         careerData: careerData ?? null
       };
     } catch (error) {
-      console.log("LoginUseCase error : ", error);
       throw handleUseCaseError(error || "Unexpected error in VerifyOTPUseCase");
     }
   }
@@ -255,7 +253,6 @@ export class VerifyEmailUseCase {
         }
       }
     } catch (error) {
-      console.log("VerifyEmailUseCase error : ", error);
       throw handleUseCaseError(error || "Unexpected error in VerifyEmailUseCase");
     }
   }
@@ -286,7 +283,6 @@ export class UpdatePasswordUseCase {
 
       return { success: true, message: "Password has been updated successfully." };
     } catch (error) {
-      console.log("UpdatePasswordUseCase error : ", error);
       throw handleUseCaseError(error || "Unexpected error in UpdatePasswordUseCase");
     }
   }

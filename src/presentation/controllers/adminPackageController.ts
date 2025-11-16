@@ -45,7 +45,6 @@ export class AdminPackageController {
             const result = await this.createPackageUseCase.execute(req.body);
             return res.status(201).json(result);
         } catch (error) {
-            console.log("createPackage error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -56,7 +55,6 @@ export class AdminPackageController {
             const result = await this.updatePackageUseCase.execute({ _id: packageId, ...req.body });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("updatePackage error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -67,7 +65,6 @@ export class AdminPackageController {
             const result = await this.deletePackageUseCase.execute({ packageId });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("deletePackage error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -78,7 +75,6 @@ export class AdminPackageController {
             const result = await this.getPackageByIdUseCase.execute({ packageId });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getPackageById error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -90,7 +86,6 @@ export class AdminPackageController {
             const result = await this.getAllPackagesUseCase.execute({ page, limit });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getAllPackages error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -103,7 +98,6 @@ export class AdminPackageController {
             const result = await this.getPackagesByTypeUseCase.execute({ packageType, page, limit });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getPackagesByType error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -113,7 +107,6 @@ export class AdminPackageController {
             const result = await this.getPackageStatsUseCase.execute();
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getPackageStats error : ", error);
             HandleError.handle(error, res);
         }
     }

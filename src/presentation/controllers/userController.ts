@@ -57,7 +57,6 @@ class UserController {
             const result = await this.getAllUsersForChatSideBarUseCase.execute(false);
             res.status(200).json(result);
         } catch (error) {
-            console.log("getAllUsersForChatSidebar error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -67,7 +66,6 @@ class UserController {
             const result = await this.useGetTestimonialsUseCase.execute();
             res.status(200).json(result);
         } catch (error) {
-            console.log("getTestimonilas error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -79,7 +77,6 @@ class UserController {
             const result = await this.userGetAllJobsUseCase.execute(validatedData, new Types.ObjectId(userId));
             res.status(200).json(result);
         } catch (error) {
-            console.log("applyJob error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -92,10 +89,8 @@ class UserController {
                 jobId: new Types.ObjectId(validatedParams.id),
                 userId: new Types.ObjectId(userId)
             });
-            console.log("result : ", result);
             res.status(200).json(result);
         } catch (error) {
-            console.log("applyJob error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -112,7 +107,6 @@ class UserController {
             })
             res.status(200).json(result);
         } catch (error) {
-            console.log("cancelJobApplication error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -124,7 +118,6 @@ class UserController {
             const result = await this.userFetchAllApplicationsUseCase.execute(validatedData, new Types.ObjectId(userId));
             res.status(200).json(result);
         } catch (error) {
-            console.log("getApplications error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -136,7 +129,6 @@ class UserController {
             const result = await this.userGetJobByIdUseCase.execute(new Types.ObjectId(jobId));
             res.status(200).json(result);
         } catch (error) {
-            console.log("Get job error:", error);
             HandleError.handle(error, res);
         }
     }

@@ -53,7 +53,6 @@ export class AdminUserController {
             const result = await this.getAllUsersForChatSideBarUseCase.execute(true);
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getAllUsersForChatSidebar error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -64,7 +63,6 @@ export class AdminUserController {
             const result = await this.createUserByAdminUseCase.execute({ ...validatedData, role: LimitedRole.User });
             return res.status(201).json(result);
         } catch (error) {
-            console.log("createUser error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -75,7 +73,6 @@ export class AdminUserController {
             const result = await this.updateUserUseCase.execute({ _id: userId, ...req.body });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("updateUser error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -86,7 +83,6 @@ export class AdminUserController {
             const result = await this.deleteUserUseCase.execute({ userId });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("deleteUser error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -97,7 +93,6 @@ export class AdminUserController {
             const result = await this.getUserByIdUseCase.execute({ userId });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getUserById error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -109,7 +104,6 @@ export class AdminUserController {
             const result = await this.getAllUsersUseCase.execute({ page, limit });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getAllUsers error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -119,7 +113,6 @@ export class AdminUserController {
             const result = await this.getUserStatsUseCase.execute();
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getUserStats error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -130,7 +123,6 @@ export class AdminUserController {
             const result = await this.adminFetchUserDetailsUseCase.execute(userId);
             res.status(200).json(result);
         } catch (error) {
-            console.log("GetUserFullDetails error : ", error);
             HandleError.handle(error, res);
         }
     }

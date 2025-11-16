@@ -52,7 +52,6 @@ class UserProfileController {
             const result = await this.userUpdateUserProfileImageUseCase.execute({ _id: new Types.ObjectId(userId), profileImage: validatedData.s3FileKey });
             res.status(200).json(result);
         } catch (error) {
-            console.log("updateUserProfileImage error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -66,10 +65,8 @@ class UserProfileController {
                 ...validatedData,
                 dob: new Date(validatedData.dob),
             });
-            console.log("result : ",result);
             res.status(200).json(result);
         } catch (error) {
-            console.log("updateProfileDetails error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -84,7 +81,6 @@ class UserProfileController {
             });
             res.status(201).json(result);
         } catch (error) {
-            console.log("createAddress error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -96,7 +92,6 @@ class UserProfileController {
             const result = await this.userUpdateAddressUseCase.execute(new Types.ObjectId(addressId), validatedData);
             res.status(200).json(result);
         } catch (error) {
-            console.log("updateAddress error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -111,7 +106,6 @@ class UserProfileController {
             });
             res.status(200).json(result);
         } catch (error) {
-            console.log("createCareerData error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -126,7 +120,6 @@ class UserProfileController {
             });
             res.status(200).json(result);
         } catch (error) {
-            console.log("updateCareerData error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -134,12 +127,10 @@ class UserProfileController {
     async updateResumeKey(req: Request, res: Response) {
         try {
             const userId = (req.user as DecodedUser).userId;
-            console.log("req.body : ",req.body);
             const validatedData = S3FileKeyZodSchmema.parse({s3FileKey: req.body.resume});
             const result = await this.userUpdateResumeKeyUseCase.execute({ _id: new Types.ObjectId(userId), resume: validatedData.s3FileKey});
             res.status(200).json(result);
         } catch (error) {
-            console.log("updateResumeKey error : ", error);
             HandleError.handle(error, res);
         }
     }

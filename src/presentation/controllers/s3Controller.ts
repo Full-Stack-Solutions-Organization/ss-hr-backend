@@ -39,24 +39,19 @@ export class S3Controller {
     async getUploadPresignedUrl(req: Request, res: Response): Promise<void> {
         try {
             const validatedData = PresignedUrlZodSchema.parse(req.query);
-            console.log("validatedData : ",validatedData);
             const result = await this.uploadFileToS3UseCase.execute(validatedData);
-            console.log("result : ",result);
             res.status(200).json(result);
         } catch (error: any) {
-            console.error("Error generating pre-signed URL:", error);
             HandleError.handle(error, res);
         }
     };
 
     async getFileSignedUrl(req: Request, res: Response) {
         try {
-            console.log("req.query : ",req.query);
             const validatedData = S3FileKeyZodSchmema.parse(req.query);
             const result = await this.getFileSignedUrlUseCase.execute(validatedData.s3FileKey);
             return res.json(result);
         } catch (error) {
-            console.error("Error generating file URL:", error);
             HandleError.handle(error, res);
         }
     };
@@ -68,7 +63,6 @@ export class S3Controller {
             const result = await this.deleteFileFromS3UseCase.execute(new Types.ObjectId(userId), validatedData.folder);
             return res.json(result);
         } catch (error) {
-            console.error("deleteFile error:", error);
             HandleError.handle(error, res);
         }
     };

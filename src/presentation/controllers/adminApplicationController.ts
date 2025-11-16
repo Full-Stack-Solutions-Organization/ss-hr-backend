@@ -57,7 +57,6 @@ export class AdminApplicationController {
             });
             res.status(200).json(result);
         } catch (error) {
-            console.log("updateApplicationStatus error : ",error);
             HandleError.handle(error, res);
         }
     }

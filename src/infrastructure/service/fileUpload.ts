@@ -18,7 +18,6 @@ export class FileUploadService {
   async uploadFile({ folder, userId, file }: UploadFileOptions): Promise<string> {
     
     try {
-      console.log("Uploading image")
       
       const s3Key = await this.s3KeyGenerator.generateS3Key({
         folder,
@@ -41,7 +40,6 @@ export class FileUploadService {
       await upload.done();
       return s3Key;
     } catch (error) {
-      console.log("image uploading error : ",error);
       throw new Error("uploadFile failed");
     }
   }
@@ -55,17 +53,14 @@ export class FileDeleteService {
 
   async deleteFile(s3Key: string): Promise<boolean> {
     try {
-      console.log("Deleting image");
       const command = new DeleteObjectCommand({
         Bucket: aws_s3Config.bucketName as string,
         Key: s3Key,
       });
 
       const result = await this.s3.send(command);
-      console.log("deleting result : ",result);
       return true;
     } catch (error) {
-      console.log("image deletion error : ",error);
       return true;
     }
   }

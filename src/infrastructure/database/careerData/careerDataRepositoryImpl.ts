@@ -50,7 +50,6 @@ export class CareerDataRepositoryImpl implements ICareerDataRepository {
             );
             return updatedCareerData ? this.mapToEntity(updatedCareerData) : null;
         } catch (error) {
-            console.log("error : ",error);
             throw new Error("updateCareerData error")
         }
     }

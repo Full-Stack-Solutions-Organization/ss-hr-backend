@@ -50,23 +50,19 @@ export class AdminPaymentController {
 
     async createPayment(req: Request, res: Response) {
         try {
-            console.log("req.body : ",req.body);
             const result = await this.createPaymentUseCase.execute(req.body);
             return res.status(201).json(result);
         } catch (error) {
-            console.log("createPayment error : ", error);
             HandleError.handle(error, res);
         }
     }
 
     async updatePayment(req: Request, res: Response) {
         try {
-            console.log("req.body : ",req.body);
             const paymentId = new Types.ObjectId(req.params.id);
             const result = await this.updatePaymentUseCase.execute({ _id: paymentId, ...req.body });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("updatePayment error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -77,7 +73,6 @@ export class AdminPaymentController {
             const result = await this.deletePaymentUseCase.execute({ paymentId });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("deletePayment error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -88,7 +83,6 @@ export class AdminPaymentController {
             const result = await this.getPaymentByIdUseCase.execute({ paymentId });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getPaymentById error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -100,7 +94,6 @@ export class AdminPaymentController {
             const result = await this.getAllPaymentsUseCase.execute({ page, limit });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getAllPayments error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -113,7 +106,6 @@ export class AdminPaymentController {
             const result = await this.getPaymentsByCustomerUseCase.execute({ customerId, page, limit });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getPaymentsByCustomer error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -126,7 +118,6 @@ export class AdminPaymentController {
             const result = await this.getPaymentsByPackageUseCase.execute({ packageId, page, limit });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getPaymentsByPackage error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -139,7 +130,6 @@ export class AdminPaymentController {
             const result = await this.getPaymentsByStatusUseCase.execute({ status, page, limit });
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getPaymentsByStatus error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -149,7 +139,6 @@ export class AdminPaymentController {
             const result = await this.getPaymentStatsUseCase.execute();
             return res.status(200).json(result);
         } catch (error) {
-            console.log("getPaymentStats error : ", error);
             HandleError.handle(error, res);
         }
     }

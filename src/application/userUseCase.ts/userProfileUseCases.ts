@@ -20,7 +20,6 @@ export class UserUpdateUserProfileImageUseCase {
 
             return { success: true, message: "Profile image updated" };
         } catch (error) {
-            console.log("UserUpdateUserProfileImageUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to get testimonials");
         }
     }
@@ -68,7 +67,6 @@ export class UserUpdatePorifleDataUseCase {
             return { success: true, message: "", data: response };
         }
         catch (error) {
-            console.log("UserUpdatePorifleData error : ", error);
             throw handleUseCaseError(error || "Failed to get testimonials");
         }
     }
@@ -93,7 +91,6 @@ export class UserUpdateResumeKeyUseCase {
 
             return { success: true, message: "Resume updated" };
         } catch (error) {
-            console.log("UserUpdateResumeKeyUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to update resume");
         }
     }

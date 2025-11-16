@@ -18,7 +18,6 @@ export class S3FileDeleteUrlService {
       await this.s3.send(command);
       return { success: true, message: "File deleted successfully!" };
     } catch (error) {
-      console.error("Error generating signed URL:", error);
       throw new Error("Failed to generate pre-signed URL");
     }
   }

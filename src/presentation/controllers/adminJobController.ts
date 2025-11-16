@@ -34,7 +34,6 @@ export class AdminJobController {
       const result = await this.createJobUseCase.execute(validatedData);
       res.status(201).json(result);
     } catch (error) {
-      console.log("Create job error:", error);
       HandleError.handle(error, res);
     }
   }
@@ -45,7 +44,6 @@ export class AdminJobController {
       const result = await this.getAllJobsUseCase.execute(validatedData);
       res.status(200).json(result);
     } catch (error) {
-      console.log("Get all jobs error:", error);
       HandleError.handle(error, res);
     }
   }
@@ -57,7 +55,6 @@ export class AdminJobController {
       const result = await this.getJobByIdUseCase.execute(new Types.ObjectId(jobId));
       res.status(200).json(result);
     } catch (error) {
-      console.log("Get job error:", error);
       HandleError.handle(error, res);
     }
   }
@@ -70,7 +67,6 @@ export class AdminJobController {
       const result = await this.updateJobUseCase.execute({jobId: new Types.ObjectId(jobId), updatedData: validatedData});
       res.status(200).json(result);
     } catch (error) {
-      console.log("Update job error:", error);
       HandleError.handle(error, res);
     }
   }
@@ -83,7 +79,6 @@ export class AdminJobController {
       const result = await this.deleteJobUseCase.execute(new Types.ObjectId(jobId));
       res.status(200).json(result);
     } catch (error) {
-      console.log("Delete job error:", error);
       HandleError.handle(error, res);
     }
   }

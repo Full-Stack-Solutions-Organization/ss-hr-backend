@@ -82,7 +82,6 @@ export class AuthController {
       };
       res.status(200).json(resultWithoutToken);
     } catch (error) {
-      console.log("error : ", error);
       HandleError.handle(error, res);
     }
   };
@@ -148,8 +147,6 @@ export class AuthController {
         careerData
       };
 
-      console.log("resultWithoutToken : ", resultWithoutToken);
-
       res.status(200).json(resultWithoutToken);
     } catch (error) {
       HandleError.handle(error, res);
@@ -181,8 +178,6 @@ export class AuthController {
     }
   }
 
-
-  // solve the redirected to home page
   async googleCallback(req: Request, res: Response) {
     try {
       if (!req.user) {
@@ -208,9 +203,7 @@ export class AuthController {
       const frontendUrl = appConfig.frontendUrl;
       res.redirect(`${frontendUrl}/`);
     } catch (error) {
-      console.log("Google auth error:", error);
       const frontendUrl = appConfig.frontendUrl;
-      console.log("frontendUrl : ", frontendUrl);
       res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
     }
   }
@@ -221,7 +214,6 @@ export class AuthController {
       const result = await this.verifyEmailUseCase.execute({ email: validatedData.email });
       res.status(200).json(result);
     } catch (error) {
-      console.log("verifyEmail error : ", error);
       HandleError.handle(error, res);
     }
   }
@@ -232,7 +224,6 @@ export class AuthController {
       const result = await this.updatePasswordUseCase.execute(validatedDate);
       res.status(200).json(result);
     } catch (error) {
-      console.log("updatePassword error : ", error);
       HandleError.handle(error, res);
     }
   }

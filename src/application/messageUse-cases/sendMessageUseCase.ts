@@ -45,7 +45,6 @@ export class SendMessageUseCase {
             
             return { data: newMessage }
         } catch (error) {
-            console.log("Send message error : ",error);
             throw new Error("Failed send to message");
         }
 

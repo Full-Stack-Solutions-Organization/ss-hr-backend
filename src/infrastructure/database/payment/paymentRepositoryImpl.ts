@@ -44,7 +44,6 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
       });
       return this.mapToEntity(createdPayment);
     } catch (error: any) {
-      console.error("Detailed createPayment error:", error);
       throw new Error("Unable to create payment, please try again after a few minutes.");
     }
   }

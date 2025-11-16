@@ -31,7 +31,6 @@ export class PackageRepositoryImpl implements IPackageRepository {
       const createdPackage = await PackageModel.create(packageData);
       return this.mapToEntity(createdPackage);
     } catch (error: any) {
-      console.error("Detailed createPackage error:", error);
       throw new Error("Unable to create package, please try again after a few minutes.");
     }
   }

@@ -22,7 +22,6 @@ export class UserGetAllJobsUseCase {
                 totalPages: result.totalPages,
             };
         } catch (error) {
-            console.log("UserGetAllJobsUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to get all jobs");
         }
     }

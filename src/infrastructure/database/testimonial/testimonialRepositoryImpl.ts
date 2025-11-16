@@ -23,7 +23,6 @@ export class TestimonialRepositoryImpl implements ITestimonialRepository {
       const createdTestimonial = await TestimonialModel.create({ ...testimonial, isVisible: true });
       return this.mapToEntity(createdTestimonial);
     } catch (error: any) {
-      console.error("Detailed createTestimonial error:", error);
       throw new Error("Unable to create testimonial, please try again after a few minutes.");
     }
   }

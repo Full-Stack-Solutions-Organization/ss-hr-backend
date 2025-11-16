@@ -16,7 +16,6 @@ export class S3FileGetUrlService {
 
       const existing = await this.signedUrlRepositoryImpl.findOneSignedUrl(key);
       if (existing && existing.expiresAt > new Date()) {
-        console.log("Returning cached signed URL");
         return existing.url;
       }
 
@@ -30,10 +29,8 @@ export class S3FileGetUrlService {
 
       await this.signedUrlRepositoryImpl.findOneSignedUrlAndUpdate(key, signedUrl, expiresAt);
 
-      console.log("Generated new signed URL");
       return signedUrl;
     } catch (error) {
-      console.error("Error generating or fetching signed URL:", error);
       throw new Error("Failed to generate signed URL");
     }
   }

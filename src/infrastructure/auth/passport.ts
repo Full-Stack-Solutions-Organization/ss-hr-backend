@@ -11,7 +11,6 @@ import { CreateGoogleUser } from '../../domain/repositories/IUserRepository';
 const userRepositoryImpl = new UserRepositoryImpl();
 
 if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret) {
-  console.warn('Google OAuth credentials not found. Google SSO will be disabled.');
 } else {
   passport.use(new GoogleStrategy({
     clientID: googleClientConfig.googleClientId,

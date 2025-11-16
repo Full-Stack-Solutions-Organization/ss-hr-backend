@@ -81,7 +81,6 @@ export class UpdateTestimonialUseCase {
         message: "Testimonial updated successfully",
       };
     } catch (error) {
-      console.log("UpdateTestimonialUseCase error :", error);
       throw handleUseCaseError(error || "Failed to update testimonial");
     }
   }

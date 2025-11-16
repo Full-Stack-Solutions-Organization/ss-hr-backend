@@ -42,7 +42,6 @@ export class MessageController {
             const result = await this.getAllMessagesUseCase.execute({ fromUserId: new Types.ObjectId(fromUserId), toUserId: new Types.ObjectId(toUserId) });
             res.status(200).json(result);
         } catch (error) {
-            console.log("Error : ",error);
             HandleError.handle(error, res);
         }
     }
@@ -62,7 +61,6 @@ export class MessageController {
             });
             res.status(200).json(result);
         } catch (error) {
-            console.log("error : ", error);
             HandleError.handle(error, res);
         }
     }

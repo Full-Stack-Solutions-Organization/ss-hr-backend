@@ -45,7 +45,6 @@
 //             const result = await this.createAdminUseCase.execute({ ...validated, profileImage: req.file });
 //             res.status(201).json(result);
 //         } catch (error) {
-//             console.log("createNewAdmin error : ", error);
 //             HandleError.handle(error, res);
 //         }
 //     }
@@ -56,7 +55,6 @@
 //             const result = await this.adminGetAllAdminsUseCase.execute(validatedData);
 //             return res.status(200).json(result);
 //         } catch (error) {
-//             console.log("getAllAdmins error : ", error);
 //             HandleError.handle(error, res);
 //         }
 //     }
@@ -68,7 +66,6 @@
 //             const result = await this.deleteAdminUseCase.execute(user.role as Role,new Types.ObjectId(adminId));
 //             res.status(200).json(result);
 //         } catch (error) {
-//             console.log("deleteAdmin error : ", error);
 //             HandleError.handle(error, res);
 //         }
 //     }

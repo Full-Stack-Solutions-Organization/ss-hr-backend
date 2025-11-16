@@ -17,7 +17,6 @@ export class UserCreateCareerDataUseCase {
 
             return { success: true, message: "Data saved successfully", data: result }
         } catch (error) {
-            console.log("UserCreateCareerDataUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to create career data");
         }
     }
@@ -38,7 +37,6 @@ export class UserUpdateCareerDataUseCase {
 
             return { success: true, message: "Data updated successfully", data: result }
         } catch (error) {
-            console.log("UserUpdateCareerDataUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to update career data");
         }
     }

@@ -18,7 +18,6 @@ export class UserCreateAddressUseCase {
 
             return{ success: true, message: "Address created successfully", data: address }
         } catch (error) {
-            console.log("UserCreateAddressUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to get testimonials");
         }
      }
@@ -36,7 +35,6 @@ export class UserUpdateAddressUseCase {
 
             return { success: true, message: "Address updated successfully", data: address };
         } catch (error) {
-            console.log("UserUpdateAddressUseCase error : ", error);
             throw handleUseCaseError(error || "Failed to update address");
         }
     }

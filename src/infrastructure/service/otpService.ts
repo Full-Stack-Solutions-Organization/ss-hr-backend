@@ -17,7 +17,6 @@ export class OTPService {
       await redis.set(verificationToken,otp, { px : 60000 });
       return otp;
     } catch (error) {
-      console.log("setOtp error : ",error);
       throw new Error("Failed to generate OTP.");
     }
   }
@@ -27,7 +26,6 @@ export class OTPService {
       const storedOtp = await redis.get(verificationToken);
       return storedOtp == otp;
     } catch (error) {
-      console.log("verifyOtp error : ",error);
       throw new Error("Failed to verify OTP.")
     }
   }
@@ -49,7 +47,6 @@ export class OTPService {
         html: options.html,
       });
     } catch (error) {
-      console.log("Email sending error : ",error);
       throw new Error("Failed to send Email.");
     }
   }

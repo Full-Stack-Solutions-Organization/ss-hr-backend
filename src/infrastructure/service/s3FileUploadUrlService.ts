@@ -37,7 +37,6 @@ export class S3FileUploadUrlService {
       const uploadUrl = await getSignedUrl(this.s3, command, { expiresIn: 300 });
       return { uploadUrl, key };
     } catch (error) {
-      console.error("Error generating signed URL:", error);
       throw new Error("Failed to generate pre-signed URL");
     }
   }

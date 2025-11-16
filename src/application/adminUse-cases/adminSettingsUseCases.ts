@@ -88,7 +88,6 @@ export class DeleteAdminUseCase {
 
             return { success: true, message: 'Admin deleted successfully' };
         } catch (error) {
-            console.log("DeleteAdminUseCase Error : ", error);
             throw handleUseCaseError(error || "Unexpected error in deleting admin");
         }
     }

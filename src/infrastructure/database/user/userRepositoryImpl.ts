@@ -37,7 +37,6 @@ export class UserRepositoryImpl implements IUserRepository {
       const createdUser = await UserModel.create({ ...user });
       return this.mapToEntity(createdUser);
     } catch (error) {
-      console.error("Detailed createUser error:", error);
       throw new Error("Unable to register, please try again after a few minutes.");
     }
   }
@@ -123,7 +122,6 @@ export class UserRepositoryImpl implements IUserRepository {
       const user = await UserModel.findOne({ googleId });
       return user ? this.mapToEntity(user) : null;
     } catch (error) {
-      console.log("findUserByGoogleId error : ", error);
       throw new Error("User finding using googleId failed");
     }
   }
@@ -146,7 +144,6 @@ export class UserRepositoryImpl implements IUserRepository {
         ? users.map((user) => this.mapToEntity(user))
         : null;
     } catch (error) {
-      console.log("findAllUsersForChatSidebar error :", error);
       throw new Error(`${isAdmin ? "Users" : "Chat Support"} fetching failed`);
     }
   }

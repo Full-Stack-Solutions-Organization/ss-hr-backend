@@ -46,17 +46,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-app.use('/api/auth', authRouter);
-app.use('/api/admin/jobs', adminJobRouter);
-app.use('/api/admin/chat', adminChatRouter);
-app.use('/api/admin/users', adminUsersRouter);
-app.use("/api/admin/testimonials", adminTestimonialRouter);
-app.use("/api/admin/applications", adminApplicationRouter);
-app.use('/api/admin/packages', adminPackageRouter);
-app.use('/api/admin/payments', adminPaymentRouter);
-app.use('/api/message', messageRouter);
-app.use('/api/user', userRouter);
-app.use("/api/s3/file", S3Router);
+app.use('/api/auth', authRoutes);
+app.use("/api/admin/settings", adminSettingsRoutes);
+app.use('/api/admin/jobs', adminJobRoutes);
+app.use('/api/admin/chat', adminChatRoutes);
+app.use('/api/admin/users', adminUsersRoutes);
+app.use("/api/admin/testimonials", adminTestimonialRoutes);
+app.use('/api/admin/packages', adminPackageRoutes);
+app.use('/api/admin/payments', adminPaymentRoutes);
+app.use('/api/message', messageRoutes);
+app.use('/api/user', userRoutes);
+
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({

@@ -1,6 +1,7 @@
 import { appConfig } from "./config/env";
 import { socketServer } from "./infrastructure/lib/socket.io";
 import { connectDB, disconnectDB } from "./config/database/connection";
+import logger from "./infrastructure/logger/logger";
 
 const port = parseInt(appConfig.port || "5000", 10);
 
@@ -9,14 +10,14 @@ async function startServer() {
     await connectDB();
 
     const server = socketServer.listen(port, () => {
-      console.log(`Server running on port ${port}`);
+      logger.info(`Server running on port ${port}`);
     });
 
     const shutdown = async () => {
-      console.log("\nShutting down server...");
+      logger.info("\nShutting down server...");
       await disconnectDB();
       server.close(() => {
-        console.log("🛑 Server stopped");
+        logger.info("🛑 Server stopped");
         process.exit(0);
       });
     };
@@ -25,7 +26,7 @@ async function startServer() {
     process.on("SIGTERM", shutdown);
 
   } catch (error) {
-    console.error("❌ Server startup failed:", error);
+    logger.error("❌ Server startup failed:", error);
     process.exit(1);
   }
 }

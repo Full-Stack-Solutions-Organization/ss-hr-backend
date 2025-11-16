@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { mongoConfig } from "../env";
+import logger from "../../infrastructure/logger/logger";
 
 export class DatabaseConnection {
   private static instance: DatabaseConnection;
@@ -22,24 +23,24 @@ export class DatabaseConnection {
       }
 
       await mongoose.connect(mongoUri);
-      console.log("✅ Database connected");
+      logger.info("✅ Database connected");
 
       mongoose.connection.on("error", (error) => {
         console.error("❌ Database connection error:", error);
       });
 
       mongoose.connection.on("disconnected", () => {
-        console.log("⚠️ Database disconnected");
+        logger.info("⚠️ Database disconnected");
       });
     } catch (error) {
-      console.error("❌ Failed to connect to database:", error);
+      logger.error("❌ Failed to connect to database:", error);
       process.exit(1);
     }
   }
 
   public async disconnect(): Promise<void> {
     await mongoose.connection.close();
-    console.log("🛑 Database connection closed");
+    logger.info("🛑 Database connection closed");
   }
 }
 

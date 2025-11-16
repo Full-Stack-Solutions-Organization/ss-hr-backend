@@ -16,3 +16,7 @@ declare global {
         }
     }
 }
+
+interface HttpError extends Error {
+  status?: number;
+}

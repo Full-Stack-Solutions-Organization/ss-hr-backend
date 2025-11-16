@@ -9,9 +9,9 @@ import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepos
 import { AddressRepositoryImpl } from "../../infrastructure/database/address/addressRepositoryImpl";
 import { CareerDataRepositoryImpl } from "../../infrastructure/database/careerData/careerDataRepositoryImpl";
 import { createAddressZodSchema, createCareerDataSchema, updateUserInfoSchema } from "../../infrastructure/zod/user.zod";
-import { UserCreateAddressUseCase, UserUpdateAddressUseCase } from "../../application/userUseCase.ts/userAddressUseCases";
-import { UserCreateCareerDataUseCase, UserUpdateCareerDataUseCase } from "../../application/userUseCase.ts/userCareerDataUseCases";
-import { UserUpdatePorifleDataUseCase, UserUpdateResumeKeyUseCase, UserUpdateUserProfileImageUseCase } from "../../application/userUseCase.ts/userProfileUseCases";
+import { UserCreateAddressUseCase, UserUpdateAddressUseCase } from "../../application/userUse-Case.ts/userAddressUseCases";
+import { UserCreateCareerDataUseCase, UserUpdateCareerDataUseCase } from "../../application/userUse-Case.ts/userCareerDataUseCases";
+import { UserUpdatePorifleDataUseCase, UserUpdateResumeKeyUseCase, UserUpdateUserProfileImageUseCase } from "../../application/userUse-Case.ts/userProfileUseCases";
 
 const s3 = new S3Client();
 const userRepositoryImpl = new UserRepositoryImpl();

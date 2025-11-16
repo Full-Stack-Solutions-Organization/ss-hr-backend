@@ -1,15 +1,16 @@
 import passport from 'passport';
 import { Types } from 'mongoose';
-import { appConfig, googleClientConfig, } from '../../config/env';
+import { v4 as uuidv4 } from 'uuid';
+import { LimitedRole } from '../zod/common.zod';
+import { googleClientConfig, } from '../../config/env';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { UserRepositoryImpl } from '../database/user/userRepositoryImpl';
 import { CreateGoogleUser } from '../../domain/repositories/IUserRepository';
-import { Role } from '../../domain/entities/user';
 
-const userRepository = new UserRepositoryImpl();
+
+const userRepositoryImpl = new UserRepositoryImpl();
 
 if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret) {
-  console.warn('Google OAuth credentials not found. Google SSO will be disabled.');
 } else {
   passport.use(new GoogleStrategy({
     clientID: googleClientConfig.googleClientId,
@@ -17,32 +18,36 @@ if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret
     callbackURL: googleClientConfig.googleCallbackURL,
   }, async (accessToken, refreshToken, profile, done) => {
     try {
-      const existingUser = await userRepository.findUserByGoogleId(profile.id);
-      
-      if (existingUser) {
-        return done(null, existingUser);
-      }
+          const existingUser = await userRepositoryImpl.findUserByGoogleId(profile.id);
+          if (existingUser) {
+            return done(null, existingUser);
+          }
 
-      const emailUser = await userRepository.findUserByEmail(profile.emails?.[0]?.value || '');
-      
-      if (emailUser) {
-        emailUser.googleId = profile.id;
-        await userRepository.updateUser(emailUser);
-        return done(null, emailUser);
-      }
+          const email = profile.emails?.[0]?.value;
+          if (!email) {
+            return done(new Error("Google account has no public email."), undefined);
+          }
 
-      const newUser = await userRepository.createUser<CreateGoogleUser>({
-        googleId: profile.id,
-        fullName: profile.displayName || '',
-        email: profile.emails?.[0]?.value || '',
-        password: '',
-        profileImage: profile.photos?.[0]?.value || '',
-        role: Role.User,
-        isVerified: true,
-        verificationToken: '',
-        phone: '',
-        phoneTwo: '',
-      });
+          const emailUser = await userRepositoryImpl.findUserByEmail(email);
+          if (emailUser) {
+            emailUser.googleId = profile.id;
+            await userRepositoryImpl.updateUser(emailUser);
+            return done(null, emailUser);
+          }
+
+          const verificationToken = uuidv4();
+      
+            const user: CreateGoogleUser = { 
+              email,
+              fullName: profile.displayName,
+              googleId: profile.id,
+              isVerified: true,
+              role: LimitedRole.User,
+              verificationToken,
+            };
+      
+            const newUser = await userRepositoryImpl.createUser<CreateGoogleUser>(user);
+            if(!newUser) throw new Error("Failed to sign up, please try again");
 
       return done(null, newUser);
     } catch (error) {
@@ -52,16 +57,17 @@ if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret
 }
 
 passport.serializeUser((user: any, done) => {
-  done(null, user._id);
+  done(null, user._id.toString());
 });
 
 passport.deserializeUser(async (id: string, done) => {
   try {
-    const user = await userRepository.findUserById(new Types.ObjectId(id));
+    const user = await userRepositoryImpl.findUserById(new Types.ObjectId(id));
     done(null, user);
   } catch (error) {
     done(error, null);
   }
 });
+
 
 export default passport;

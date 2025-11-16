@@ -1,45 +1,55 @@
-// **** Controller for user side ( not for admins user side);
-
 import { Types } from "mongoose";
 import { Request, Response } from "express";
 import { DecodedUser } from "../../express";
-import { S3Client } from "@aws-sdk/client-s3";
 import { aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
-import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
+import { updateApplicationZodSchmea } from "../../infrastructure/zod/user.zod";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
-import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
+import { UserGetAllJobsUseCase, UserGetJobByIdUseCase } from "../../application/userUseCase.ts/useJobUseCases";
+import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
+import { paginationReqQuery, ValidateObjectId } from "../../infrastructure/zod/common.zod";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
-import { UseGetTestimonialsUseCase } from "../../application/userUseCase.ts/userTestimonial";
-import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
-import { UserUpdateUserProfileImageUseCase } from "../../application/userUseCase.ts/userProfileUseCase";
+import { AddressRepositoryImpl } from "../../infrastructure/database/address/addressRepositoryImpl";
+import { UseGetTestimonialsUseCase } from "../../application/userUseCase.ts/userTestimonialUseCases";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 import { TestimonialRepositoryImpl } from "../../infrastructure/database/testimonial/testimonialRepositoryImpl";
+import { ApplicationRepositoryImpl } from "../../infrastructure/database/application/applicationRepositoryImpl";
 import { GetAllUsersForChatSideBarUseCase } from "../../application/commonUse-cases/getAllUsersForChatSidebarUseCase";
+import { UserCreateApplicationUseCase, UserFetchAllApplicationsUseCase, UserUpdateApplicationUseCase } from "../../application/userUseCase.ts/userApplicationUseCases";
 
-const s3 = new S3Client();
-const fileDeleteService = new FileDeleteService(s3);
+const jobRepositoryImpl = new JobRepositoryImpl();
 const userRepositoryImpl = new UserRepositoryImpl();
-const randomStringGenerator = new RandomStringGenerator();
+const addressRepositoryImpl = new AddressRepositoryImpl();
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
-const s3KeyGenerator = new S3KeyGenerator(randomStringGenerator);
 const testimonialRepositoryImpl = new TestimonialRepositoryImpl();
-const fileUploadService = new  FileUploadService(s3, s3KeyGenerator);
+const applicationRepositoryImpl = new ApplicationRepositoryImpl();
 const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);
 
-const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
+const userGetAllJobsUseCase = new UserGetAllJobsUseCase(jobRepositoryImpl);
+const userFetchAllApplicationsUseCase = new UserFetchAllApplicationsUseCase(applicationRepositoryImpl);
 const useGetTestimonialsUseCase = new UseGetTestimonialsUseCase(testimonialRepositoryImpl, signedUrlService);
-const userUpdateUserProfileImageUseCase = new UserUpdateUserProfileImageUseCase(userRepositoryImpl, fileDeleteService, fileUploadService, signedUrlService );
+const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
+const userCreateApplicationUseCase = new UserCreateApplicationUseCase(userRepositoryImpl, addressRepositoryImpl, applicationRepositoryImpl);
+const userUpdateApplicationUseCase = new UserUpdateApplicationUseCase(userRepositoryImpl, addressRepositoryImpl, applicationRepositoryImpl);
+const userGetJobByIdUseCase = new UserGetJobByIdUseCase(jobRepositoryImpl);
 
-export class UserController {
+class UserController {
     constructor(
         private getAllUsersForChatSideBarUseCase: GetAllUsersForChatSideBarUseCase,
-        private userUpdateUserProfileImageUseCase: UserUpdateUserProfileImageUseCase,
         private useGetTestimonialsUseCase: UseGetTestimonialsUseCase,
+        private userGetAllJobsUseCase: UserGetAllJobsUseCase,
+        private userCreateApplicationUseCase: UserCreateApplicationUseCase,
+        private userUpdateApplicationUseCase: UserUpdateApplicationUseCase,
+        private userFetchAllApplicationsUseCase: UserFetchAllApplicationsUseCase,
+        private userGetJobByIdUseCase: UserGetJobByIdUseCase
     ) {
         this.getAdminsForChatSidebar = this.getAdminsForChatSidebar.bind(this);
-        this.updateUserProfileImage = this.updateUserProfileImage.bind(this);
         this.getTestimonilas = this.getTestimonilas.bind(this);
+        this.getAllJobs = this.getAllJobs.bind(this);
+        this.applyJob = this.applyJob.bind(this);
+        this.cancelJobApplication = this.cancelJobApplication.bind(this);
+        this.getApplications = this.getApplications.bind(this);
+        this.userGetJobById = this.userGetJobById.bind(this);
     }
 
     async getAdminsForChatSidebar(req: Request, res: Response) {
@@ -47,22 +57,6 @@ export class UserController {
             const result = await this.getAllUsersForChatSideBarUseCase.execute(false);
             res.status(200).json(result);
         } catch (error) {
-            console.log("getAllUsersForChatSidebar error : ", error);
-            HandleError.handle(error, res);
-        }
-    }
-
-    async updateUserProfileImage(req: Request, res: Response) {
-         try {
-            console.log("ProfileImage updating ")
-            const userId = (req.user as DecodedUser).userId;
-            const file = req.file;
-            if(!userId || !file) throw new Error("Invalid request.");
-            const result = await this.userUpdateUserProfileImageUseCase.execute({userId: new Types.ObjectId(userId), file});
-            console.log("result : ",result);
-            res.status(200).json(result);
-        } catch (error) {
-            console.log("getTestimonilas error : ", error);
             HandleError.handle(error, res);
         }
     }
@@ -72,18 +66,82 @@ export class UserController {
             const result = await this.useGetTestimonialsUseCase.execute();
             res.status(200).json(result);
         } catch (error) {
-            console.log("getTestimonilas error : ", error);
             HandleError.handle(error, res);
         }
     }
-    
+
+    async getAllJobs(req: Request, res: Response) {
+        try {
+            const userId = (req.user as DecodedUser).userId;
+            const validatedData = paginationReqQuery.parse(req.query);
+            const result = await this.userGetAllJobsUseCase.execute(validatedData, new Types.ObjectId(userId));
+            res.status(200).json(result);
+        } catch (error) {
+            HandleError.handle(error, res);
+        }
+    }
+
+    async applyJob(req: Request, res: Response) {
+        try {
+            const userId = (req.user as DecodedUser).userId;
+            const validatedParams = ValidateObjectId(req.params.id, "job id");
+            const result = await this.userCreateApplicationUseCase.execute({
+                jobId: new Types.ObjectId(validatedParams.id),
+                userId: new Types.ObjectId(userId)
+            });
+            res.status(200).json(result);
+        } catch (error) {
+            HandleError.handle(error, res);
+        }
+    }
+
+    async cancelJobApplication(req: Request, res: Response) {
+        try {
+            const userId = (req.user as DecodedUser).userId;
+            const validatedParams = ValidateObjectId(req.params.id, "job id");
+            const validatedData = updateApplicationZodSchmea.parse(req.body);
+            const result = await this.userUpdateApplicationUseCase.execute({
+                _id: new Types.ObjectId(validatedParams.id),
+                status: validatedData.status,
+                userId: new Types.ObjectId(userId)
+            })
+            res.status(200).json(result);
+        } catch (error) {
+            HandleError.handle(error, res);
+        }
+    }
+
+    async getApplications(req: Request, res: Response) {
+        try {
+            const userId = (req.user as DecodedUser).userId;
+            const validatedData = paginationReqQuery.parse(req.query);
+            const result = await this.userFetchAllApplicationsUseCase.execute(validatedData, new Types.ObjectId(userId));
+            res.status(200).json(result);
+        } catch (error) {
+            HandleError.handle(error, res);
+        }
+    }
+
+    async userGetJobById(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const { id: jobId } = ValidateObjectId(id, "Job Id");
+            const result = await this.userGetJobByIdUseCase.execute(new Types.ObjectId(jobId));
+            res.status(200).json(result);
+        } catch (error) {
+            HandleError.handle(error, res);
+        }
+    }
 
 }
 
-const userController = new UserController(
+export const userController = new UserController(
     getAllUsersForChatSideBarUseCase,
-    userUpdateUserProfileImageUseCase,
-    useGetTestimonialsUseCase
+    useGetTestimonialsUseCase,
+    userGetAllJobsUseCase,
+    userCreateApplicationUseCase,
+    userUpdateApplicationUseCase,
+    userFetchAllApplicationsUseCase,
+    userGetJobByIdUseCase
 );
 
-export { userController };

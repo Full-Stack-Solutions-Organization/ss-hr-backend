@@ -1,69 +1,39 @@
 import { z } from 'zod';
-import { Role } from '../../domain/entities/user';
+import { email, fullName, limitedRoleSchema, otp, password, roleSchema, verificationToken } from './common.zod';
 
-export const fullNameFiled = z.string()
-  .min(4, "FullName must be at least 4 characters")
-  .max(30, "FullName must be at most 30 characters")
-  .regex(/^[a-zA-Z ]{4,30}$/, "Invalid username");
-
-export const emailField = z.string().email("Invalid email format");
-
-export const passwordField = z.string()
-  .min(8, "Password must be at least 8 characters")
-  .max(50, "Password must be at most 50 characters")
-  .regex(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,50}$/,
-    "Invalid password"
-  );
-
-export const roleField = z.enum(["user", "admin", "superAdmin", "systemAdmin"] as const);
-
-export const limitedRoleField = z.enum([Role.User, Role.Admin, Role.SuperAdmin]);
-
-export const otpField = z.string().length(6, "OTP must be exactly 6 digits");
-
-export const verificationTokenField = z.string();
-
-// Regist controller zod validation
-const RegisterZodSchema = z.object({
-  fullName: fullNameFiled,
-  email: emailField,
-  password: passwordField,
-  role: limitedRoleField
+// register user zod validation
+export const registerZodSchema = z.object({
+  fullName,
+  email,
+  password,
+  role: limitedRoleSchema
 });
 
-// OTP Verification controller zod validation
-const OTPVerificationZodSchema = z.object({
-  otp: otpField,
-  verificationToken: verificationTokenField,
-  role: limitedRoleField
+// otp verification zod validation
+export const otpVerificationZodSchema = z.object({
+  otp,
+  verificationToken,
+  role: limitedRoleSchema
 });
 
-// Resend otp controller zod validation
-const ResendOTPZodSchema = z.object({
-  role: limitedRoleField,
-  verificationToken: verificationTokenField.optional(),
-  email: emailField.optional()
+// resend otp controller zod validation
+export const resendOTPZodSchema = z.object({
+  role: limitedRoleSchema,
+  verificationToken: verificationToken.optional(),
+  email: email.optional()
 });
 
-// Login controller zod validation
-const LoginZodSchema = z.object({
-  email: emailField,
-  password: passwordField,
-  role: roleField
+// login controller zod validation
+export const loginZodSchema = z.object({ email, password, role: roleSchema });
+
+// verify email controller zod validation
+export const verifyEmailZodSchema = z.object({ email });
+
+// update password zod validation
+export const updatePasswordZodSchema = z.object({
+  role: limitedRoleSchema,
+  email,
+  verificationToken: verificationToken,
+  password
 });
 
-// Update password zod validation
-const UpdatePasswordZodSchema = z.object({
-  role: limitedRoleField,
-  verificationToken: verificationTokenField.optional(),
-  password: passwordField
-});
-
-export {
-    RegisterZodSchema,
-    OTPVerificationZodSchema,
-    ResendOTPZodSchema,
-    LoginZodSchema,
-    UpdatePasswordZodSchema
-};

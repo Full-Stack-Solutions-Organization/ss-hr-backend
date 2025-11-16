@@ -1,14 +1,15 @@
 import { Types } from "mongoose";
+import { ApplicationStatusType } from "../../infrastructure/zod/common.zod";
 
 export class Application {
     constructor(
         public _id: Types.ObjectId,
-        public userId: string,
-        public jobId: string,
-        public resume: string, // file in aws_s3
-        public applicationStatus: boolean,
-        public createdAt: string,
-        public updatedAt: string,
+        public userId: Types.ObjectId,
+        public jobId: Types.ObjectId,
+        public status: ApplicationStatusType,
+        public applicationUniqueId: string,
+        public createdAt: Date,
+        public updatedAt: Date,
     ) { }
 }
 

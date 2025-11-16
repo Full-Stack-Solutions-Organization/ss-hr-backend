@@ -1,8 +1,3 @@
-import { Types } from "mongoose";
-import { Payment } from "../../domain/entities/payment";
-import { ApiResponse } from "../../infrastructure/dtos/common.dts";
-import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
-import { PaymentRepositoryImpl } from "../../infrastructure/database/payment/paymentRepositoryImpl";
 import {
   CreatePaymentRequest,
   CreatePaymentResponse,
@@ -15,59 +10,24 @@ import {
   GetPaymentsByPackageRequest,
   GetPaymentsByStatusRequest,
 } from "../../infrastructure/dtos/payment.dto";
+import { Payment } from "../../domain/entities/payment";
+import { ApiResponse } from "../../infrastructure/dtos/common.dts";
+import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
+import { PaymentRepositoryImpl } from "../../infrastructure/database/payment/paymentRepositoryImpl";
 
 export class CreatePaymentUseCase {
   constructor(private paymentRepository: PaymentRepositoryImpl) {}
 
   async execute(data: CreatePaymentRequest): Promise<CreatePaymentResponse> {
     try {
-      const { 
-        customerId,
-        packageId,
-        customerName, 
-        packageName, 
-        totalAmount, 
-        paidAmount, 
-        paymentMethod, 
-        paymentDate, 
-        referenceId, 
-        paymentProof,
-        adminNotes
-      } = data;
 
-      const createdPayment = await this.paymentRepository.createPayment({
-        customerId,
-        packageId,
-        customerName,
-        packageName,
-        totalAmount,
-        paidAmount: paidAmount || 0,
-        paymentMethod,
-        paymentDate,
-        referenceId,
-        paymentProof,
-        adminNotes: adminNotes || "",
-      });
+      data.balanceAmount = data.totalAmount - data.paidAmount
+      const createdPayment = await this.paymentRepository.createPayment(data);
 
       return {
         success: true,
         message: "Payment created successfully",
-        payment: {
-          _id: createdPayment._id,
-          customerId: createdPayment.customerId,
-          packageId: createdPayment.packageId,
-          customerName: createdPayment.customerName,
-          packageName: createdPayment.packageName,
-          totalAmount: createdPayment.totalAmount,
-          paidAmount: createdPayment.paidAmount,
-          balanceAmount: createdPayment.balanceAmount,
-          paymentMethod: createdPayment.paymentMethod,
-          paymentDate: createdPayment.paymentDate,
-          referenceId: createdPayment.referenceId,
-          paymentProof: createdPayment.paymentProof,
-          adminNotes: createdPayment.adminNotes,
-          status: createdPayment.status,
-        },
+        payment: createdPayment,
       };
     } catch (error) {
       throw handleUseCaseError(error || "Failed to create payment");
@@ -87,45 +47,28 @@ export class UpdatePaymentUseCase {
 
       const updatedPayment = new Payment(
         existingPayment._id,
-        updateData.customerId ?? existingPayment.customerId,
-        updateData.packageId ?? existingPayment.packageId,
         updateData.customerName ?? existingPayment.customerName,
         updateData.packageName ?? existingPayment.packageName,
         updateData.totalAmount ?? existingPayment.totalAmount,
         updateData.paidAmount ?? existingPayment.paidAmount,
-        existingPayment.balanceAmount, // Will be recalculated
+        updateData.balanceAmount = updateData.totalAmount - updateData.paidAmount,
         updateData.paymentMethod ?? existingPayment.paymentMethod,
         updateData.paymentDate ?? existingPayment.paymentDate,
         updateData.referenceId ?? existingPayment.referenceId,
         updateData.paymentProof ?? existingPayment.paymentProof,
         updateData.adminNotes ?? existingPayment.adminNotes,
-        existingPayment.status, // Will be recalculated
+        updateData.paymentStatus ?? existingPayment.paymentStatus,
         existingPayment.createdAt,
         existingPayment.updatedAt
       );
 
-      const result = await this.paymentRepository.updatePayment(updatedPayment);
-      if (!result) throw new Error("Failed to update payment");
+      const updated = await this.paymentRepository.updatePayment(updatedPayment);
+      if (!updated) throw new Error("Failed to update payment");
 
       return {
         success: true,
         message: "Payment updated successfully",
-        payment: {
-          _id: result._id,
-          customerId: result.customerId,
-          packageId: result.packageId,
-          customerName: result.customerName,
-          packageName: result.packageName,
-          totalAmount: result.totalAmount,
-          paidAmount: result.paidAmount,
-          balanceAmount: result.balanceAmount,
-          paymentMethod: result.paymentMethod,
-          paymentDate: result.paymentDate,
-          referenceId: result.referenceId,
-          paymentProof: result.paymentProof,
-          adminNotes: result.adminNotes,
-          status: result.status,
-        },
+        payment: updated,
       };
     } catch (error) {
       throw handleUseCaseError(error || "Failed to update payment");
@@ -166,24 +109,7 @@ export class GetPaymentByIdUseCase {
       return {
         success: true,
         message: "Payment retrieved successfully",
-        payment: {
-          _id: paymentData._id,
-          customerId: paymentData.customerId,
-          packageId: paymentData.packageId,
-          customerName: paymentData.customerName,
-          packageName: paymentData.packageName,
-          totalAmount: paymentData.totalAmount,
-          paidAmount: paymentData.paidAmount,
-          balanceAmount: paymentData.balanceAmount,
-          paymentMethod: paymentData.paymentMethod,
-          paymentDate: paymentData.paymentDate,
-          referenceId: paymentData.referenceId,
-          paymentProof: paymentData.paymentProof,
-          adminNotes: paymentData.adminNotes,
-          status: paymentData.status,
-          createdAt: new Date(paymentData.createdAt),
-          updatedAt: new Date(paymentData.updatedAt),
-        },
+        payment: paymentData,
       };
     } catch (error) {
       throw handleUseCaseError(error || "Failed to get payment");

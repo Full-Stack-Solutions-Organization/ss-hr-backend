@@ -13,7 +13,6 @@ export class SignedUrlService {
   async generateSignedUrl(s3Key: string, expires: number = 172800): Promise<string> {
 
     try {
-      console.log("generateSignedUrl service");
       const existing = await this.signedUrlRepositoryImpl.findOneSignedUrl(s3Key);
       if (existing && existing.expiresAt > new Date()) {
         return existing.url;
@@ -31,7 +30,6 @@ export class SignedUrlService {
 
       return signedUrl;
     } catch (error) {
-      console.log("generateSignedUrl error : ",error);
       throw new Error("generateSignedUrl failed")
     }
   }

@@ -5,6 +5,7 @@ export interface DecodedUser {
     role: string;
     exp: number;
     iat: number;
+    email?: string;
 }
 
 // Extend the Request interface

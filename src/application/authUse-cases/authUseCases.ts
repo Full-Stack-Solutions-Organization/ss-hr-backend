@@ -1,16 +1,21 @@
 import { Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { adminConfig } from '../../config/env';
-import { Role, User } from '../../domain/entities/user';
+import { User } from '../../domain/entities/user';
+import { Address } from '../../domain/entities/address';
+import { CareerData } from '../../domain/entities/careerData';
 import { JWTService } from '../../infrastructure/security/jwt';
 import { ApiResponse } from '../../infrastructure/dtos/common.dts';
 import { OTPService } from '../../infrastructure/service/otpService';
+import { LimitedRole, Role } from '../../infrastructure/zod/common.zod';
 import { CreateLocalUser } from '../../domain/repositories/IUserRepository';
 import { handleUseCaseError } from '../../infrastructure/error/useCaseError';
 import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
 import { SignedUrlService } from '../../infrastructure/service/generateSignedUrl';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
-import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
+import { AddressRepositoryImpl } from '../../infrastructure/database/address/addressRepositoryImpl';
+import { CareerDataRepositoryImpl } from '../../infrastructure/database/careerData/careerDataRepositoryImpl';
+import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse, UpdatePasswordRequest, VerifyEmailRequest, VerifyEmailResponse } from '../../infrastructure/dtos/auth.dto';
 
 export class RegisterUseCase {
   constructor(
@@ -21,15 +26,13 @@ export class RegisterUseCase {
     try {
       const { email, password, fullName, role } = data;
 
-      const existingUser = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
+      const existingUser = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
       if (existingUser?.isVerified) throw new Error("User already exists with this email");
 
       const hashedPassword = await PasswordHasher.hashPassword(password);
 
       const verificationToken = uuidv4();
       if (!verificationToken) throw new Error("Unexpected error, please try again.");
-
-      const serialNumber: string = await this.userRepositoryImpl.generateNextSerialNumber();
 
       const otp = await OTPService.setOtp(verificationToken);
       if (!otp) throw new Error("Unexpected error, please try again.");
@@ -47,7 +50,6 @@ export class RegisterUseCase {
           password: hashedPassword,
           verificationToken: verificationToken,
           role: role,
-          serialNumber: serialNumber
         });
       }
 
@@ -98,8 +100,8 @@ export class ResendOtpUseCase {
       let user: User | null = null;
 
       if (email && role) {
-        if (role === Role.User) {
-          user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
+        if (role === LimitedRole.User) {
+          user = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
         }
 
       } else if (verificationToken && role) {
@@ -126,7 +128,9 @@ export class ResendOtpUseCase {
 export class LoginUseCase {
   constructor(
     private userRepositoryImpl: UserRepositoryImpl,
-    private signedUrlService: SignedUrlService
+    private signedUrlService: SignedUrlService,
+    private addressRepositoryImpl: AddressRepositoryImpl,
+    private careerDataRepositoryImpl: CareerDataRepositoryImpl,
   ) { }
 
   async execute(data: LoginRequest): Promise<LoginResponse> {
@@ -136,14 +140,14 @@ export class LoginUseCase {
 
       let user: User | null = null;
 
-      if (role === Role.User || role === Role.Admin || role === Role.SuperAdmin) {
-        user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
+      if (role === LimitedRole.User || role === LimitedRole.Admin) {
+        user = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
       } else if (role === Role.SystemAdmin) {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
           throw new Error("Invalid credentials.");
         }
         const token = JWTService.generateToken({ email: email, role: role });
-        return { success: true, message: "Logged In Successfully.", user: { fullName: "Super Admin", profileImage: "", role: role, token } };
+        return { success: true, message: "Logged In Successfully.", user: { fullName: "Super Admin", profileImage: "", role: role }, token };
       } else {
         throw new Error("Invalid request.");
       }
@@ -159,20 +163,47 @@ export class LoginUseCase {
 
       const token = JWTService.generateToken({ userId: user._id, role: role });
 
-      let updateProfileImage;
+      let profileImageSignedUrl: string = "";
+      let resumeSignedUrl: string = "";
 
       if (user.profileImage) {
-        updateProfileImage = await this.signedUrlService.generateSignedUrl(user.profileImage);
+        profileImageSignedUrl = await this.signedUrlService.generateSignedUrl(user.profileImage);
+      }
+
+      if (user.resume) {
+        resumeSignedUrl = await this.signedUrlService.generateSignedUrl(user.resume);
+      }
+
+      let userAddress: Address | null = null;
+      let careerData: CareerData | null = null;
+
+      if (role === LimitedRole.User) {
+        userAddress = await this.addressRepositoryImpl.findAddressesByUserId(user._id);
+        careerData = await this.careerDataRepositoryImpl.findCareerDataByUserId(user._id);
       }
 
       return {
-        success: true, message: 'Logged In Successfully.', user: {
+        success: true,
+        message: 'Logged In Successfully.',
+        user: {
           _id: user._id,
           fullName: user.fullName,
-          profileImage: updateProfileImage ? updateProfileImage : user.profileImage,
+          email: user.email,
+          profileImage: profileImageSignedUrl,
           role: role,
-          token,
-        }
+          dob: user.dob,
+          gender: user.gender,
+          nationality: user.nationality,
+          phone: user.phone,
+          phoneTwo: user.phoneTwo,
+          linkedInUsername: user.linkedInUsername,
+          portfolioUrl: user.portfolioUrl,
+          resume: resumeSignedUrl,
+          professionalStatus: user.professionalStatus
+        },
+        token,
+        address: userAddress ?? null,
+        careerData: careerData ?? null
       };
     } catch (error) {
       throw handleUseCaseError(error || "Unexpected error in VerifyOTPUseCase");
@@ -197,3 +228,62 @@ export class CheckUserStatusUseCase {
   }
 }
 
+
+export class VerifyEmailUseCase {
+  constructor(
+    private userRepositoryImpl: UserRepositoryImpl,
+  ) { }
+
+  async execute(data: VerifyEmailRequest): Promise<VerifyEmailResponse> {
+    try {
+      const { email } = data;
+
+      const user = await this.userRepositoryImpl.findUserByEmail(email);
+      if (!user) throw new Error("Invalid credential");
+
+      const otp = await OTPService.setOtp(user.verificationToken);
+      if (!otp) throw new Error("Failed to generate otp.");
+
+      await OTPService.sendOTP(email, otp);
+      return {
+        success: true, message: "Otp has been sent.", data: {
+          email: user.email,
+          verificationToken: user.verificationToken,
+          role: user.role
+        }
+      }
+    } catch (error) {
+      throw handleUseCaseError(error || "Unexpected error in VerifyEmailUseCase");
+    }
+  }
+}
+
+
+export class UpdatePasswordUseCase {
+  constructor(
+    private userRepositoryImpl: UserRepositoryImpl
+  ) { }
+
+  async execute(data: UpdatePasswordRequest): Promise<ApiResponse> {
+    try {
+      const { email, password, role, verificationToken } = data;
+
+      const user = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
+      if (user?.verificationToken !== verificationToken.toString()) {
+        throw new Error("You are not able to update password, please try again");
+      }
+
+      const hashedPassword = await PasswordHasher.hashPassword(password);
+      if (!hashedPassword) throw new Error("Failed to update password");
+
+      user.password = hashedPassword;
+
+      const updatedUser = await this.userRepositoryImpl.updateUser(user);
+      if (!updatedUser) throw new Error("Failed to update password");
+
+      return { success: true, message: "Password has been updated successfully." };
+    } catch (error) {
+      throw handleUseCaseError(error || "Unexpected error in UpdatePasswordUseCase");
+    }
+  }
+}

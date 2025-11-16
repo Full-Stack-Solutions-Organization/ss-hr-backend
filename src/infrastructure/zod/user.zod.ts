@@ -1,46 +1,90 @@
 import { z } from 'zod';
+import { addressLine1, addressLine2, applicationStatusSchema, city, country, currentCompany, currentDesignation, currentSalary, district, email, expectedSalary, experience, fullName, gender, immediateJoiner, industry, jobtypeSchema, landmark, linkedInUsername, nationality, noticePeriod, password, phone, phoneTwo, portfolioUrl, postalCode, preferredJobTypes, preferredWorkModes, primary, professionalStatus, state, status } from './common.zod';
 
-export const createUserByAdminSchema = z.object({
-  fullName: z.string()
-    .min(4, "Full name must be at least 4 characters")
-    .max(30, "Full name must be at most 30 characters")
-    .regex(/^[a-zA-Z\s]{4,30}$/, "Invalid full name"),
-  email: z.string()
-    .email("Invalid email format")
-    .toLowerCase(),
-  password: z.string()
-    .min(8, "Password must be at least 8 characters")
-    .max(100, "Password must be at most 100 characters")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,100}$/, "Password must contain uppercase, lowercase, number and special character"),
-  role: z.enum(['user', 'admin'], "Invalid role"),
-  phone: z.string()
-    .regex(/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number")
-    .optional(),
-  phoneTwo: z.string()
-    .regex(/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number")
-    .optional()
+// user update Profile details zod schema
+export const updateUserInfoSchema = z.object({
+  fullName,
+  email,
+  phone,
+  phoneTwo,
+  gender,
+  nationality,
+  linkedInUsername: linkedInUsername.optional(),
+  portfolioUrl: portfolioUrl.optional(),
+  dob: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: "Invalid date format.",
+    })
+    .refine((val) => {
+      const dob = new Date(val);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const hasNotHadBirthdayThisYear =
+        today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+
+      if (hasNotHadBirthdayThisYear) age--;
+
+      return age >= 18;
+    }, {
+      message: "You must be at least 18 years old",
+    })
+    .refine((val) => new Date(val) <= new Date(), {
+      message: "DOB cannot be in the future",
+    }),
+  professionalStatus,
 });
 
-export const updateUserSchema = z.object({
-  fullName: z.string()
-    .min(4, "Full name must be at least 4 characters")
-    .max(30, "Full name must be at most 30 characters")
-    .regex(/^[a-zA-Z\s]{4,30}$/, "Invalid full name")
-    .optional(),
-  email: z.string()
-    .email("Invalid email format")
-    .toLowerCase()
-    .optional(),
-  phone: z.string()
-    .regex(/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number")
-    .optional(),
-  phoneTwo: z.string()
-    .regex(/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number")
-    .optional(),
-  isBlocked: z.boolean().optional(),
-  isVerified: z.boolean().optional()
+// User create Address zod schema
+export const createAddressZodSchema = z.object({
+  addressLine1,
+  addressLine2,
+  city,
+  state,
+  district,
+  country,
+  postalCode,
+  landmark,
+  primary,
 });
 
-export const getUserByIdSchema = z.object({
-  id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid user ID")
+// User create Career Data zod schema
+export const createCareerDataSchema = z
+  .object({
+    currentSalary,
+    expectedSalary,
+    immediateJoiner,
+    noticePeriod,
+    experience,
+    currentJobType: jobtypeSchema,
+    currentDesignation: currentDesignation.optional(),
+    currentCompany: currentCompany.optional(),
+    industry: industry.optional(),
+    preferredJobTypes: preferredJobTypes.optional(),
+    preferredWorkModes: preferredWorkModes.optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      !data.immediateJoiner &&
+      (data.noticePeriod == null || Number.isNaN(data.noticePeriod))
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["noticePeriod"],
+        message: "Notice period is required if you are not an immediate joiner",
+      });
+    }
+  });
+
+// user update application zod schema
+export const updateApplicationZodSchmea = z.object({
+  status: applicationStatusSchema
+});
+
+export const adminCreateUserZodSchema = z.object({
+  fullName,
+  email,
+  password,
+  phone,
+  phoneTwo
 });

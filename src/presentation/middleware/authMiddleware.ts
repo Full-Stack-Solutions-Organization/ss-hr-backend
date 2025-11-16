@@ -22,7 +22,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
     req.user = decoded as DecodedUser;
     next();
   } catch (error) {
-    console.log("middleware error");
     res.status(401).json({ success: false, message: "Unauthorized: Invalid token." });
   }
 };

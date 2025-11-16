@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 import { IUser, UserModel } from "./userModel";
 import { User } from "../../../domain/entities/user";
+import { AdminFetchAllUsers, IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { ApiPaginationRequest, ApiResponse, FetchUsersForChatSideBar } from "../../dtos/common.dts";
-import { AdminFetchAllAdmins, AdminFetchAllUsers, IUserRepository } from "../../../domain/repositories/IUserRepository";
 
 export class UserRepositoryImpl implements IUserRepository {
   private mapToEntity(user: IUser): User {
@@ -20,30 +20,16 @@ export class UserRepositoryImpl implements IUserRepository {
       user.isVerified,
       user.verificationToken,
       user.googleId,
+      user.gender,
+      user.nationality,
+      user.dob,
+      user.linkedInUsername,
+      user.portfolioUrl,
+      user.resume,
+      user.professionalStatus,
       user.createdAt,
-      user.updatedAt
+      user.updatedAt,
     );
-  }
-
-  async generateNextSerialNumber(): Promise<string> {
-    try {
-      const lastUser = await UserModel.findOne({}, { serialNumber: 1 })
-        .sort({ serialNumber: -1 })
-        .lean();
-
-      if (!lastUser || !lastUser.serialNumber) {
-        return "U001";
-      }
-
-      const lastNumber = parseInt(lastUser.serialNumber.substring(1), 10);
-      const nextNumber = lastNumber + 1;
-
-      const newSerialNumber = `U${nextNumber.toString().padStart(3, "0")}`;
-      return newSerialNumber;
-    } catch (error) {
-      console.log("error : ", error);
-      throw new Error("Failed to generate serial number");
-    }
   }
 
   async createUser<T>(user: T): Promise<User> {
@@ -51,7 +37,6 @@ export class UserRepositoryImpl implements IUserRepository {
       const createdUser = await UserModel.create({ ...user });
       return this.mapToEntity(createdUser);
     } catch (error) {
-      console.error("Detailed createUser error:", error);
       throw new Error("Unable to register, please try again after a few minutes.");
     }
   }
@@ -137,7 +122,6 @@ export class UserRepositoryImpl implements IUserRepository {
       const user = await UserModel.findOne({ googleId });
       return user ? this.mapToEntity(user) : null;
     } catch (error) {
-      console.log("findUserByGoogleId error : ", error);
       throw new Error("User finding using googleId failed");
     }
   }
@@ -160,7 +144,6 @@ export class UserRepositoryImpl implements IUserRepository {
         ? users.map((user) => this.mapToEntity(user))
         : null;
     } catch (error) {
-      console.log("findAllUsersForChatSidebar error :", error);
       throw new Error(`${isAdmin ? "Users" : "Chat Support"} fetching failed`);
     }
   }
@@ -193,47 +176,16 @@ export class UserRepositoryImpl implements IUserRepository {
     }
   }
 
-  async findAllAdmins({ page, limit, }: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllAdmins>> {
-    try {
-      const skip = (page - 1) * limit;
-      const [users, totalCount] = await Promise.all([
-        UserModel.find(
-          { role: { $in: ["admin", "superAdmin"] } },
-          {
-            _id: 1,
-            fullName: 1,
-            email: 1,
-            role: 1,
-            isBlocked: 1,
-            createdAt: 1,
-            profileImage: 1,
-          }
-        )
-          .skip(skip)
-          .limit(limit)
-          .lean(),
-        UserModel.countDocuments(),
-      ]);
-
-      const totalPages = Math.ceil(totalCount / limit);
-      return {
-        data: users.map(this.mapToEntity),
-        totalPages,
-        currentPage: page,
-        totalCount,
-      };
-    } catch (error) {
-      throw new Error("Failed to fetch  froadminsm database.");
-    }
-  }
-
-  async deleteUserById(id: Types.ObjectId): Promise<User | null> {
+  async deleteUserById(id: Types.ObjectId): Promise<boolean> {
     try {
       const result = await UserModel.findByIdAndDelete(id);
-      return result || null;
+      return result ? true : false;
     } catch (error) {
       throw new Error("Failed to delete user.");
     }
   }
+  
 
 }
+
+

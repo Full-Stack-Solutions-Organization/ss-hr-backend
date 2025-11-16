@@ -1,7 +1,7 @@
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { CommonRequest, GetAllMessageResponse } from "../../infrastructure/dtos/message.dtos";
-import { MessageRepositoryImpl } from "../../infrastructure/database/message/message.repository.impl";
+import { MessageRepositoryImpl } from "../../infrastructure/database/message/messageRepositorylmpl";
 
 
 export class GetAllMessagesUseCase {
@@ -24,8 +24,6 @@ export class GetAllMessagesUseCase {
                 return msg;
             })
         );
-
-        console.log("result : ",result);
 
         return { success: true, message: "Fetched messages", data: result }
     }

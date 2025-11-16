@@ -1,73 +1,57 @@
 import { Types } from "mongoose";
 import { ApiResponse } from "./common.dts";
-import { PaymentMethod, PaymentStatus } from "../../domain/entities/payment";
+import { PaymentMethodType, PaymentStatusType } from "../zod/common.zod";
+import { Payment } from "../../domain/entities/payment";
 
 // Create Payment DTOs
 export interface CreatePaymentRequest {
-  customerId: Types.ObjectId;
-  packageId: Types.ObjectId;
-  customerName: string;
-  packageName: string;
-  totalAmount: number;
-  paidAmount: number;
-  paymentMethod: PaymentMethod;
-  paymentDate: string;
-  referenceId: string;
-  paymentProof: string;
-  adminNotes: string;
+  customerName: string,
+  packageName: string,
+  totalAmount: number,
+  paidAmount: number,
+  balanceAmount: number,
+  paymentMethod: PaymentMethodType,
+  paymentDate: Date,
+  adminNotes: string,
+  referenceId: string,
+  paymentProof: string
+  paymentStatus: PaymentStatusType,
 }
 
 export interface CreatePaymentResponse extends ApiResponse {
-  payment?: {
-    _id: Types.ObjectId;
-    customerId: Types.ObjectId;
-    packageId: Types.ObjectId;
-    customerName: string;
-    packageName: string;
-    totalAmount: number;
-    paidAmount: number;
-    balanceAmount: number;
-    paymentMethod: PaymentMethod;
-    paymentDate: string;
-    referenceId: string;
-    paymentProof: string;
-    adminNotes: string;
-    status: PaymentStatus;
-  };
+  payment: Payment;
 }
 
 // Update Payment DTOs
 export interface UpdatePaymentRequest {
   _id: Types.ObjectId;
-  customerId?: Types.ObjectId;
-  packageId?: Types.ObjectId;
-  customerName?: string;
-  packageName?: string;
-  totalAmount?: number;
-  paidAmount?: number;
-  paymentMethod?: PaymentMethod;
-  paymentDate?: string;
-  referenceId?: string;
-  paymentProof?: string;
-  adminNotes?: string;
+  customerName: string,
+  packageName: string,
+  totalAmount: number,
+  paidAmount: number,
+  balanceAmount: number,
+  paymentMethod: PaymentMethodType,
+  paymentDate: Date,
+  adminNotes: string,
+  referenceId: string,
+  paymentProof: string,
+  paymentStatus: PaymentStatusType,
 }
 
 export interface UpdatePaymentResponse extends ApiResponse {
   payment?: {
     _id: Types.ObjectId;
-    customerId: Types.ObjectId;
-    packageId: Types.ObjectId;
-    customerName: string;
-    packageName: string;
-    totalAmount: number;
-    paidAmount: number;
-    balanceAmount: number;
-    paymentMethod: PaymentMethod;
-    paymentDate: string;
-    referenceId: string;
-    paymentProof: string;
-    adminNotes: string;
-    status: PaymentStatus;
+    customerName: string,
+    packageName: string,
+    totalAmount: number,
+    paidAmount: number,
+    balanceAmount: number,
+    paymentMethod: PaymentMethodType,
+    paymentDate: Date,
+    adminNotes: string,
+    referenceId: string,
+    paymentProof: string,
+    paymentStatus: PaymentStatusType,
   };
 }
 
@@ -77,24 +61,7 @@ export interface GetPaymentByIdRequest {
 }
 
 export interface GetPaymentByIdResponse extends ApiResponse {
-  payment?: {
-    _id: Types.ObjectId;
-    customerId: Types.ObjectId;
-    packageId: Types.ObjectId;
-    customerName: string;
-    packageName: string;
-    totalAmount: number;
-    paidAmount: number;
-    balanceAmount: number;
-    paymentMethod: PaymentMethod;
-    paymentDate: string;
-    referenceId: string;
-    paymentProof: string;
-    adminNotes: string;
-    status: PaymentStatus;
-    createdAt: Date;
-    updatedAt: Date;
-  };
+  payment: Payment;
 }
 
 // Delete Payment DTOs

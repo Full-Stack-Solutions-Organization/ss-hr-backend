@@ -1,11 +1,13 @@
-import { Types } from "mongoose";
-import { User } from "../../domain/entities/user";
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { PasswordHasher } from "../../infrastructure/security/passwordHasher";
 import { CreateLocalUserByAdmin } from "../../domain/repositories/IUserRepository";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
+import { AddressRepositoryImpl } from "../../infrastructure/database/address/addressRepositoryImpl";
+import { CareerDataRepositoryImpl } from "../../infrastructure/database/careerData/careerDataRepositoryImpl";
+import { AdminFetchUserDetailsRequest, AdminFetchUserDetailsResponse } from "../../infrastructure/dtos/admin.dtos";
 import {CreateUserByAdminRequest,CreateUserByAdminResponse,UpdateUserRequest,UpdateUserResponse,DeleteUserRequest,GetUserByIdRequest,GetUserByIdResponse} from "../../infrastructure/dtos/user.dto";
+import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 
 export class CreateUserByAdminUseCase {
   constructor(
@@ -22,19 +24,15 @@ export class CreateUserByAdminUseCase {
       if (existingUser) throw new Error("User already exists with this email");
 
       const hashedPassword = await PasswordHasher.hashPassword(password);
-      
-      const serialNumber = await this.userRepository.generateNextSerialNumber();
-      
+            
       const createdUser = await this.userRepository.createUser<CreateLocalUserByAdmin>({
         fullName,
         email,
-        serialNumber,
         password: hashedPassword,
         role,
         phone: phone || "",
         phoneTwo: phoneTwo || "",
         isVerified: true,
-        profileImage: "",
       });
 
       return {
@@ -71,25 +69,15 @@ export class UpdateUserUseCase {
         if (emailExists) throw new Error("Email already exists");
       }
 
-      const updatedUser = new User(
-        existingUser._id,
-        existingUser.serialNumber,
-        updateData.fullName ?? existingUser.fullName,
-        updateData.email ?? existingUser.email,
-        existingUser.password,
-        existingUser.role,
-        updateData.phone ?? existingUser.phone,
-        updateData.phoneTwo ?? existingUser.phoneTwo,
-        existingUser.profileImage,
-        updateData.isBlocked ?? existingUser.isBlocked,
-        updateData.isVerified ?? existingUser.isVerified,
-        existingUser.verificationToken,
-        existingUser.googleId,
-        existingUser.createdAt,
-        existingUser.updatedAt
-      );
+      existingUser.fullName = updateData.fullName;
+      existingUser.email = updateData.email;
+      existingUser.isBlocked = updateData.isBlocked;
+      existingUser.isVerified = updateData.isVerified;
+      existingUser.isVerified = updateData.isVerified;
+      existingUser.phone = updateData.phone;
+      existingUser.phoneTwo = updateData.phoneTwo;
 
-      const result = await this.userRepository.updateUser(updatedUser);
+      const result = await this.userRepository.updateUser(existingUser);
       if (!result) throw new Error("Failed to update user");
 
       return {
@@ -149,14 +137,11 @@ export class GetUserByIdUseCase {
           serialNumber: user.serialNumber,
           fullName: user.fullName,
           email: user.email,
-          role: user.role,
           phone: user.phone,
           phoneTwo: user.phoneTwo,
-          profileImage: user.profileImage,
           isBlocked: user.isBlocked,
           isVerified: user.isVerified,
           createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
         },
       };
     } catch (error) {
@@ -195,6 +180,58 @@ export class GetUserStatsUseCase {
       };
     } catch (error) {
       throw handleUseCaseError(error || "Failed to get user stats");
+    }
+  }
+}
+
+
+export class AdminFetchUserDetailsUseCase {
+  constructor(
+    private userRepositoryImpl: UserRepositoryImpl,
+    private addressRepositoryImpl: AddressRepositoryImpl,
+    private careerDataRepositoryImpl: CareerDataRepositoryImpl,
+    private signedUrlService: SignedUrlService
+  ) { }
+
+  async execute(data: AdminFetchUserDetailsRequest): Promise<ApiResponse<AdminFetchUserDetailsResponse>> {
+    try {
+
+      const userData = await this.userRepositoryImpl.findUserById(data._id);
+      if(!userData) throw new Error("No user found");
+
+      const address = await this.addressRepositoryImpl.findAddressesByUserId(data._id);
+      const careerData = await this.careerDataRepositoryImpl.findCareerDataByUserId(data._id);
+
+      const { _id: userId, password, verificationToken, role, googleId, ...userResult} = userData;
+
+      if(userResult.profileImage) {
+        userResult.profileImage = await this.signedUrlService.generateSignedUrl(userResult.profileImage);
+      }
+
+      if(userResult.resume) {
+        userResult.resume = await this.signedUrlService.generateSignedUrl(userResult.resume);
+      }
+
+      const addressResult = address
+        ? (({ _id, ...rest }) => rest)(address)
+        : null;
+
+      const careerDataResult = careerData
+        ? (({ _id, ...rest }) => rest)(careerData)
+        : null;
+
+      return {
+        success: true,
+        message: "User details fetched",
+        data : {
+          userData: userResult,
+          address: addressResult,
+          careerData: careerDataResult
+        }
+      }
+
+    } catch (error) {
+      throw handleUseCaseError(error || "Failed to fetch user details");
     }
   }
 }

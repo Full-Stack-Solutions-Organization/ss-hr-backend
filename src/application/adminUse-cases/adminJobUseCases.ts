@@ -43,12 +43,15 @@ export class GetAllJobsUseCase {
     try {
 
       const { page, limit } = payload;
-      const jobs = await this.jobRepository.findAllJobs({ page, limit },true)
+      const jobs = await this.jobRepository.adminFindAllJobs({ page, limit })
 
       return {
         success: true,
         message: "Jobs retrieved successfully",
-        data: jobs as AdminFetchAllJobs
+        data: jobs as AdminFetchAllJobs,
+        currentPage: jobs.currentPage,
+        totalCount: jobs.totalCount,
+        totalPages: jobs.totalPages,
       };
     } catch (error) {
       throw handleUseCaseError(error || "Unexpected error in GetAllJobsUseCase");

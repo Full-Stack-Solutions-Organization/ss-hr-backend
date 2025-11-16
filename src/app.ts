@@ -6,16 +6,17 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import { appConfig } from './config/env';
 import passport from './infrastructure/auth/passport';
-import authRoutes from './presentation/routes/authRoutes';
-import userRoutes from './presentation/routes/userRoutes';
-import messageRoutes from './presentation/routes/messageRoutes';
-import adminJobRoutes from './presentation/routes/adminJobRoutes';
-import adminChatRoutes from './presentation/routes/adminChatRoutes';
-import adminUsersRoutes from './presentation/routes/adminUserRoutes';
-import adminPaymentRoutes from "./presentation/routes/adminPaymentRoutes";
-import adminPackageRoutes from "./presentation/routes/adminPackageRoutes";
-import adminSettingsRoutes from './presentation/routes/adminSettingsRoutes';
-import adminTestimonialRoutes from './presentation/routes/adminTestimonialRoutes';
+import S3Router from './presentation/routes/s3Router';
+import authRouter from './presentation/routes/authRouter';
+import userRouter from './presentation/routes/userRouter';
+import messageRouter from './presentation/routes/messageRouter';
+import adminJobRouter from './presentation/routes/adminJobRouter';
+import adminChatRouter from './presentation/routes/adminChatRouter';
+import adminUsersRouter from './presentation/routes/adminUserRouter';
+import adminPaymentRouter from "./presentation/routes/adminPaymentRouter";
+import adminPackageRouter from "./presentation/routes/adminPackageRouter";
+import adminTestimonialRouter from './presentation/routes/adminTestimonialRouter';
+import adminApplicationRouter from './presentation/routes/adminApplicationRouter';
 
 const app = express();
 
@@ -45,7 +46,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use("/api/admin/settings", adminSettingsRoutes);
 app.use('/api/admin/jobs', adminJobRoutes);

@@ -10,6 +10,7 @@ import {
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { TestimonialRepositoryImpl } from "../../infrastructure/database/testimonial/testimonialRepositoryImpl";
+import { AdminFetchAllTestimonials } from "../../domain/repositories/ITestimonialRepository";
 
 
 export class CreateTestimonialUseCase {
@@ -139,14 +140,17 @@ export class GetAllTestimonialsUseCase {
     private testimonialRepository: TestimonialRepositoryImpl,
   ) { }
 
-  async execute(data: { page: number; limit: number }) {
+  async execute(data: { page: number; limit: number }): Promise<ApiResponse<AdminFetchAllTestimonials>> {
     try {
       const result = await this.testimonialRepository.findAllTestimonials(data);
 
       return {
         success: true,
         message: "Testimonials retrieved successfully",
-        data: result,
+        data: result.data,
+        currentPage: result.currentPage,
+        totalCount: result.totalCount,
+        totalPages: result.totalPages,
       };
     } catch (error) {
       throw handleUseCaseError(error || "Failed to get testimonials");

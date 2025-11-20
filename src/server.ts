@@ -10,14 +10,14 @@ async function startServer() {
     await connectDB();
 
     const server = socketServer.listen(port, () => {
-      logger.info(`Server running on port ${port}`);
+      logger.info(`Server running on ${port}`);
     });
 
     const shutdown = async () => {
       logger.info("\nShutting down server...");
       await disconnectDB();
       server.close(() => {
-        logger.info("🛑 Server stopped");
+        logger.info(" Server stopped");
         process.exit(0);
       });
     };

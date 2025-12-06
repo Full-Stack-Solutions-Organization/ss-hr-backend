@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import { redis } from '../lib/redis';
 import { mailConfig } from '../../config/env';
 import { generateOTP } from 'otp-generator-module';
 
@@ -9,12 +8,20 @@ interface EmailOptions {
   html: string;
 }
 
+const otpStore = new Map<string, string>();
+
 export class OTPService {
 
   static async setOtp(verificationToken: string): Promise<string> {
     try {
       const otp = generateOTP({ length: 6 });
-      await redis.set(verificationToken,otp, { px : 60000 });
+      otpStore.set(verificationToken, otp);
+      
+      // Expire after 60 seconds (same as Redis px: 60000)
+      setTimeout(() => {
+        otpStore.delete(verificationToken);
+      }, 60000);
+
       return otp;
     } catch (error) {
       throw new Error("Failed to generate OTP.");
@@ -23,8 +30,12 @@ export class OTPService {
 
   static async verifyOTP(verificationToken: string, otp: string): Promise<boolean> {
     try {
-      const storedOtp = await redis.get(verificationToken);
-      return storedOtp == otp;
+      const storedOtp = otpStore.get(verificationToken);
+      if (storedOtp === otp) {
+        otpStore.delete(verificationToken);
+        return true;
+      }
+      return false;
     } catch (error) {
       throw new Error("Failed to verify OTP.")
     }

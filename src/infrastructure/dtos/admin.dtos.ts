@@ -39,3 +39,28 @@ export interface AdminFetchUserDetailsResponse {
 
 
 export type AdminUpdateApplicationStatusRequest = Pick<Application, "_id" | "status">;
+
+export interface GetOverviewStatsResponse {
+  totalUsers: number;
+  totalPackages: number;
+  totalJobsAvailable: number;
+  totalCompanies: number;
+  totalPostions: number;
+  totalApplications: number;
+}
+
+export interface GetOverviewGraphDataResponse {
+  usersGragphData: Array<{
+    date: string;
+    newUsers: number;
+    oldUsers: number;
+  }>;
+  applicationsGraphData: Array<{
+    date: string;
+    users: number; // Represents applications here, likely mapped from 'count'
+    applications: number; // Represents something else or just total? Assuming 'users' -> applicants, 'applications' -> placements? Need to check frontend mapping.
+    // Frontend AdminOverview.tsx: 
+    // AreaGroupedChart: usersGraphData -> newUsers, oldUsers
+    // BarChartVertical: applicationsGraphData -> users, applications
+  }>;
+}

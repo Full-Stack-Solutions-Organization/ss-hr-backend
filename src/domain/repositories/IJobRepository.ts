@@ -18,7 +18,7 @@ export interface IJobRepository {
 
   userFindAllJobs({page,limit}: ApiPaginationRequest, userId: Types.ObjectId): Promise<ApiResponse<UserFetchAllJobsResponse>>
 
-  // getTotalCount(): Promise<number>;
+  countJobs(): Promise<number>;
   
   // findJobsByCompanyName(companyName: string): Promise<Job[]>;
 }

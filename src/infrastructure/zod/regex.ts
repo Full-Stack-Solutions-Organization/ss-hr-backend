@@ -1,6 +1,6 @@
 export const REGEX_NAME = /^[A-Za-z\s]{2,100}$/;
 
-export const REGEX_FULL_NAME = /^[A-Za-z\s]{4,30}$/;
+export const REGEX_FULL_NAME = /^[A-Za-z\s.'-]{2,50}$/;
 
 export const REGEX_USERNAME = /^[a-zA-Z0-9-]{5,40}$/;
 
@@ -20,8 +20,7 @@ export const REGEX_COUNTRY = /^[A-Za-z\s]{2,60}$/;
 
 export const REGEX_URL = /^https?:\/\/[^\s]{9,250}$/;
 
-export const REGEX_PASSWORD =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,50}$/;
+export const REGEX_PASSWORD = /^.{8,50}$/;
 
 export const REGEX_HASHED_PASSWORD =
   /^\$2[aby]?\$\d{2}\$[./A-Za-z0-9]{53}$/;

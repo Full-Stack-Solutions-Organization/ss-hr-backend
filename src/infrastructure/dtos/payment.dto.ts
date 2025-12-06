@@ -89,3 +89,16 @@ export interface GetPaymentsByStatusRequest {
   page: number;
   limit: number;
 }
+
+export interface GetPaymentGraphDataResponse {
+  paymentsRadialGragphData: Array<{
+    day: string;
+    count: number;
+  }>;
+  revenueLineGraphData: Array<{
+    date: string;
+    totalRevenue: number;
+    packageRevenue: number;
+    hiringRevenue: number;
+  }>;
+}

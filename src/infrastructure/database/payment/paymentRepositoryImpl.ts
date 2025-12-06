@@ -1,8 +1,10 @@
+
 import { Types } from "mongoose";
 import { IPayment, PaymentModel } from "./paymentModel";
 import { Payment } from "../../../domain/entities/payment";
 import { ApiPaginationRequest, ApiResponse } from "../../dtos/common.dts";
 import { AdminFetchAllPayments, CreatePayment, IPaymentRepository } from "../../../domain/repositories/IPaymentRepository";
+import { GetPaymentGraphDataResponse } from "../../dtos/payment.dto";
 
 export class PaymentRepositoryImpl implements IPaymentRepository {
   private mapToEntity(payment: IPayment): Payment {
@@ -186,6 +188,97 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
       };
     } catch (error) {
       throw new Error("Failed to fetch payments by status from database.");
+    }
+  }
+
+  async getPaymentGraphData(): Promise<GetPaymentGraphDataResponse> {
+    try {
+      const today = new Date();
+      const sevenDaysAgo = new Date(today);
+      sevenDaysAgo.setDate(today.getDate() - 6);
+
+      // Radial Graph Data (Last 7 Days Count)
+      const radialData = await PaymentModel.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: sevenDaysAgo }
+          }
+        },
+        {
+          $group: {
+            _id: { $dayOfWeek: "$createdAt" },
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+
+      const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const paymentsRadialGragphData = daysOfWeek.map((day, index) => {
+        const found = radialData.find(d => d._id === index + 1);
+        return {
+          day,
+          count: found ? found.count : 0
+        };
+      });
+
+      // Revenue Line Graph Data (Last 7 Days Revenue Breakdown)
+      const lineData = await PaymentModel.aggregate([
+        {
+           $match: {
+             createdAt: { $gte: sevenDaysAgo }
+           }
+        },
+        {
+          $project: {
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            totalAmount: 1,
+            // Assuming we can distinguish revenue types, otherwise generic
+             // In Payment entity, we might not have 'type'.
+             // Looking at Payment schema: customerName, packageName, totalAmount...
+             // If packageName exists, maybe it's package revenue?
+             // If there's a hiring related field...
+             // For now, I'll assume if packageName is present -> Package Revenue.
+             // If not -> Hiring Revenue (or other).
+             isPackage: { $cond: [{ $ifNull: ["$packageName", false] }, 1, 0] }
+          }
+        },
+        {
+          $group: {
+            _id: "$date",
+            totalRevenue: { $sum: "$totalAmount" },
+            packageRevenue: {
+                $sum: {
+                    $cond: [ { $eq: ["$isPackage", 1] }, "$totalAmount", 0 ]
+                }
+            },
+            hiringRevenue: {
+                $sum: {
+                     $cond: [ { $eq: ["$isPackage", 0] }, "$totalAmount", 0 ]
+                }
+            }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]);
+
+
+      const revenueLineGraphData = lineData.map(item => ({
+        date: item._id,
+        totalRevenue: item.totalRevenue,
+        packageRevenue: item.packageRevenue,
+        hiringRevenue: item.hiringRevenue
+      }));
+
+       // Ensure all days are covered? Optional, but better for graphs.
+       // For now, returning aggregation result.
+
+      return {
+        paymentsRadialGragphData,
+        revenueLineGraphData
+      };
+
+    } catch (error) {
+      throw new Error("Failed to fetch payment graph data from database.");
     }
   }
 }

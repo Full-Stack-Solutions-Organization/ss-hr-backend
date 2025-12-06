@@ -14,4 +14,5 @@ router.get("/:id", authMiddleware, adminPaymentController.getPaymentById);
 router.put("/:id", authMiddleware, adminPaymentController.updatePayment);
 router.delete("/:id", authMiddleware, adminPaymentController.deletePayment);
 
+router.get("/graph-data", authMiddleware, adminPaymentController.getPaymentGraphData);
 export default router;

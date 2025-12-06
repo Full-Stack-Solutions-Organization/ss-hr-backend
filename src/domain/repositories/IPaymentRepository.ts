@@ -25,4 +25,6 @@ export interface IPaymentRepository {
 
     findPaymentsByStatus(status: string, { page, limit }: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllPayments>>;
 
+    getPaymentGraphData(): Promise<any>; // Using any temporarily or specific type if imported
+
 }

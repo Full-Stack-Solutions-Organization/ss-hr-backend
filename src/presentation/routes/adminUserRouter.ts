@@ -20,4 +20,8 @@ router.delete('/:id', authMiddleware, adminUserController.deleteUser);
 
 router.get('/details/:id', authMiddleware, adminUserController.getUserFullDetails);
 
+// Overview Routes
+router.get("/overview/stats", authMiddleware, adminUserController.getOverviewStats);
+router.get("/overview/graph-data", authMiddleware, adminUserController.getOverviewGraphData);
+
 export default router;

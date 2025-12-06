@@ -5,11 +5,15 @@ import { CreateLocalUserByAdmin } from "../../domain/repositories/IUserRepositor
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { AddressRepositoryImpl } from "../../infrastructure/database/address/addressRepositoryImpl";
 import { CareerDataRepositoryImpl } from "../../infrastructure/database/careerData/careerDataRepositoryImpl";
-import { AdminFetchUserDetailsRequest, AdminFetchUserDetailsResponse } from "../../infrastructure/dtos/admin.dtos";
+import { AdminFetchUserDetailsRequest, AdminFetchUserDetailsResponse, GetOverviewGraphDataResponse, GetOverviewStatsResponse } from "../../infrastructure/dtos/admin.dtos";
 import {CreateUserByAdminRequest,CreateUserByAdminResponse,UpdateUserRequest,UpdateUserResponse,DeleteUserRequest,GetUserByIdRequest,GetUserByIdResponse} from "../../infrastructure/dtos/user.dto";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { IApplicationRepository } from "../../domain/repositories/IApplicationRepository";
 import { IPaymentRepository } from "../../domain/repositories/IPaymentRepository";
+import { IJobRepository } from "../../domain/repositories/IJobRepository";
+import { ICompanyRepository } from "../../domain/repositories/ICompanyRepository";
+import { CompanyRepositoryImpl } from "../../infrastructure/database/company/companyRepositoryImpl";
+import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
 
 export class CreateUserByAdminUseCase {
   constructor(
@@ -302,5 +306,81 @@ export class AdminFetchUserDetailsUseCase {
     } catch (error) {
       throw handleUseCaseError(error || "Failed to fetch user details");
     }
+  }
+}
+
+export class GetOverviewStatsUseCase {
+  constructor(
+    private userRepository: UserRepositoryImpl,
+    private paymentRepository: IPaymentRepository,
+    private companyRepository: CompanyRepositoryImpl,
+    private jobRepository: JobRepositoryImpl,
+    private applicationRepository: IApplicationRepository,
+  ) {}
+
+  async execute(): Promise<ApiResponse<GetOverviewStatsResponse>> {
+    try {
+      const totalUsers = await this.userRepository.getTotalCount();
+      const totalPackages = await this.paymentRepository.getTotalCount(); // Placeholder logic
+      const totalJobsAvailable = await this.jobRepository.countJobs();
+      const totalCompanies = await this.companyRepository.countCompanies();
+      const totalPostions = await this.jobRepository.countJobs(); // Assuming positions ~= jobs for now
+      const totalApplications = await this.applicationRepository.getTotalCount();
+
+      return {
+        success: true,
+        message: "Overview stats retrieved successfully",
+        data: {
+          totalUsers,
+          totalPackages,
+          totalJobsAvailable,
+          totalCompanies,
+          totalPostions,
+          totalApplications
+        }
+      };
+    } catch (error) {
+      throw handleUseCaseError(error || "Failed to get overview stats");
+    }
+  }
+}
+
+export class GetOverviewGraphDataUseCase {
+  constructor(
+      private userRepository: UserRepositoryImpl,
+      private applicationRepository: IApplicationRepository
+  ) {}
+
+  async execute(): Promise<ApiResponse<GetOverviewGraphDataResponse>> {
+      try {
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+          const userGraphData = await this.userRepository.getUserGraphData(thirtyDaysAgo);
+          const appGraphData = await this.applicationRepository.getApplicationGraphData(thirtyDaysAgo);
+
+          const usersGragphData = userGraphData.map((item: any) => ({
+              date: item._id,
+              newUsers: item.count,
+              oldUsers: 0 // Simplification
+          }));
+
+          const applicationsGraphData = appGraphData.map((item: any) => ({
+              date: item._id,
+              users: item.count, // Using total applications count as 'users' for now to match frontend expectations
+              applications: item.placedCount // Using placed count as 'applications' (successful)
+          }));
+
+          return {
+              success: true,
+              message: "Overview graph data retrieved successfully",
+              data: {
+                  usersGragphData,
+                  applicationsGraphData
+              }
+          };
+      } catch (error) {
+          throw handleUseCaseError(error || "Failed to get overview graph data");
+      }
   }
 }

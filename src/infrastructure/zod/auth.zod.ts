@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { email, fullName, limitedRoleSchema, otp, password, roleSchema, verificationToken } from './common.zod';
+import { email, fullName, limitedRoleSchema, otp, password, roleSchema, verificationToken, LimitedRole } from './common.zod';
 
 // register user zod validation
 export const registerZodSchema = z.object({
   fullName,
   email,
   password,
-  role: limitedRoleSchema
+  role: z.literal(LimitedRole.User)
 });
 
 // otp verification zod validation

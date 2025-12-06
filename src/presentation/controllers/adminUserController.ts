@@ -10,9 +10,11 @@ import { AddressRepositoryImpl } from '../../infrastructure/database/address/add
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 import { CareerDataRepositoryImpl } from '../../infrastructure/database/careerData/careerDataRepositoryImpl';
 import { GetAllUsersForChatSideBarUseCase } from "../../application/commonUse-cases/getAllUsersForChatSidebarUseCase";
-import { CreateUserByAdminUseCase, UpdateUserUseCase, DeleteUserUseCase, GetUserByIdUseCase, GetAllUsersUseCase, GetUserStatsUseCase, AdminFetchUserDetailsUseCase, GetUserGraphDataUseCase } from '../../application/adminUse-cases/adminUserUseCases';
+import { CreateUserByAdminUseCase, UpdateUserUseCase, DeleteUserUseCase, GetUserByIdUseCase, GetAllUsersUseCase, GetUserStatsUseCase, AdminFetchUserDetailsUseCase, GetUserGraphDataUseCase, GetOverviewStatsUseCase, GetOverviewGraphDataUseCase } from '../../application/adminUse-cases/adminUserUseCases';
 import { ApplicationRepositoryImpl } from '../../infrastructure/database/application/applicationRepositoryImpl';
 import { PaymentRepositoryImpl } from '../../infrastructure/database/payment/paymentRepositoryImpl';
+import { CompanyRepositoryImpl } from "../../infrastructure/database/company/companyRepositoryImpl";
+import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
@@ -21,6 +23,8 @@ const addressRepositoryImpl = new AddressRepositoryImpl();
 const careerDataRepositoryImpl = new CareerDataRepositoryImpl();
 const applicationRepositoryImpl = new ApplicationRepositoryImpl();
 const paymentRepositoryImpl = new PaymentRepositoryImpl();
+const companyRepositoryImpl = new CompanyRepositoryImpl();
+const jobRepositoryImpl = new JobRepositoryImpl();
 
 const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
 const createUserByAdminUseCase = new CreateUserByAdminUseCase(userRepositoryImpl);
@@ -31,6 +35,8 @@ const getAllUsersUseCase = new GetAllUsersUseCase(userRepositoryImpl);
 const getUserStatsUseCase = new GetUserStatsUseCase(userRepositoryImpl, applicationRepositoryImpl, paymentRepositoryImpl);
 const getUserGraphDataUseCase = new GetUserGraphDataUseCase(userRepositoryImpl);
 const adminFetchUserDetailsUseCase = new AdminFetchUserDetailsUseCase(userRepositoryImpl, addressRepositoryImpl, careerDataRepositoryImpl, signedUrlService)
+const getOverviewStatsUseCase = new GetOverviewStatsUseCase(userRepositoryImpl, paymentRepositoryImpl, companyRepositoryImpl, jobRepositoryImpl, applicationRepositoryImpl);
+const getOverviewGraphDataUseCase = new GetOverviewGraphDataUseCase(userRepositoryImpl, applicationRepositoryImpl);
 
 export class AdminUserController {
     constructor(
@@ -42,7 +48,9 @@ export class AdminUserController {
         private getAllUsersUseCase: GetAllUsersUseCase,
         private getUserStatsUseCase: GetUserStatsUseCase,
         private getUserGraphDataUseCase: GetUserGraphDataUseCase,
-        private adminFetchUserDetailsUseCase: AdminFetchUserDetailsUseCase
+        private adminFetchUserDetailsUseCase: AdminFetchUserDetailsUseCase,
+        private getOverviewStatsUseCase: GetOverviewStatsUseCase,
+        private getOverviewGraphDataUseCase: GetOverviewGraphDataUseCase
     ) {
         this.getUserForChatSidebar = this.getUserForChatSidebar.bind(this);
         this.createUser = this.createUser.bind(this);
@@ -53,6 +61,8 @@ export class AdminUserController {
         this.getUserStats = this.getUserStats.bind(this);
         this.getUserGraphData = this.getUserGraphData.bind(this);
         this.getUserFullDetails = this.getUserFullDetails.bind(this);
+        this.getOverviewStats = this.getOverviewStats.bind(this);
+        this.getOverviewGraphData = this.getOverviewGraphData.bind(this);
     }
 
     async getUserForChatSidebar(req: Request, res: Response) {
@@ -143,6 +153,24 @@ export class AdminUserController {
         }
     }
 
+    async getOverviewStats(req: Request, res: Response) {
+        try {
+            const result = await this.getOverviewStatsUseCase.execute();
+            return res.status(200).json(result);
+        } catch (error) {
+            HandleError.handle(error, res);
+        }
+    }
+
+    async getOverviewGraphData(req: Request, res: Response) {
+        try {
+            const result = await this.getOverviewGraphDataUseCase.execute();
+            return res.status(200).json(result);
+        } catch (error) {
+            HandleError.handle(error, res);
+        }
+    }
+
 }
 
 export const adminUserController = new AdminUserController(
@@ -154,5 +182,7 @@ export const adminUserController = new AdminUserController(
     getAllUsersUseCase,
     getUserStatsUseCase,
     getUserGraphDataUseCase,
-    adminFetchUserDetailsUseCase
+    adminFetchUserDetailsUseCase,
+    getOverviewStatsUseCase,
+    getOverviewGraphDataUseCase
 );

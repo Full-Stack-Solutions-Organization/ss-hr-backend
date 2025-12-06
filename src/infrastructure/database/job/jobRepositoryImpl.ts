@@ -219,13 +219,13 @@ export class JobRepositoryImpl implements IJobRepository {
     }
   }
 
-  // async getTotalCount(): Promise<number> {
-  //   try {
-  //     return await JobModel.countDocuments({});
-  //   } catch (error) {
-  //     throw new Error("Failed to get total job count.");
-  //   }
-  // }
+  async countJobs(): Promise<number> {
+    try {
+      return await JobModel.countDocuments({});
+    } catch (error) {
+      throw new Error("Failed to get total job count.");
+    }
+  }
 
   // async findJobsByCompanyName(companyName: string): Promise<Job[]> {
   //   try {

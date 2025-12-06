@@ -9,7 +9,8 @@ import {
   GetPaymentsByCustomerUseCase,
   GetPaymentsByPackageUseCase,
   GetPaymentsByStatusUseCase,
-  GetPaymentStatsUseCase
+  GetPaymentStatsUseCase,
+  GetPaymentGraphDataUseCase
 } from '../../application/adminUse-cases/adminPaymentUseCases';
 import { HandleError } from "../../infrastructure/error/error";
 import { PaymentRepositoryImpl } from "../../infrastructure/database/payment/paymentRepositoryImpl";
@@ -24,6 +25,7 @@ const getPaymentsByCustomerUseCase = new GetPaymentsByCustomerUseCase(paymentRep
 const getPaymentsByPackageUseCase = new GetPaymentsByPackageUseCase(paymentRepositoryImpl);
 const getPaymentsByStatusUseCase = new GetPaymentsByStatusUseCase(paymentRepositoryImpl);
 const getPaymentStatsUseCase = new GetPaymentStatsUseCase(paymentRepositoryImpl);
+const getPaymentGraphDataUseCase = new GetPaymentGraphDataUseCase(paymentRepositoryImpl);
 
 export class AdminPaymentController {
     constructor(
@@ -35,7 +37,8 @@ export class AdminPaymentController {
         private getPaymentsByCustomerUseCase: GetPaymentsByCustomerUseCase,
         private getPaymentsByPackageUseCase: GetPaymentsByPackageUseCase,
         private getPaymentsByStatusUseCase: GetPaymentsByStatusUseCase,
-        private getPaymentStatsUseCase: GetPaymentStatsUseCase
+        private getPaymentStatsUseCase: GetPaymentStatsUseCase,
+        private getPaymentGraphDataUseCase: GetPaymentGraphDataUseCase
     ) {
         this.createPayment = this.createPayment.bind(this);
         this.updatePayment = this.updatePayment.bind(this);
@@ -46,6 +49,7 @@ export class AdminPaymentController {
         this.getPaymentsByPackage = this.getPaymentsByPackage.bind(this);
         this.getPaymentsByStatus = this.getPaymentsByStatus.bind(this);
         this.getPaymentStats = this.getPaymentStats.bind(this);
+        this.getPaymentGraphData = this.getPaymentGraphData.bind(this);
     }
 
     async createPayment(req: Request, res: Response) {
@@ -142,6 +146,15 @@ export class AdminPaymentController {
             HandleError.handle(error, res);
         }
     }
+
+    async getPaymentGraphData(req: Request, res: Response) {
+        try {
+            const result = await this.getPaymentGraphDataUseCase.execute();
+            return res.status(200).json(result);
+        } catch (error) {
+            HandleError.handle(error, res);
+        }
+    }
 }
 
 export const adminPaymentController = new AdminPaymentController(
@@ -153,5 +166,6 @@ export const adminPaymentController = new AdminPaymentController(
     getPaymentsByCustomerUseCase,
     getPaymentsByPackageUseCase,
     getPaymentsByStatusUseCase,
-    getPaymentStatsUseCase
+    getPaymentStatsUseCase,
+    getPaymentGraphDataUseCase
 );

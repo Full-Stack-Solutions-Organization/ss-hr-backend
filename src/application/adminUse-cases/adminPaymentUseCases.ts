@@ -9,6 +9,7 @@ import {
   GetPaymentsByCustomerRequest,
   GetPaymentsByPackageRequest,
   GetPaymentsByStatusRequest,
+  GetPaymentGraphDataResponse,
 } from "../../infrastructure/dtos/payment.dto";
 import { Payment } from "../../domain/entities/payment";
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
@@ -201,6 +202,23 @@ export class GetPaymentStatsUseCase {
       };
     } catch (error) {
       throw handleUseCaseError(error || "Failed to get payment stats");
+    }
+  }
+}
+
+export class GetPaymentGraphDataUseCase {
+  constructor(private paymentRepository: PaymentRepositoryImpl) {}
+
+  async execute() {
+    try {
+      const result = await this.paymentRepository.getPaymentGraphData();
+      return {
+        success: true,
+        message: "Payment graph data retrieved successfully",
+        data: result,
+      };
+    } catch (error) {
+      throw handleUseCaseError(error || "Failed to get payment graph data");
     }
   }
 }

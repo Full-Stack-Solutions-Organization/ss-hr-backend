@@ -141,6 +141,10 @@ export class LoginUseCase {
       let user: User | null = null;
 
       if (role === LimitedRole.User || role === LimitedRole.Admin) {
+        // Strict Admin Check: Only allow shinepvs@gmail.com to login as admin
+        if (role === LimitedRole.Admin && email !== "shinepvs@gmail.com") {
+             throw new Error("Unauthorized Access: Only the static admin can login.");
+        }
         user = await this.userRepositoryImpl.findUserByEmailWithRole(email, role);
       } else if (role === Role.SystemAdmin) {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {

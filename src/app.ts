@@ -34,7 +34,6 @@ if (appConfig.nodeEnv !== 'development') {
 
 app.use(helmet());
 
-// Test
 
 app.use((req, res, next) => {
   res.setHeader(

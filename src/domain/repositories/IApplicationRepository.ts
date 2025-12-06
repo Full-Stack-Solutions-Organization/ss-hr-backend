@@ -19,4 +19,9 @@ export interface IApplicationRepository {
 
     adminUpdateApplicationStatus(data: AdminUpdateApplicationStatusRequest): Promise<Application | null>;
 
+    getTotalCount(): Promise<number>;
+
+    getSuccessfulPlacementsCount(startDate: Date): Promise<number>;
+
+    getApplicationGraphData(startDate: Date): Promise<any>;
 }

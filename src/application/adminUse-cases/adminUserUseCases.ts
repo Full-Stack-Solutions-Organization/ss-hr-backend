@@ -8,6 +8,8 @@ import { CareerDataRepositoryImpl } from "../../infrastructure/database/careerDa
 import { AdminFetchUserDetailsRequest, AdminFetchUserDetailsResponse } from "../../infrastructure/dtos/admin.dtos";
 import {CreateUserByAdminRequest,CreateUserByAdminResponse,UpdateUserRequest,UpdateUserResponse,DeleteUserRequest,GetUserByIdRequest,GetUserByIdResponse} from "../../infrastructure/dtos/user.dto";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
+import { IApplicationRepository } from "../../domain/repositories/IApplicationRepository";
+import { IPaymentRepository } from "../../domain/repositories/IPaymentRepository";
 
 export class CreateUserByAdminUseCase {
   constructor(
@@ -168,15 +170,34 @@ export class GetAllUsersUseCase {
 }
 
 export class GetUserStatsUseCase {
-  constructor(private userRepository: UserRepositoryImpl) {}
+  constructor(
+    private userRepository: UserRepositoryImpl,
+    private applicationRepository: IApplicationRepository,
+    private paymentRepository: IPaymentRepository
+  ) {}
 
   async execute() {
     try {
       const totalUsers = await this.userRepository.getTotalCount();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const newUsers = await this.userRepository.getNewUsersCount(thirtyDaysAgo);
+      const oldUsers = totalUsers - newUsers;
+      
+      const jobApplications = await this.applicationRepository.getTotalCount();
+      const packageUsedUsers = await this.paymentRepository.getTotalCount(); // Using total payments as proxy for now
+
       return {
         success: true,
         message: "User stats retrieved successfully",
-        stats: { totalUsers },
+        stats: { 
+          totalUsers,
+          newUsers,
+          oldUsers,
+          jobApplications,
+          packageUsedUsers
+        },
       };
     } catch (error) {
       throw handleUseCaseError(error || "Failed to get user stats");
@@ -184,6 +205,54 @@ export class GetUserStatsUseCase {
   }
 }
 
+export class GetUserGraphDataUseCase {
+  constructor(private userRepository: UserRepositoryImpl) {}
+
+  async execute() {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const graphData = await this.userRepository.getUserGraphData(thirtyDaysAgo);
+      
+      // Process data for usersLineGraphData
+      const usersLineGraphData = graphData.map((item: any) => ({
+        date: item._id,
+        totalUsers: item.count, // Simplified for now
+        newUsers: item.count,
+        oldUsers: 0,
+        jobApplicants: 0,
+        packageUsedUsers: 0
+      }));
+
+      // Process data for usersRadialGragphData (Day of week)
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const radialDataMap = new Map<string, number>();
+      
+      graphData.forEach((item: any) => {
+        const date = new Date(item._id);
+        const dayName = days[date.getDay()];
+        radialDataMap.set(dayName, (radialDataMap.get(dayName) || 0) + item.count);
+      });
+
+      const usersRadialGragphData = Array.from(radialDataMap.entries()).map(([day, count]) => ({
+        day,
+        count
+      }));
+
+      return {
+        success: true,
+        message: "User graph data retrieved successfully",
+        data: {
+          usersRadialGragphData,
+          usersLineGraphData
+        }
+      };
+    } catch (error) {
+      throw handleUseCaseError(error || "Failed to get user graph data");
+    }
+  }
+}
 
 export class AdminFetchUserDetailsUseCase {
   constructor(

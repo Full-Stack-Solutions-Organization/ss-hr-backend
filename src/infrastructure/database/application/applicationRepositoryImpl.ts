@@ -189,4 +189,40 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
         }
     }
 
+    async getTotalCount(): Promise<number> {
+        try {
+            return await ApplicationModel.countDocuments();
+        } catch (error) {
+            throw new Error("Failed to get total count");
+        }
+    }
+
+    async getSuccessfulPlacementsCount(startDate: Date): Promise<number> {
+        try {
+            return await ApplicationModel.countDocuments({ status: "placed", createdAt: { $gte: startDate } });
+        } catch (error) {
+            throw new Error("Failed to get successful placements count");
+        }
+    }
+
+    async getApplicationGraphData(startDate: Date): Promise<any> {
+        try {
+            const result = await ApplicationModel.aggregate([
+                { $match: { createdAt: { $gte: startDate } } },
+                {
+                    $group: {
+                        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                        count: { $sum: 1 },
+                        placedCount: {
+                            $sum: { $cond: [{ $eq: ["$status", "placed"] }, 1, 0] }
+                        }
+                    },
+                },
+                { $sort: { _id: 1 } },
+            ]);
+            return result;
+        } catch (error) {
+            throw new Error("Failed to get application graph data");
+        }
+    }
 }

@@ -31,4 +31,8 @@ export interface IUserRepository {
   getTotalCount():Promise<number>;
 
   deleteUserById(id: Types.ObjectId): Promise<boolean>;
+
+  getNewUsersCount(startDate: Date): Promise<number>;
+
+  getUserGraphData(startDate: Date): Promise<any>;
 }

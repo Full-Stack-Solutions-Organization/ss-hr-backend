@@ -69,3 +69,57 @@ export class AdminUpdateApplicationStatusUseCase {
         }
     }
 }
+
+export class GetApplicationStatsUseCase {
+    constructor(private applicationRepository: ApplicationRepositoryImpl) {}
+
+    async execute() {
+        try {
+            const totalApplications = await this.applicationRepository.getTotalCount();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            const successfulPlacements = await this.applicationRepository.getSuccessfulPlacementsCount(thirtyDaysAgo);
+            
+            return {
+                success: true,
+                message: "Application stats retrieved successfully",
+                stats: {
+                    totalApplications,
+                    successfulPlacements
+                }
+            };
+        } catch (error) {
+            throw handleUseCaseError(error || "Failed to get application stats");
+        }
+    }
+}
+
+export class GetApplicationGraphDataUseCase {
+    constructor(private applicationRepository: ApplicationRepositoryImpl) {}
+
+    async execute() {
+        try {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            const graphData = await this.applicationRepository.getApplicationGraphData(thirtyDaysAgo);
+            
+            const applicationsLineGraphData = graphData.map((item: any) => ({
+                date: item._id,
+                applications: item.count,
+                placed: item.placedCount
+            }));
+
+            return {
+                success: true,
+                message: "Application graph data retrieved successfully",
+                data: {
+                    applicationsLineGraphData
+                }
+            };
+        } catch (error) {
+            throw handleUseCaseError(error || "Failed to get application graph data");
+        }
+    }
+}

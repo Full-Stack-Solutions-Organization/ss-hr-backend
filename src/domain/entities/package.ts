@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { PackageType } from "../../infrastructure/zod/common.zod";
+export { PackageType };
 
 export class Package {
     constructor(

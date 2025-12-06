@@ -186,6 +186,32 @@ export class UserRepositoryImpl implements IUserRepository {
   }
   
 
+
+  async getNewUsersCount(startDate: Date): Promise<number> {
+    try {
+      return await UserModel.countDocuments({ createdAt: { $gte: startDate } });
+    } catch (error) {
+      throw new Error("Failed to get new users count");
+    }
+  }
+
+  async getUserGraphData(startDate: Date): Promise<any> {
+    try {
+      const result = await UserModel.aggregate([
+        { $match: { createdAt: { $gte: startDate } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+      return result;
+    } catch (error) {
+      throw new Error("Failed to get user graph data");
+    }
+  }
 }
 
 

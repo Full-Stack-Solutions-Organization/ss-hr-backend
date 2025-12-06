@@ -10,13 +10,17 @@ import { AddressRepositoryImpl } from '../../infrastructure/database/address/add
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 import { CareerDataRepositoryImpl } from '../../infrastructure/database/careerData/careerDataRepositoryImpl';
 import { GetAllUsersForChatSideBarUseCase } from "../../application/commonUse-cases/getAllUsersForChatSidebarUseCase";
-import { CreateUserByAdminUseCase, UpdateUserUseCase, DeleteUserUseCase, GetUserByIdUseCase, GetAllUsersUseCase, GetUserStatsUseCase, AdminFetchUserDetailsUseCase } from '../../application/adminUse-cases/adminUserUseCases';
+import { CreateUserByAdminUseCase, UpdateUserUseCase, DeleteUserUseCase, GetUserByIdUseCase, GetAllUsersUseCase, GetUserStatsUseCase, AdminFetchUserDetailsUseCase, GetUserGraphDataUseCase } from '../../application/adminUse-cases/adminUserUseCases';
+import { ApplicationRepositoryImpl } from '../../infrastructure/database/application/applicationRepositoryImpl';
+import { PaymentRepositoryImpl } from '../../infrastructure/database/payment/paymentRepositoryImpl';
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);
 const addressRepositoryImpl = new AddressRepositoryImpl();
 const careerDataRepositoryImpl = new CareerDataRepositoryImpl();
+const applicationRepositoryImpl = new ApplicationRepositoryImpl();
+const paymentRepositoryImpl = new PaymentRepositoryImpl();
 
 const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
 const createUserByAdminUseCase = new CreateUserByAdminUseCase(userRepositoryImpl);
@@ -24,7 +28,8 @@ const updateUserUseCase = new UpdateUserUseCase(userRepositoryImpl);
 const deleteUserUseCase = new DeleteUserUseCase(userRepositoryImpl);
 const getUserByIdUseCase = new GetUserByIdUseCase(userRepositoryImpl);
 const getAllUsersUseCase = new GetAllUsersUseCase(userRepositoryImpl);
-const getUserStatsUseCase = new GetUserStatsUseCase(userRepositoryImpl);
+const getUserStatsUseCase = new GetUserStatsUseCase(userRepositoryImpl, applicationRepositoryImpl, paymentRepositoryImpl);
+const getUserGraphDataUseCase = new GetUserGraphDataUseCase(userRepositoryImpl);
 const adminFetchUserDetailsUseCase = new AdminFetchUserDetailsUseCase(userRepositoryImpl, addressRepositoryImpl, careerDataRepositoryImpl, signedUrlService)
 
 export class AdminUserController {
@@ -36,6 +41,7 @@ export class AdminUserController {
         private getUserByIdUseCase: GetUserByIdUseCase,
         private getAllUsersUseCase: GetAllUsersUseCase,
         private getUserStatsUseCase: GetUserStatsUseCase,
+        private getUserGraphDataUseCase: GetUserGraphDataUseCase,
         private adminFetchUserDetailsUseCase: AdminFetchUserDetailsUseCase
     ) {
         this.getUserForChatSidebar = this.getUserForChatSidebar.bind(this);
@@ -45,6 +51,7 @@ export class AdminUserController {
         this.getUserById = this.getUserById.bind(this);
         this.getAllUsers = this.getAllUsers.bind(this);
         this.getUserStats = this.getUserStats.bind(this);
+        this.getUserGraphData = this.getUserGraphData.bind(this);
         this.getUserFullDetails = this.getUserFullDetails.bind(this);
     }
 
@@ -117,6 +124,15 @@ export class AdminUserController {
         }
     }
 
+    async getUserGraphData(req: Request, res: Response) {
+        try {
+            const result = await this.getUserGraphDataUseCase.execute();
+            return res.status(200).json(result);
+        } catch (error) {
+            HandleError.handle(error, res);
+        }
+    }
+
     async getUserFullDetails(req: Request, res: Response) {
         try {
             const userId = new Types.ObjectId(req.params.id);
@@ -137,5 +153,6 @@ export const adminUserController = new AdminUserController(
     getUserByIdUseCase,
     getAllUsersUseCase,
     getUserStatsUseCase,
+    getUserGraphDataUseCase,
     adminFetchUserDetailsUseCase
 );

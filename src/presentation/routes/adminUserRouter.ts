@@ -8,6 +8,8 @@ router.post('/', authMiddleware, adminUserController.createUser);
 
 router.get('/', authMiddleware, adminUserController.getAllUsers);
 
+router.get('/graph-data', authMiddleware, adminUserController.getUserGraphData);
+
 router.get('/stats', authMiddleware, adminUserController.getUserStats);
 
 router.get('/:id', authMiddleware, adminUserController.getUserById);

@@ -23,21 +23,19 @@ export class UserCreateApplicationUseCase {
             if (!userDetails.isVerified) throw new Error("Your account is not verified.");
 
             const requiredFields = [
-                userDetails.phone,
-                userDetails.phoneTwo,
-                userDetails.resume,
-                userDetails.gender,
-                userDetails.nationality,
-                userDetails.dob,
-                userDetails.professionalStatus
+                { value: userDetails.phone, name: "Phone" },
+                { value: userDetails.gender, name: "Gender" },
+                { value: userDetails.nationality, name: "Nationality" },
+                { value: userDetails.dob, name: "Date of Birth" },
+                { value: userDetails.professionalStatus, name: "Profession" }
             ];
-            if (requiredFields.some(field => !field)) {
-                throw new Error("Please complete your profile details before applying to jobs.");
-            }
 
-            const userAddress = await this.addressRepositoryImpl.findAddressesByUserId(data.userId);
-            if (!userAddress || !userAddress) {
-                throw new Error("Please save your address before applying to jobs.");
+            const missingFields = requiredFields
+                .filter(field => !field.value)
+                .map(field => field.name);
+
+            if (missingFields.length > 0) {
+                throw new Error(`Please complete the following profile details before applying: ${missingFields.join(", ")}`);
             }
 
             let application = await this.applicationRepositoryImpl.findApplicationByUserIdWithApplicationId(data);
@@ -88,13 +86,21 @@ export class UserUpdateApplicationUseCase {
                 throw new Error("You account is not verified");
             }
 
-            if (!userDetails?.phone || !userDetails.phoneTwo || !userDetails.resume || !userDetails.gender ||
-                !userDetails.nationality || !userDetails.dob || !userDetails.professionalStatus) {
-                throw new Error("Please complete your profile details before applying to jobs.");
-            }
+            const requiredFields = [
+                { value: userDetails?.phone, name: "Phone" },
+                { value: userDetails?.gender, name: "Gender" },
+                { value: userDetails?.nationality, name: "Nationality" },
+                { value: userDetails?.dob, name: "Date of Birth" },
+                { value: userDetails?.professionalStatus, name: "Profession" }
+            ];
 
-            const userAddress = await this.addressRepositoryImpl.findAddressesByUserId(data.userId);
-            if (!userAddress) throw new Error("Please save your address before applying to jobs.");
+            const missingFields = requiredFields
+                .filter(field => !field.value)
+                .map(field => field.name);
+
+            if (missingFields.length > 0) {
+                throw new Error(`Please complete the following profile details before applying: ${missingFields.join(", ")}`);
+            }
 
             const updatedApplication = await this.applicationRepositoryImpl.updateApplication(data);
             if (!updatedApplication) throw new Error("Failed to update application");

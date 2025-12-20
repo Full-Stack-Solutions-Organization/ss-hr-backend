@@ -6,11 +6,9 @@ export const updateUserInfoSchema = z.object({
   fullName,
   email,
   phone,
-  phoneTwo,
   gender,
   nationality,
   linkedInUsername: linkedInUsername.optional(),
-  portfolioUrl: portfolioUrl.optional(),
   dob: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), {

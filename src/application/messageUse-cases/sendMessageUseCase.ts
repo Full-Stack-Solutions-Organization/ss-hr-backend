@@ -22,7 +22,7 @@ export class SendMessageUseCase {
                 newMessage.image = await this.signedUrlService.generateSignedUrl(newMessage.image);
             }
             
-            const receiverSocketId = await getReceiverSocketId(receiverId);
+            const receiverSocketId = await getReceiverSocketId(receiverId.toString());
             if (receiverSocketId) {
                 io.to(receiverSocketId).emit("newMessage", newMessage);
             }

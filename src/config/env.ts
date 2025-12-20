@@ -35,10 +35,7 @@ export const aws_s3Config = {
     bucketName: process.env.AWS_S3_BUCKET_NAME,
 }
 
-export const redisConfig = {
-    redisUrl: process.env.REDIS_URL,
-    redisToken: process.env.REDIS_TOKEN
-}
+
 
 export const googleClientConfig = {
     googleClientId: process.env.GOOGLE_CLIENT_ID,

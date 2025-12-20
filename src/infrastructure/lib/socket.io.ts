@@ -1,6 +1,5 @@
 import http from "http";
 import app from "../../app";
-import { redis } from "./redis";
 import { Types } from "mongoose";
 import { Server } from "socket.io";
 import { appConfig } from "../../config/env";
@@ -18,47 +17,48 @@ const io = new Server(socketServer, {
     },
 });
 
-export async function getReceiverSocketId(userId: Types.ObjectId): Promise<string | null> {
-    return await redis.get(`socket:${userId}`);
+// Map to store userId -> socketId
+const userSocketMap = new Map<string, string>();
+
+export async function getReceiverSocketId(userId: Types.ObjectId | string): Promise<string | null> {
+    return userSocketMap.get(userId.toString()) || null;
 }
 
 async function getOnlineUsers(): Promise<string[]> {
-    const keys = await redis.keys("socket:*");
-    return keys.map((key) => key.split(":")[1]);
+    return Array.from(userSocketMap.keys());
 }
 
-io.on("connection", async (socket) => {
-    (async () => {
-        const queryUserId = socket.handshake.query.userId;
-        const userId = typeof queryUserId === "string" ? queryUserId : null;
+io.on("connection", (socket) => {
+    const queryUserId = socket.handshake.query.userId;
+    const userId = typeof queryUserId === "string" ? queryUserId : null;
 
-        if (userId) {
-            await redis.set(`socket:${userId}`, socket.id);
+    if (userId) {
+        userSocketMap.set(userId, socket.id);
+    }
+
+    // Emit online users immediately (sync)
+    io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+
+    socket.on("typing", ({ fromUserId, toUserId }: { fromUserId: string; toUserId: string }) => {
+        const toSocketId = userSocketMap.get(toUserId);
+        if (toSocketId) {
+            io.to(toSocketId).emit("typing", { fromUserId, toUserId });
         }
+    });
 
-        io.emit("getOnlineUsers", await getOnlineUsers());
+    socket.on("stopTyping", ({ fromUserId, toUserId }: { fromUserId: string; toUserId: string }) => {
+        const toSocketId = userSocketMap.get(toUserId);
+        if (toSocketId) {
+            io.to(toSocketId).emit("stopTyping", { fromUserId, toUserId });
+        }
+    });
 
-        socket.on("typing", async ({ fromUserId, toUserId }: { fromUserId: string; toUserId: string }) => {
-            const toSocketId: string | null = await redis.get(`socket:${toUserId}`);
-            if (toSocketId) {
-                io.to(toSocketId).emit("typing", { fromUserId, toUserId });
-            }
-        });
-
-        socket.on("stopTyping", async ({ fromUserId, toUserId }: { fromUserId: string; toUserId: string }) => {
-            const toSocketId: string | null = await redis.get(`socket:${toUserId}`);
-            if (toSocketId) {
-                io.to(toSocketId).emit("stopTyping", { fromUserId, toUserId });
-            }
-        });
-
-        socket.on("disconnect", async () => {
-            if (userId) {
-                await redis.del(`socket:${userId}`);
-            }
-            io.emit("getOnlineUsers", await getOnlineUsers());
-        });
-    })();
+    socket.on("disconnect", () => {
+        if (userId) {
+            userSocketMap.delete(userId);
+        }
+        io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+    });
 });
 
 export { io, socketServer };

@@ -80,6 +80,7 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
             const [applications, totalCount] = await Promise.all([
                 ApplicationModel.find({})
                     .populate<{ jobId: adminFetchApplicationsJobFields }>("jobId")
+                    .populate<{ userId: { fullName: string } }>("userId", "fullName")
                     .skip((page - 1) * limit)
                     .limit(limit),
                 ApplicationModel.countDocuments()
@@ -96,7 +97,8 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
                     jobId: application.jobId._id,
                     jobUniqueId: application.jobId.jobUniqueId,
                     designation: application.jobId.designation,
-                    companyName: application.jobId.companyName
+                    companyName: application.jobId.companyName,
+                    userName: (application.userId as unknown as { fullName: string })?.fullName || "Unknown User"
                 })),
                 totalPages,
                 currentPage: page,

@@ -34,19 +34,17 @@ export class UserUpdatePorifleDataUseCase {
 
     async execute(data: UseUpdateProfileRequest): Promise<ApiResponse<UseUpdateProfileResponse>> {
         try {
-            const { _id, dob, fullName, gender, nationality, phone, phoneTwo, linkedInUsername, portfolioUrl, professionalStatus } = data;
+            const { _id, dob, fullName, gender, nationality, phone, linkedInUsername, professionalStatus } = data;
 
             const user = await this.userRepositoryImpl.findUserById(_id);
             if (!user) throw new Error("No user found");
 
             user.fullName = fullName ?? user.fullName;
             user.phone = phone ?? user.phone;
-            user.phoneTwo = phoneTwo ?? user.phoneTwo;
             user.gender = gender ?? user.gender;
             user.nationality = nationality ?? user.nationality;
             user.dob = dob ?? user.dob;
             user.linkedInUsername = linkedInUsername ?? user.linkedInUsername;
-            user.portfolioUrl = portfolioUrl ?? user.portfolioUrl;
             user.professionalStatus = professionalStatus ?? user.professionalStatus;
 
             const updatedUser = await this.userRepositoryImpl.updateUser(user);
@@ -55,12 +53,10 @@ export class UserUpdatePorifleDataUseCase {
             const response: UseUpdateProfileResponse = {
                 fullName: updatedUser.fullName,
                 phone: updatedUser.phone,
-                phoneTwo: updatedUser.phoneTwo,
                 gender: updatedUser.gender,
                 nationality: updatedUser.nationality,
                 dob: updatedUser.dob,
                 linkedInUsername: updatedUser.linkedInUsername,
-                portfolioUrl: updatedUser.portfolioUrl,
                 professionalStatus: updatedUser.professionalStatus,
             };
 

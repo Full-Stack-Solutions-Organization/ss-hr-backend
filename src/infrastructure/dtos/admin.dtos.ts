@@ -16,6 +16,7 @@ export type AdminFetchAllApplicationsResponse = Array<{
   updatedAt: Application["updatedAt"];
   status: Application["status"];
   applicationUniqueId: Application["applicationUniqueId"];
+  userName: string;
 } & adminFetchApplicationsJobFields>;
 
 export type AdminFetchApplicationDetailsRequest = Pick<Application, "_id">;
